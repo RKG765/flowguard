@@ -1,0 +1,57 @@
+# FlowGuard
+
+Flow-rule integrity monitoring and unauthorized network-state change detection for SDN (Ryu + Open vSwitch).
+
+> **Status: Phase 0 of 11 (environment doctor and feasibility spike).** The detection engine, API and dashboard are **not built yet**. What exists and was verified is listed in [STATUS.md](STATUS.md). Nothing here claims a working detector.
+
+## What it will do
+1. **L1 authenticated rules:** an HMAC tag in the 64-bit OpenFlow `cookie` of every controller-installed rule; a verifier flags forged, altered, shadowing and missing rules and restores the signed rule.
+2. **L2 data-plane probing:** canary packets verify real forwarding behavior (catches a switch that lies in stats replies).
+3. **L3 ML anomaly scoring:** scores rule-change events and traffic shifts to catch signed-but-malicious rules. ML alone never deletes rules.
+4. A **risk engine** fuses the three signals; a **web dashboard** with an Attack Lab shows it live on real Open vSwitch + Mininet traffic.
+
+Honest scope: see [docs/threat_model.md](docs/threat_model.md) (including the lab limitation that controller, key and switch share one host).
+
+## Install (Ubuntu 22.04: WSL2 or native)
+```bash
+git clone <your-remote> flowguard && cd flowguard
+sudo bash scripts/setup_ubuntu.sh     # apt packages, Python 3.9 venv for Ryu, Node 20, OVS daemons
+bin/flowguard doctor                  # PASS/WARN/FAIL table with a fix for every problem
+```
+WSL2 notes: enable systemd (`[boot]` / `systemd=true` in `/etc/wsl.conf`, then `wsl --shutdown`). The setup was developed on kernel `6.6.87.2-microsoft-standard-WSL2`, where the Open vSwitch kernel module loads. If your kernel lacks it, FlowGuard falls back to the OVS userspace datapath.
+
+Native Ubuntu: the same commands. It has **not** been verified there yet; see [HANDOFF.md](HANDOFF.md).
+
+## Commands available now
+| Command | What it does |
+|---|---|
+| `make setup` | run `scripts/setup_ubuntu.sh` |
+| `make doctor` / `bin/flowguard doctor [--json] [--quick]` | environment check |
+| `make docs` / `make docs-check` | regenerate / verify generated docs |
+| `make test` | unit tests available in this phase |
+| `make spike` | re-run the Phase 0 feasibility spikes (root) |
+
+`start`, `demo`, `eval`, `test-e2e`, `test-security`, `test-soak` are planned and exit with code 2.
+
+## Documentation
+[STATUS.md](STATUS.md) · [HANDOFF.md](HANDOFF.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [DECISIONS.md](DECISIONS.md) · [ROADMAP.md](ROADMAP.md) · [TESTING.md](TESTING.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/spike_findings.md](docs/spike_findings.md) · [docs/threat_model.md](docs/threat_model.md)
+
+Screenshots will appear in `docs/img/` from Phase 4.
+
+## Phase progress
+<!-- AUTO:phase_table -->
+| # | Phase | Status | Started | Finished |
+|---|---|---|---|---|
+| 0 | Environment doctor and feasibility spike | done | 2026-10-14 | 2026-10-14 |
+| 1 | Engine L1 (signer, store, verifier, responder) | not_started | - | - |
+| 2 | Core service, API, storage, auth | not_started | - | - |
+| 3 | Design system and dashboard shell | not_started | - | - |
+| 4 | Attack Lab and core pages (tag demo-v0) | not_started | - | - |
+| 5 | L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete) | not_started | - | - |
+| 6 | Remaining pages, reports, polish | not_started | - | - |
+| 7 | Packaging and hardening | not_started | - | - |
+| 8 | Evaluation and docs | not_started | - | - |
+| 9 | Rigorous testing (full QA pass) | not_started | - | - |
+| 10 | Persona-based review | not_started | - | - |
+| 11 | Fix loop and release gate | not_started | - | - |
+<!-- /AUTO:phase_table -->

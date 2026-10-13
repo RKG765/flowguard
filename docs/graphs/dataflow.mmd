@@ -1,0 +1,13 @@
+flowchart TD
+  Install[install_signed_rule] --> Sign[canonical + HMAC cookie]
+  Sign --> Golden[(golden store)]
+  Sign --> Switch[OVS table 0]
+  Tamper[external ovs-ofctl change] --> Switch
+  Switch --> Monitor[NXST monitor event]
+  Monitor --> Verify[targeted stats + verify]
+  Golden --> Verify
+  Verify --> Risk[risk engine]
+  L2[L2 canary probes] --> Risk
+  L3[L3 ML score] --> Risk
+  Risk --> Respond[restore / quarantine / alert]
+  Respond --> Alert[alert -> spool -> core -> dashboard]

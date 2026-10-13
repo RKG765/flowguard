@@ -1,0 +1,26 @@
+.venv-*/
+__pycache__/
+*.pyc
+.pytest_cache/
+.hypothesis/
+.coverage
+htmlcov/
+node_modules/
+web/dist/
+
+# runtime data (kept out of git; directories exist via .gitkeep)
+data/sessions/*
+data/models/*
+!data/sessions/.gitkeep
+!data/models/.gitkeep
+results/tmp/
+
+# secrets: never commit keys or local config
+config.yaml
+*.key
+*.pem
+.env
+secrets/
+data/spool/*
+!data/spool/.gitkeep
+.scratch/

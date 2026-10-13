@@ -1,0 +1,21 @@
+## mn version: 2.3.0
+
+## pingall, standalone OVS bridge, datapath=kernel
+*** Results: 0% dropped (12/12 received)
+rc=0
+
+## pingall, standalone OVS bridge, datapath=user
+*** Results: 0% dropped (12/12 received)
+rc=0
+
+## topo_basic.py standalone pingall (explicit dpid, 4 hosts) datapath=auto
+your 131072x1 screen size is bogus. expect trouble
+your 131072x1 screen size is bogus. expect trouble
+{"datapath": "kernel", "switches": ["s1"], "dpids": {"s1": "0000000000000001"}, "two_switch": false, "controller": null, "pingall_loss_percent": 0.0}
+
+## tc/netem/htb link shaping (mn --link tc), datapath=user
+*** Results: 0% dropped (2/2 received)
+
+## tc modules
+sch_htb: loaded
+sch_netem: loaded

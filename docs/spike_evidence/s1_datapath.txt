@@ -1,0 +1,44 @@
+## kernel: 6.6.87.2-microsoft-standard-WSL2
+## modules dir:
+6.6.87.2-microsoft-standard-WSL2
+## modprobe openvswitch (real attempt):
+modprobe rc=0
+## /sys/module/openvswitch present: yes
+## lsmod | grep openvswitch:
+openvswitch           172032  0
+nsh                    12288  1 openvswitch
+nf_conncount           24576  1 openvswitch
+## ovs-vsctl --version:
+ovs-vsctl (Open vSwitch) 2.17.12
+## existing datapaths:
+
+## TEST A: bridge with default (kernel) datapath
+system@ovs-system: hit:0 missed:0
+  fgspike-k:
+    fgspike-k 65534/1: (internal)
+""
+kernel_bridge_result=created
+
+## TEST B: bridge with userspace datapath (datapath_type=netdev)
+netdev@ovs-netdev: hit:0 missed:0
+  fgspike-u:
+    fgspike-u 65534/1: (tap)
+netdev
+userspace_bridge_result=created
+
+## ovs-vswitchd.log (last 15 lines mentioning datapath/module/dpif):
+2026-10-13T22:26:47.911Z|01095|ofproto_dpif|INFO|netdev@ovs-netdev: Datapath supports ct_zone
+2026-10-13T22:26:47.911Z|01096|ofproto_dpif|INFO|netdev@ovs-netdev: Datapath supports ct_mark
+2026-10-13T22:26:47.911Z|01097|ofproto_dpif|INFO|netdev@ovs-netdev: Datapath supports ct_label
+2026-10-13T22:26:47.911Z|01098|ofproto_dpif|INFO|netdev@ovs-netdev: Datapath supports ct_state_nat
+2026-10-13T22:26:47.911Z|01099|ofproto_dpif|INFO|netdev@ovs-netdev: Datapath supports ct_orig_tuple
+2026-10-13T22:26:47.911Z|01100|ofproto_dpif|INFO|netdev@ovs-netdev: Datapath supports ct_orig_tuple6
+2026-10-13T22:26:47.911Z|01101|ofproto_dpif|INFO|netdev@ovs-netdev: Datapath supports IPv6 ND Extensions
+2026-10-13T22:26:47.911Z|01102|ofproto_dpif_upcall|INFO|Setting n-handler-threads to 17, setting n-revalidator-threads to 7
+2026-10-13T22:26:47.911Z|01103|ofproto_dpif_upcall|INFO|Starting 24 threads
+2026-10-13T22:26:47.986Z|01104|dpif_netdev|INFO|pmd-rxq-affinity isolates PMD core
+2026-10-13T22:26:47.986Z|01105|dpif_netdev|INFO|PMD auto load balance interval set to 1 mins
+2026-10-13T22:26:47.986Z|01106|dpif_netdev|INFO|PMD auto load balance improvement threshold set to 25%
+2026-10-13T22:26:47.986Z|01107|dpif_netdev|INFO|PMD auto load balance load threshold set to 95%
+2026-10-13T22:26:47.986Z|01108|dpif_netdev|INFO|PMD auto load balance is disabled.
+2026-10-13T22:26:47.990Z|01110|bridge|INFO|bridge fgspike-u: using datapath ID 00007629221da14a

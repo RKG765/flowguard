@@ -1,0 +1,31 @@
+flowchart LR
+  P0["0: Environment doctor and feasibility spike"]:::done
+  P1["1: Engine L1 (signer, store, verifier, responder)"]:::not_started
+  P2["2: Core service, API, storage, auth"]:::not_started
+  P3["3: Design system and dashboard shell"]:::not_started
+  P4["4: Attack Lab and core pages (tag demo-v0)"]:::not_started
+  P5["5: L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete)"]:::not_started
+  P6["6: Remaining pages, reports, polish"]:::not_started
+  P7["7: Packaging and hardening"]:::not_started
+  P8["8: Evaluation and docs"]:::not_started
+  P9["9: Rigorous testing (full QA pass)"]:::not_started
+  P10["10: Persona-based review"]:::not_started
+  P11["11: Fix loop and release gate"]:::not_started
+  P0 --> P1
+  P1 --> P2
+  P2 --> P3
+  P3 --> P4
+  P4 --> P5
+  P5 --> P6
+  P6 --> P7
+  P7 --> P8
+  P8 --> P9
+  P9 --> P10
+  P10 --> P11
+  classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
+  classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
+  classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;
+  classDef blocked fill:#c53030,stroke:#63171b,color:#ffffff;
+  classDef implemented fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
+  classDef partial fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
+  classDef planned fill:#4a5568,stroke:#1a202c,color:#ffffff;

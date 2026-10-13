@@ -1,0 +1,33 @@
+## ovs-ofctl -O OpenFlow14 monitor (4s) while a rule is modified, added and deleted
+OFPT_ERROR (xid=0x6): OFPBRC_BAD_VERSION
+NXST_FLOW_MONITOR request (xid=0x6):
+ id=0 flags=initial,add,delete,modify,actions,own
+2026-10-13T22:39:24Z|00001|fatal_signal|WARN|terminating with signal 15 (signal 15)
+
+## ovs-ofctl -O OpenFlow13 monitor (4s) while a rule is modified, added and deleted
+OFPT_ERROR (xid=0x6): OFPBRC_BAD_VERSION
+NXST_FLOW_MONITOR request (xid=0x6):
+ id=0 flags=initial,add,delete,modify,actions,own
+2026-10-13T22:39:30Z|00001|fatal_signal|WARN|terminating with signal 15 (signal 15)
+
+## ovs-ofctl -O OpenFlow10 monitor (4s) while a rule is modified, added and deleted
+NXST_FLOW_MONITOR reply (xid=0x6):
+ event=ADDED table=0 cookie=0x1234 ip actions=resubmit(,1)
+ event=ADDED table=0 cookie=0 actions=NORMAL
+NXST_FLOW_MONITOR reply (xid=0x0):
+ event=MODIFIED table=0 cookie=0x1234 ip
+NXST_FLOW_MONITOR reply (xid=0x0):
+ event=ADDED table=0 cookie=0 ip,nw_dst=10.0.0.3
+NXST_FLOW_MONITOR reply (xid=0x0):
+ event=DELETED reason=delete table=0 cookie=0 ip,nw_dst=10.0.0.3
+NXST_FLOW_MONITOR reply (xid=0x0):
+ event=ADDED table=0 cookie=0x1234 ip actions=resubmit(,1)
+2026-10-13T22:39:35Z|00001|fatal_signal|WARN|terminating with signal 15 (signal 15)
+
+## ovs-vswitchd.log lines mentioning monitor / bad subtype (last 8)
+2026-10-13T22:00:39.691Z|00042|ofp_monitor|WARN|NXST_FLOW_MONITOR has bad flags 0xffff
+2026-10-13T22:03:53.032Z|00078|connmgr|INFO|s1<->tcp:127.0.0.1:6653: sending OFPBRC_BAD_SUBTYPE error reply to invalid message
+2026-10-13T22:13:08.030Z|00308|ofp_monitor|WARN|NXST_FLOW_MONITOR has bad flags 0xffff
+2026-10-13T22:14:43.479Z|00404|connmgr|INFO|s1<->tcp:127.0.0.1:6653: sending OFPBRC_BAD_SUBTYPE error reply to invalid message
+2026-10-13T22:27:08.509Z|01342|ofp_monitor|WARN|NXST_FLOW_MONITOR has bad flags 0xffff
+2026-10-13T22:28:31.857Z|01438|connmgr|INFO|s1<->tcp:127.0.0.1:6653: sending OFPBRC_BAD_SUBTYPE error reply to invalid message

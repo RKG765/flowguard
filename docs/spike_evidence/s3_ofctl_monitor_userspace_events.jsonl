@@ -1,0 +1,444 @@
+{"mode": "of13", "poll": 0.5, "kind": "app_start", "t": 1791930954.6044934}
+{"dpid": 1, "version": 4, "kind": "switch_connected", "t": 1791930957.6501424}
+{"t_send": 1791930958.6520422, "t_recv": 1791930958.6532817, "rtt_ms": 1.2395381927490234, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930958.6537724}
+{"t_send": 1791930959.1535776, "t_recv": 1791930959.1545546, "rtt_ms": 0.9770393371582031, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930959.154977}
+{"t_send": 1791930959.6546605, "t_recv": 1791930959.655991, "rtt_ms": 1.3306140899658203, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930959.6563847}
+{"t_send": 1791930960.1563776, "t_recv": 1791930960.1574662, "rtt_ms": 1.0886192321777344, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930960.157873}
+{"t_send": 1791930960.6579428, "t_recv": 1791930960.6592813, "rtt_ms": 1.3384819030761719, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930960.6596992}
+{"t_send": 1791930961.1593425, "t_recv": 1791930961.1608794, "rtt_ms": 1.5368461608886719, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930961.1613026}
+{"t_send": 1791930961.6601567, "t_recv": 1791930961.6627858, "rtt_ms": 2.6290416717529297, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930961.663409}
+{"t_send": 1791930962.1610806, "t_recv": 1791930962.162267, "rtt_ms": 1.186370849609375, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930962.1626678}
+{"t_send": 1791930962.6619291, "t_recv": 1791930962.6629632, "rtt_ms": 1.0340213775634766, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930962.663349}
+{"t_send": 1791930963.1623514, "t_recv": 1791930963.1634653, "rtt_ms": 1.1138916015625, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930963.1639714}
+{"t_send": 1791930963.6633108, "t_recv": 1791930963.6644025, "rtt_ms": 1.0917186737060547, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930963.6647897}
+{"t_send": 1791930964.1647136, "t_recv": 1791930964.1659396, "rtt_ms": 1.2259483337402344, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930964.1663604}
+{"kind": "monitor_other", "t": 1791930964.6074884, "line": "NXST_FLOW_MONITOR reply (xid=0x6):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930964.6076791, "event": "added", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930964.607763, "event": "added", "table_id": 0, "cookie": "0xaaaa000000000002", "priority": null, "match": "tcp,tp_dst=22 actions=resubmit(,1)"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930964.6077833, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "actions=resubmit(,1)"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930964.607799, "event": "added", "table_id": 1, "cookie": "0", "priority": null, "match": "actions=CONTROLLER:65535"}
+{"t_send": 1791930964.6660194, "t_recv": 1791930964.6669931, "rtt_ms": 0.9737014770507812, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930964.6673942}
+{"t_send": 1791930965.1673656, "t_recv": 1791930965.1687105, "rtt_ms": 1.344919204711914, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930965.169096}
+{"t_send": 1791930965.668515, "t_recv": 1791930965.669791, "rtt_ms": 1.2760162353515625, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930965.670446}
+{"kind": "monitor_other", "t": 1791930966.111792, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930966.1119003, "event": "added", "table_id": 1, "cookie": "0", "priority": null, "match": "dl_dst=00:00:00:00:00:01 actions=output:1"}
+{"kind": "monitor_other", "t": 1791930966.1146383, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930966.114782, "event": "added", "table_id": 1, "cookie": "0", "priority": null, "match": "dl_dst=00:00:00:00:00:02 actions=output:2"}
+{"kind": "monitor_other", "t": 1791930966.122328, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930966.1223958, "event": "added", "table_id": 1, "cookie": "0", "priority": null, "match": "dl_dst=00:00:00:00:00:03 actions=output:3"}
+{"kind": "monitor_other", "t": 1791930966.1300738, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930966.1301312, "event": "added", "table_id": 1, "cookie": "0", "priority": null, "match": "dl_dst=00:00:00:00:00:04 actions=output:4"}
+{"t_send": 1791930966.1689765, "t_recv": 1791930966.1696389, "rtt_ms": 0.6623268127441406, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930966.1700091}
+{"t_send": 1791930966.6700025, "t_recv": 1791930966.6713033, "rtt_ms": 1.300811767578125, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930966.6719391}
+{"t_send": 1791930967.171009, "t_recv": 1791930967.1723082, "rtt_ms": 1.299142837524414, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930967.1727154}
+{"t_send": 1791930967.6724186, "t_recv": 1791930967.673478, "rtt_ms": 1.0592937469482422, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930967.6739075}
+{"t_send": 1791930968.1734178, "t_recv": 1791930968.1746452, "rtt_ms": 1.2273788452148438, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930968.175053}
+{"kind": "monitor_other", "t": 1791930968.491091, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930968.4911866, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930968.6741145, "t_recv": 1791930968.6755195, "rtt_ms": 1.4050006866455078, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930968.676349}
+{"t_send": 1791930969.175208, "t_recv": 1791930969.1767838, "rtt_ms": 1.5757083892822266, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930969.177581}
+{"kind": "monitor_other", "t": 1791930969.6088307, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791930969.6757748, "t_recv": 1791930969.677204, "rtt_ms": 1.4290809631347656, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930969.677825}
+{"kind": "monitor_other", "t": 1791930969.8152926, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930969.8154984, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930973.6044333, "t_recv": 1791930973.6057992, "rtt_ms": 1.3659000396728516, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930973.6062424}
+{"t_send": 1791930974.1058054, "t_recv": 1791930974.106916, "rtt_ms": 1.1105537414550781, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930974.1074572}
+{"kind": "monitor_other", "t": 1791930974.5731246, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930974.5732107, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930974.6068077, "t_recv": 1791930974.6082122, "rtt_ms": 1.4045238494873047, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930974.610463}
+{"t_send": 1791930975.1075118, "t_recv": 1791930975.1087701, "rtt_ms": 1.2583732604980469, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930975.1094315}
+{"t_send": 1791930975.6083055, "t_recv": 1791930975.6096766, "rtt_ms": 1.371145248413086, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930975.6103272}
+{"kind": "monitor_other", "t": 1791930975.9029002, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930975.9064353, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930976.109877, "t_recv": 1791930976.1113737, "rtt_ms": 1.4965534210205078, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930976.111866}
+{"t_send": 1791930976.6111631, "t_recv": 1791930976.6125863, "rtt_ms": 1.4231204986572266, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930976.613075}
+{"t_send": 1791930977.1122668, "t_recv": 1791930977.1134996, "rtt_ms": 1.2328624725341797, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930977.1139703}
+{"kind": "monitor_other", "t": 1791930977.2262619, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930977.2263832, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930977.6130745, "t_recv": 1791930977.614364, "rtt_ms": 1.28936767578125, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930977.6149848}
+{"kind": "monitor_other", "t": 1791930978.037303, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791930978.114378, "t_recv": 1791930978.115931, "rtt_ms": 1.5530586242675781, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930978.1169631}
+{"kind": "monitor_other", "t": 1791930978.5567298, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930978.5568495, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930978.615367, "t_recv": 1791930978.6168568, "rtt_ms": 1.489877700805664, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930978.617347}
+{"t_send": 1791930979.1161597, "t_recv": 1791930979.1177628, "rtt_ms": 1.6031265258789062, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930979.1182854}
+{"t_send": 1791930979.6172426, "t_recv": 1791930979.61865, "rtt_ms": 1.4073848724365234, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930979.6193914}
+{"kind": "monitor_other", "t": 1791930979.884281, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930979.8843641, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930980.1188452, "t_recv": 1791930980.1203675, "rtt_ms": 1.5223026275634766, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930980.1209793}
+{"t_send": 1791930980.6194081, "t_recv": 1791930980.6208026, "rtt_ms": 1.394510269165039, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930980.6215494}
+{"t_send": 1791930981.1206973, "t_recv": 1791930981.121733, "rtt_ms": 1.0356903076171875, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930981.122277}
+{"kind": "monitor_other", "t": 1791930981.2046475, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930981.2047524, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930981.6218307, "t_recv": 1791930981.6235726, "rtt_ms": 1.7418861389160156, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930981.623979}
+{"t_send": 1791930982.1231508, "t_recv": 1791930982.124205, "rtt_ms": 1.0542869567871094, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930982.1245801}
+{"kind": "monitor_other", "t": 1791930982.5317214, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930982.5318453, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930982.6235943, "t_recv": 1791930982.6246004, "rtt_ms": 1.0061264038085938, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930982.6253204}
+{"kind": "monitor_other", "t": 1791930983.0383751, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791930983.1245224, "t_recv": 1791930983.1258123, "rtt_ms": 1.2898445129394531, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930983.1263642}
+{"t_send": 1791930983.6257372, "t_recv": 1791930983.6268983, "rtt_ms": 1.1610984802246094, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930983.62758}
+{"kind": "monitor_other", "t": 1791930983.8544903, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930983.8545666, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930984.1264486, "t_recv": 1791930984.1275253, "rtt_ms": 1.0766983032226562, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930984.1279185}
+{"t_send": 1791930984.6273687, "t_recv": 1791930984.6288009, "rtt_ms": 1.432180404663086, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930984.6301255}
+{"t_send": 1791930985.1284037, "t_recv": 1791930985.1296346, "rtt_ms": 1.2309551239013672, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930985.1300664}
+{"kind": "monitor_other", "t": 1791930985.17682, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930985.1769056, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930985.6291537, "t_recv": 1791930985.6304038, "rtt_ms": 1.2500286102294922, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930985.6309385}
+{"t_send": 1791930986.1300166, "t_recv": 1791930986.131397, "rtt_ms": 1.3804435729980469, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930986.131907}
+{"kind": "monitor_other", "t": 1791930986.5017595, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930986.5018642, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930986.631154, "t_recv": 1791930986.6324732, "rtt_ms": 1.3191699981689453, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930986.632896}
+{"t_send": 1791930987.13201, "t_recv": 1791930987.133166, "rtt_ms": 1.1560916900634766, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930987.133614}
+{"t_send": 1791930987.6328945, "t_recv": 1791930987.6347616, "rtt_ms": 1.867055892944336, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930987.635871}
+{"kind": "monitor_other", "t": 1791930987.8275113, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930987.8276148, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791930988.0397506, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791930988.1339052, "t_recv": 1791930988.1350596, "rtt_ms": 1.1544227600097656, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930988.1357515}
+{"t_send": 1791930988.63472, "t_recv": 1791930988.6362443, "rtt_ms": 1.524209976196289, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930988.6367927}
+{"t_send": 1791930989.1353796, "t_recv": 1791930989.1363902, "rtt_ms": 1.0106563568115234, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930989.137092}
+{"kind": "monitor_other", "t": 1791930989.1492772, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930989.149361, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930989.6362724, "t_recv": 1791930989.6373045, "rtt_ms": 1.032114028930664, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930989.6376948}
+{"t_send": 1791930990.1372929, "t_recv": 1791930990.1384609, "rtt_ms": 1.1680126190185547, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930990.1388636}
+{"kind": "monitor_other", "t": 1791930990.4728892, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930990.4731648, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930990.6382725, "t_recv": 1791930990.639505, "rtt_ms": 1.2323856353759766, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930990.640207}
+{"t_send": 1791930991.1393836, "t_recv": 1791930991.1405528, "rtt_ms": 1.1692047119140625, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930991.1413877}
+{"t_send": 1791930991.6403422, "t_recv": 1791930991.641425, "rtt_ms": 1.0826587677001953, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930991.6419775}
+{"kind": "monitor_other", "t": 1791930991.7928936, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930991.792994, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930992.1411808, "t_recv": 1791930992.142691, "rtt_ms": 1.5101432800292969, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930992.1432316}
+{"t_send": 1791930992.6425238, "t_recv": 1791930992.6441557, "rtt_ms": 1.6319751739501953, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930992.6446052}
+{"kind": "monitor_other", "t": 1791930993.0409584, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"kind": "monitor_other", "t": 1791930993.1176827, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930993.1177576, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930993.1436822, "t_recv": 1791930993.1448972, "rtt_ms": 1.2149810791015625, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930993.145945}
+{"t_send": 1791930993.645047, "t_recv": 1791930993.646042, "rtt_ms": 0.9951591491699219, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930993.6468856}
+{"t_send": 1791930994.1461732, "t_recv": 1791930994.1473067, "rtt_ms": 1.1334419250488281, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930994.1479554}
+{"kind": "monitor_other", "t": 1791930994.442448, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930994.4425342, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930994.647413, "t_recv": 1791930994.649003, "rtt_ms": 1.5900135040283203, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930994.649489}
+{"t_send": 1791930995.1480284, "t_recv": 1791930995.1492474, "rtt_ms": 1.219034194946289, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930995.149793}
+{"t_send": 1791930995.649157, "t_recv": 1791930995.6502054, "rtt_ms": 1.0483264923095703, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930995.6508713}
+{"kind": "monitor_other", "t": 1791930995.7641647, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930995.7643008, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791930996.150135, "t_recv": 1791930996.1517851, "rtt_ms": 1.650094985961914, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930996.1523833}
+{"t_send": 1791930996.6514015, "t_recv": 1791930996.6525264, "rtt_ms": 1.1248588562011719, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930996.653225}
+{"t_send": 1791930997.15222, "t_recv": 1791930997.153528, "rtt_ms": 1.3079643249511719, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930997.1541336}
+{"t_send": 1791930997.653021, "t_recv": 1791930997.6543698, "rtt_ms": 1.348733901977539, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930997.6551044}
+{"kind": "monitor_other", "t": 1791930998.0415514, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791930998.1542547, "t_recv": 1791930998.155779, "rtt_ms": 1.524209976196289, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791930998.156446}
+{"kind": "monitor_other", "t": 1791930998.392132, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930998.39232, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791930998.655396, "t_recv": 1791930998.6564372, "rtt_ms": 1.0411739349365234, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930998.6568468}
+{"t_send": 1791930999.1567442, "t_recv": 1791930999.1577387, "rtt_ms": 0.9944438934326172, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930999.1582587}
+{"t_send": 1791930999.657312, "t_recv": 1791930999.6584544, "rtt_ms": 1.1425018310546875, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791930999.6592886}
+{"kind": "monitor_other", "t": 1791930999.7129025, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791930999.7129984, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791931000.1582522, "t_recv": 1791931000.15949, "rtt_ms": 1.2378692626953125, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931000.1600285}
+{"t_send": 1791931000.6593826, "t_recv": 1791931000.6610007, "rtt_ms": 1.6181468963623047, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931000.661574}
+{"kind": "monitor_other", "t": 1791931001.0378573, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931001.0379658, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931001.1608799, "t_recv": 1791931001.1628652, "rtt_ms": 1.985311508178711, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931001.163443}
+{"t_send": 1791931001.6614554, "t_recv": 1791931001.662552, "rtt_ms": 1.0967254638671875, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931001.66296}
+{"t_send": 1791931002.1625626, "t_recv": 1791931002.1637137, "rtt_ms": 1.1510848999023438, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931002.1640942}
+{"kind": "monitor_other", "t": 1791931002.3641849, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931002.3642974, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791931002.6630929, "t_recv": 1791931002.6646135, "rtt_ms": 1.5206336975097656, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931002.6652558}
+{"kind": "monitor_other", "t": 1791931003.0428433, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931003.1641695, "t_recv": 1791931003.1653435, "rtt_ms": 1.1739730834960938, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931003.1659892}
+{"t_send": 1791931003.665262, "t_recv": 1791931003.6670487, "rtt_ms": 1.7867088317871094, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931003.6678414}
+{"kind": "monitor_other", "t": 1791931003.6884623, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931003.6885448, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931004.1667461, "t_recv": 1791931004.168576, "rtt_ms": 1.8298625946044922, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931004.1692214}
+{"t_send": 1791931004.6674523, "t_recv": 1791931004.6688604, "rtt_ms": 1.4081001281738281, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931004.6693244}
+{"kind": "monitor_other", "t": 1791931005.014221, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931005.01432, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791931005.1684904, "t_recv": 1791931005.1695385, "rtt_ms": 1.0480880737304688, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931005.170111}
+{"t_send": 1791931005.6700556, "t_recv": 1791931005.6741564, "rtt_ms": 4.100799560546875, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931005.6750484}
+{"t_send": 1791931008.9630864, "t_recv": 1791931008.9643846, "rtt_ms": 1.2981891632080078, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931008.9649642}
+{"kind": "monitor_other", "t": 1791931009.1306767, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931009.1309307, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931009.4644787, "t_recv": 1791931009.4657726, "rtt_ms": 1.2938976287841797, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931009.4663143}
+{"t_send": 1791931009.965843, "t_recv": 1791931009.9671705, "rtt_ms": 1.3275146484375, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931009.967683}
+{"kind": "monitor_other", "t": 1791931010.4558814, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931010.4559855, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791931010.4670057, "t_recv": 1791931010.4682178, "rtt_ms": 1.2121200561523438, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931010.468991}
+{"kind": "monitor_other", "t": 1791931010.8346527, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931010.9682379, "t_recv": 1791931010.9695663, "rtt_ms": 1.3284683227539062, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931010.9707577}
+{"t_send": 1791931011.4693673, "t_recv": 1791931011.4709175, "rtt_ms": 1.5501976013183594, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931011.4715304}
+{"kind": "monitor_other", "t": 1791931011.7827308, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931011.7828107, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931011.9707117, "t_recv": 1791931011.9719493, "rtt_ms": 1.237630844116211, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931011.9723709}
+{"t_send": 1791931012.471733, "t_recv": 1791931012.47303, "rtt_ms": 1.2969970703125, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931012.473493}
+{"t_send": 1791931012.9735506, "t_recv": 1791931012.9752345, "rtt_ms": 1.683950424194336, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931012.9756734}
+{"kind": "monitor_other", "t": 1791931013.1080499, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931013.1081486, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791931013.4748049, "t_recv": 1791931013.475931, "rtt_ms": 1.1260509490966797, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931013.4764977}
+{"t_send": 1791931013.9756992, "t_recv": 1791931013.9769247, "rtt_ms": 1.2254714965820312, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931013.9775991}
+{"kind": "monitor_other", "t": 1791931014.431256, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931014.4313564, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931014.476799, "t_recv": 1791931014.478131, "rtt_ms": 1.3320446014404297, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931014.4785666}
+{"t_send": 1791931014.9780774, "t_recv": 1791931014.979579, "rtt_ms": 1.5015602111816406, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931014.9801145}
+{"t_send": 1791931015.4793556, "t_recv": 1791931015.4805255, "rtt_ms": 1.1699199676513672, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931015.4809527}
+{"kind": "monitor_other", "t": 1791931015.758421, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931015.758516, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931015.835071, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931015.9799948, "t_recv": 1791931015.9813602, "rtt_ms": 1.3654232025146484, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931015.9823833}
+{"t_send": 1791931016.4814112, "t_recv": 1791931016.4829135, "rtt_ms": 1.5022754669189453, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931016.483465}
+{"t_send": 1791931016.9823563, "t_recv": 1791931016.9843633, "rtt_ms": 2.007007598876953, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931016.9851618}
+{"kind": "monitor_other", "t": 1791931017.0820556, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931017.0821722, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931017.4832397, "t_recv": 1791931017.4845133, "rtt_ms": 1.2736320495605469, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931017.4849467}
+{"t_send": 1791931017.9840798, "t_recv": 1791931017.985334, "rtt_ms": 1.2540817260742188, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931017.985774}
+{"kind": "monitor_other", "t": 1791931018.4076068, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931018.4076986, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791931018.4854226, "t_recv": 1791931018.4865935, "rtt_ms": 1.1708736419677734, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931018.4874423}
+{"t_send": 1791931018.986681, "t_recv": 1791931018.988023, "rtt_ms": 1.3420581817626953, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931018.9890885}
+{"t_send": 1791931019.4879491, "t_recv": 1791931019.4890754, "rtt_ms": 1.1262893676757812, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931019.4896796}
+{"kind": "monitor_other", "t": 1791931019.7332892, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931019.7333827, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931019.9886868, "t_recv": 1791931019.9897573, "rtt_ms": 1.0704994201660156, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931019.9902453}
+{"t_send": 1791931020.489295, "t_recv": 1791931020.4907718, "rtt_ms": 1.4767646789550781, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931020.4911911}
+{"kind": "monitor_other", "t": 1791931020.8359559, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931020.9902618, "t_recv": 1791931020.9916844, "rtt_ms": 1.4226436614990234, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931020.9923248}
+{"kind": "monitor_other", "t": 1791931021.0532632, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931021.0533638, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791931021.491332, "t_recv": 1791931021.4923897, "rtt_ms": 1.0576248168945312, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931021.4929018}
+{"t_send": 1791931021.9919968, "t_recv": 1791931021.99317, "rtt_ms": 1.173257827758789, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931021.993722}
+{"kind": "monitor_other", "t": 1791931022.3813796, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931022.3814554, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931022.4927268, "t_recv": 1791931022.4944468, "rtt_ms": 1.7199516296386719, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931022.49494}
+{"t_send": 1791931022.9940486, "t_recv": 1791931022.9956129, "rtt_ms": 1.5642642974853516, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931022.996123}
+{"t_send": 1791931023.4953854, "t_recv": 1791931023.4966812, "rtt_ms": 1.2958049774169922, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931023.4970846}
+{"kind": "monitor_other", "t": 1791931023.7142148, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931023.7142868, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"t_send": 1791931023.9963622, "t_recv": 1791931023.997629, "rtt_ms": 1.2667179107666016, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931023.9982824}
+{"t_send": 1791931024.4974453, "t_recv": 1791931024.4998283, "rtt_ms": 2.382993698120117, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931024.5006433}
+{"t_send": 1791931024.99878, "t_recv": 1791931025.0000062, "rtt_ms": 1.226186752319336, "n": 3, "tables": [0], "digest": "d0cd7f29f686e945", "kind": "poll", "t": 1791931025.0006497}
+{"kind": "monitor_other", "t": 1791931025.0381875, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931025.038287, "event": "modified", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931025.4997115, "t_recv": 1791931025.50125, "rtt_ms": 1.5385150909423828, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931025.5016418}
+{"kind": "monitor_other", "t": 1791931025.8373408, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931026.0006876, "t_recv": 1791931026.001952, "rtt_ms": 1.264333724975586, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931026.0024774}
+{"t_send": 1791931026.502091, "t_recv": 1791931026.5036397, "rtt_ms": 1.54876708984375, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931026.5040526}
+{"t_send": 1791931027.0036254, "t_recv": 1791931027.0051217, "rtt_ms": 1.4963150024414062, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931027.0056267}
+{"t_send": 1791931027.5040894, "t_recv": 1791931027.5053384, "rtt_ms": 1.249074935913086, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931027.5059536}
+{"kind": "monitor_other", "t": 1791931027.6674864, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931027.667565, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931028.0056167, "t_recv": 1791931028.0072985, "rtt_ms": 1.6818046569824219, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931028.007838}
+{"t_send": 1791931028.5069613, "t_recv": 1791931028.5084982, "rtt_ms": 1.5368461608886719, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931028.5091445}
+{"kind": "monitor_other", "t": 1791931028.9971764, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931028.9972868, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931029.0083742, "t_recv": 1791931029.009627, "rtt_ms": 1.252889633178711, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931029.0102258}
+{"t_send": 1791931029.5092533, "t_recv": 1791931029.5105581, "rtt_ms": 1.3048648834228516, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931029.5109773}
+{"t_send": 1791931030.0105639, "t_recv": 1791931030.0117223, "rtt_ms": 1.1584758758544922, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931030.0122452}
+{"kind": "monitor_other", "t": 1791931030.3235986, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931030.3236637, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931030.5113647, "t_recv": 1791931030.5127661, "rtt_ms": 1.4014244079589844, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931030.5132005}
+{"kind": "monitor_other", "t": 1791931030.8384504, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931031.012306, "t_recv": 1791931031.013657, "rtt_ms": 1.3511180877685547, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931031.0142505}
+{"t_send": 1791931031.5132592, "t_recv": 1791931031.5145385, "rtt_ms": 1.2793540954589844, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931031.5150483}
+{"kind": "monitor_other", "t": 1791931031.6487222, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931031.648816, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931032.0139327, "t_recv": 1791931032.0149302, "rtt_ms": 0.9975433349609375, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931032.015351}
+{"t_send": 1791931032.515323, "t_recv": 1791931032.5165567, "rtt_ms": 1.233816146850586, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931032.5176563}
+{"kind": "monitor_other", "t": 1791931032.9700267, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931032.9701314, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931033.0165849, "t_recv": 1791931033.0176659, "rtt_ms": 1.0809898376464844, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931033.018218}
+{"t_send": 1791931033.5171962, "t_recv": 1791931033.5184553, "rtt_ms": 1.2590885162353516, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931033.5188816}
+{"t_send": 1791931034.0177002, "t_recv": 1791931034.018806, "rtt_ms": 1.1057853698730469, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931034.0192113}
+{"kind": "monitor_other", "t": 1791931034.2951937, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931034.2952743, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931034.5182858, "t_recv": 1791931034.5197148, "rtt_ms": 1.4290809631347656, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931034.5201974}
+{"t_send": 1791931035.0202224, "t_recv": 1791931035.0219026, "rtt_ms": 1.680135726928711, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931035.0225666}
+{"t_send": 1791931035.5216577, "t_recv": 1791931035.5229719, "rtt_ms": 1.3141632080078125, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931035.523425}
+{"kind": "monitor_other", "t": 1791931035.6240103, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931035.6241086, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"kind": "monitor_other", "t": 1791931035.8392417, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931036.0224354, "t_recv": 1791931036.0236416, "rtt_ms": 1.2061595916748047, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931036.0241404}
+{"t_send": 1791931036.5233107, "t_recv": 1791931036.5244882, "rtt_ms": 1.1775493621826172, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931036.5248804}
+{"kind": "monitor_other", "t": 1791931036.9514701, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931036.9515636, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931037.0238488, "t_recv": 1791931037.024696, "rtt_ms": 0.8473396301269531, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931037.025066}
+{"t_send": 1791931037.5251067, "t_recv": 1791931037.526349, "rtt_ms": 1.2423992156982422, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931037.5268912}
+{"t_send": 1791931038.025716, "t_recv": 1791931038.0268424, "rtt_ms": 1.1262893676757812, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931038.0273042}
+{"kind": "monitor_other", "t": 1791931038.2741458, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931038.2742472, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931038.5263906, "t_recv": 1791931038.5278184, "rtt_ms": 1.4278888702392578, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931038.528228}
+{"t_send": 1791931039.0270698, "t_recv": 1791931039.0282357, "rtt_ms": 1.1658668518066406, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931039.0287037}
+{"t_send": 1791931039.5280688, "t_recv": 1791931039.5301232, "rtt_ms": 2.054452896118164, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931039.5306294}
+{"kind": "monitor_other", "t": 1791931039.6028788, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931039.602988, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931040.028741, "t_recv": 1791931040.0306997, "rtt_ms": 1.9588470458984375, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931040.0313032}
+{"t_send": 1791931040.5300994, "t_recv": 1791931040.5314133, "rtt_ms": 1.313924789428711, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931040.5318491}
+{"kind": "monitor_other", "t": 1791931040.8399765, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"kind": "monitor_other", "t": 1791931040.9275947, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931040.9277093, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931041.0310779, "t_recv": 1791931041.032398, "rtt_ms": 1.3201236724853516, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931041.0328538}
+{"t_send": 1791931044.589452, "t_recv": 1791931044.590981, "rtt_ms": 1.5289783477783203, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931044.591435}
+{"t_send": 1791931045.0905244, "t_recv": 1791931045.091708, "rtt_ms": 1.1835098266601562, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931045.092584}
+{"kind": "monitor_other", "t": 1791931045.3112638, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931045.3113706, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931045.5912974, "t_recv": 1791931045.592555, "rtt_ms": 1.2576580047607422, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931045.5929596}
+{"t_send": 1791931046.0921984, "t_recv": 1791931046.0934222, "rtt_ms": 1.2238025665283203, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931046.0938218}
+{"t_send": 1791931046.5931034, "t_recv": 1791931046.594552, "rtt_ms": 1.4486312866210938, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931046.595017}
+{"kind": "monitor_other", "t": 1791931046.6348627, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931046.6349666, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931047.0942569, "t_recv": 1791931047.0960217, "rtt_ms": 1.7647743225097656, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931047.0967598}
+{"t_send": 1791931047.595028, "t_recv": 1791931047.5963569, "rtt_ms": 1.3289451599121094, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931047.5968792}
+{"kind": "monitor_other", "t": 1791931047.9628174, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931047.9629228, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931048.0960698, "t_recv": 1791931048.0971735, "rtt_ms": 1.1036396026611328, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931048.0975769}
+{"t_send": 1791931048.596683, "t_recv": 1791931048.5981574, "rtt_ms": 1.4743804931640625, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931048.5986016}
+{"kind": "monitor_other", "t": 1791931048.8993204, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931049.0978413, "t_recv": 1791931049.099072, "rtt_ms": 1.2307167053222656, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931049.0994744}
+{"kind": "monitor_other", "t": 1791931049.2899518, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931049.2900462, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931049.5986087, "t_recv": 1791931049.599884, "rtt_ms": 1.2753009796142578, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931049.6003182}
+{"t_send": 1791931050.0996625, "t_recv": 1791931050.1012309, "rtt_ms": 1.5683174133300781, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931050.1017299}
+{"t_send": 1791931050.600777, "t_recv": 1791931050.60427, "rtt_ms": 3.493070602416992, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931050.6046956}
+{"kind": "monitor_other", "t": 1791931050.612839, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931050.6129258, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931051.1016228, "t_recv": 1791931051.102901, "rtt_ms": 1.2781620025634766, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931051.1032739}
+{"t_send": 1791931051.6021953, "t_recv": 1791931051.6036274, "rtt_ms": 1.432180404663086, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931051.6041365}
+{"kind": "monitor_other", "t": 1791931051.9384801, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931051.9385629, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931052.1031415, "t_recv": 1791931052.1044343, "rtt_ms": 1.2927055358886719, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931052.104847}
+{"t_send": 1791931052.6041408, "t_recv": 1791931052.6054797, "rtt_ms": 1.338958740234375, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931052.605892}
+{"t_send": 1791931053.105691, "t_recv": 1791931053.1073365, "rtt_ms": 1.6455650329589844, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931053.1080935}
+{"kind": "monitor_other", "t": 1791931053.2654538, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931053.265548, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931053.6070552, "t_recv": 1791931053.6085713, "rtt_ms": 1.516103744506836, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931053.6091208}
+{"kind": "monitor_other", "t": 1791931053.899912, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931054.108137, "t_recv": 1791931054.1092706, "rtt_ms": 1.1336803436279297, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931054.109678}
+{"kind": "monitor_other", "t": 1791931054.5929356, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931054.5930386, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931054.609552, "t_recv": 1791931054.6106045, "rtt_ms": 1.0526180267333984, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931054.61103}
+{"t_send": 1791931055.1101077, "t_recv": 1791931055.1119332, "rtt_ms": 1.825571060180664, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931055.112371}
+{"t_send": 1791931055.610557, "t_recv": 1791931055.6116357, "rtt_ms": 1.0786056518554688, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931055.6121857}
+{"t_send": 1791931056.1117196, "t_recv": 1791931056.1131203, "rtt_ms": 1.4007091522216797, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931056.113805}
+{"t_send": 1791931056.612956, "t_recv": 1791931056.6141944, "rtt_ms": 1.2383460998535156, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931056.6146345}
+{"t_send": 1791931057.113774, "t_recv": 1791931057.1149306, "rtt_ms": 1.1565685272216797, "n": 4, "tables": [0], "digest": "ed05d432573e95fe", "kind": "poll", "t": 1791931057.115343}
+{"kind": "monitor_other", "t": 1791931057.217791, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931057.21793, "event": "deleted", "table_id": 0, "cookie": "0", "priority": null, "match": "ip,nw_dst=10.0.0.3"}
+{"t_send": 1791931057.6143715, "t_recv": 1791931057.6156762, "rtt_ms": 1.30462646484375, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931057.616221}
+{"t_send": 1791931058.1152008, "t_recv": 1791931058.1164165, "rtt_ms": 1.2156963348388672, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931058.1168149}
+{"t_send": 1791931058.615742, "t_recv": 1791931058.6170447, "rtt_ms": 1.3027191162109375, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931058.6174307}
+{"kind": "monitor_other", "t": 1791931058.9005716, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931059.1162767, "t_recv": 1791931059.1174862, "rtt_ms": 1.2094974517822266, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931059.1180701}
+{"t_send": 1791931059.6170852, "t_recv": 1791931059.6183062, "rtt_ms": 1.2209415435791016, "n": 3, "tables": [0], "digest": "80509bf893f1f39b", "kind": "poll", "t": 1791931059.618699}
+{"kind": "monitor_other", "t": 1791931059.8448944, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931059.8450797, "event": "deleted", "table_id": 0, "cookie": "0xaaaa000000000001", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931060.1177306, "t_recv": 1791931060.1189075, "rtt_ms": 1.1768341064453125, "n": 2, "tables": [0], "digest": "84a7063e346f0662", "kind": "poll", "t": 1791931060.1193216}
+{"t_send": 1791931060.618405, "t_recv": 1791931060.6196213, "rtt_ms": 1.2161731719970703, "n": 2, "tables": [0], "digest": "84a7063e346f0662", "kind": "poll", "t": 1791931060.6201642}
+{"t_send": 1791931061.1191382, "t_recv": 1791931061.120318, "rtt_ms": 1.1796951293945312, "n": 2, "tables": [0], "digest": "84a7063e346f0662", "kind": "poll", "t": 1791931061.120702}
+{"t_send": 1791931061.619694, "t_recv": 1791931061.620898, "rtt_ms": 1.2040138244628906, "n": 2, "tables": [0], "digest": "84a7063e346f0662", "kind": "poll", "t": 1791931061.621353}
+{"t_send": 1791931062.120418, "t_recv": 1791931062.1215615, "rtt_ms": 1.1434555053710938, "n": 2, "tables": [0], "digest": "84a7063e346f0662", "kind": "poll", "t": 1791931062.1218822}
+{"kind": "monitor_other", "t": 1791931062.4736152, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931062.4737263, "event": "added", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931062.6208916, "t_recv": 1791931062.621993, "rtt_ms": 1.1014938354492188, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931062.6223798}
+{"t_send": 1791931063.1213877, "t_recv": 1791931063.1223705, "rtt_ms": 0.9827613830566406, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931063.1227539}
+{"t_send": 1791931063.6218224, "t_recv": 1791931063.6230536, "rtt_ms": 1.2311935424804688, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931063.623452}
+{"kind": "monitor_other", "t": 1791931063.9013824, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931064.1224446, "t_recv": 1791931064.1234374, "rtt_ms": 0.9927749633789062, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931064.1239772}
+{"t_send": 1791931064.6230595, "t_recv": 1791931064.624383, "rtt_ms": 1.3234615325927734, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931064.6247678}
+{"kind": "monitor_other", "t": 1791931065.101082, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931065.10121, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931065.1184492, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931065.118523, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931065.1237998, "t_recv": 1791931065.1247556, "rtt_ms": 0.9558200836181641, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931065.1251185}
+{"t_send": 1791931065.6242447, "t_recv": 1791931065.6252809, "rtt_ms": 1.0361671447753906, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931065.625754}
+{"t_send": 1791931066.124899, "t_recv": 1791931066.1260412, "rtt_ms": 1.142263412475586, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931066.126443}
+{"t_send": 1791931066.6265445, "t_recv": 1791931066.6286054, "rtt_ms": 2.0608901977539062, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931066.6290512}
+{"t_send": 1791931067.1271477, "t_recv": 1791931067.128274, "rtt_ms": 1.1262893676757812, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931067.1287224}
+{"t_send": 1791931067.6279984, "t_recv": 1791931067.628984, "rtt_ms": 0.9856224060058594, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931067.629372}
+{"kind": "monitor_other", "t": 1791931067.7453473, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931067.7454455, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931067.7650654, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931067.7652955, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931068.1293688, "t_recv": 1791931068.1305728, "rtt_ms": 1.2040138244628906, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931068.1309762}
+{"t_send": 1791931068.6298826, "t_recv": 1791931068.631129, "rtt_ms": 1.2464523315429688, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931068.6315527}
+{"kind": "monitor_other", "t": 1791931068.9017057, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931069.1302972, "t_recv": 1791931069.1314356, "rtt_ms": 1.138448715209961, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931069.1319077}
+{"t_send": 1791931069.630811, "t_recv": 1791931069.6324818, "rtt_ms": 1.67083740234375, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931069.6330905}
+{"t_send": 1791931070.1319954, "t_recv": 1791931070.1330311, "rtt_ms": 1.0356903076171875, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931070.133417}
+{"kind": "monitor_other", "t": 1791931070.3919425, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931070.3920412, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931070.4088879, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931070.409025, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931070.6333477, "t_recv": 1791931070.63461, "rtt_ms": 1.2621879577636719, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931070.6350062}
+{"t_send": 1791931071.1338685, "t_recv": 1791931071.1349533, "rtt_ms": 1.0848045349121094, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931071.1353424}
+{"t_send": 1791931071.6352355, "t_recv": 1791931071.6362207, "rtt_ms": 0.9851455688476562, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931071.6366243}
+{"t_send": 1791931072.136685, "t_recv": 1791931072.1378827, "rtt_ms": 1.19781494140625, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931072.1385117}
+{"t_send": 1791931072.6375952, "t_recv": 1791931072.638908, "rtt_ms": 1.3127326965332031, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931072.6395564}
+{"kind": "monitor_other", "t": 1791931073.0351818, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931073.035309, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931073.0542126, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931073.0542848, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931073.1383932, "t_recv": 1791931073.139475, "rtt_ms": 1.0819435119628906, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931073.139984}
+{"t_send": 1791931073.6389647, "t_recv": 1791931073.6402445, "rtt_ms": 1.2798309326171875, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931073.6407309}
+{"kind": "monitor_other", "t": 1791931073.9036498, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931074.1395571, "t_recv": 1791931074.140822, "rtt_ms": 1.264810562133789, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931074.141445}
+{"t_send": 1791931074.6406138, "t_recv": 1791931074.641711, "rtt_ms": 1.0972023010253906, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931074.642155}
+{"t_send": 1791931075.1413043, "t_recv": 1791931075.142538, "rtt_ms": 1.233816146850586, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931075.1429508}
+{"t_send": 1791931075.6421351, "t_recv": 1791931075.643616, "rtt_ms": 1.4808177947998047, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931075.6442373}
+{"kind": "monitor_other", "t": 1791931075.6839886, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931075.6840858, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931075.7036443, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931075.7037168, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931076.1433818, "t_recv": 1791931076.1446598, "rtt_ms": 1.277923583984375, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931076.1450677}
+{"t_send": 1791931079.9462953, "t_recv": 1791931079.9472947, "rtt_ms": 0.99945068359375, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931079.9477825}
+{"t_send": 1791931080.446995, "t_recv": 1791931080.4482458, "rtt_ms": 1.2507438659667969, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931080.4487212}
+{"t_send": 1791931080.9477375, "t_recv": 1791931080.948875, "rtt_ms": 1.1374950408935547, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931080.9492908}
+{"t_send": 1791931081.4485145, "t_recv": 1791931081.450192, "rtt_ms": 1.6775131225585938, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931081.450788}
+{"kind": "monitor_other", "t": 1791931081.636035, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931081.636131, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931081.6551142, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931081.6551864, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931081.9494333, "t_recv": 1791931081.9510708, "rtt_ms": 1.6374588012695312, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931081.9514673}
+{"kind": "monitor_other", "t": 1791931082.2065609, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931082.4508371, "t_recv": 1791931082.4523418, "rtt_ms": 1.504659652709961, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931082.452756}
+{"t_send": 1791931082.9514747, "t_recv": 1791931082.9529703, "rtt_ms": 1.4955997467041016, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931082.95337}
+{"t_send": 1791931083.4526849, "t_recv": 1791931083.4538956, "rtt_ms": 1.2106895446777344, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931083.454334}
+{"t_send": 1791931083.9534755, "t_recv": 1791931083.9545925, "rtt_ms": 1.1169910430908203, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931083.954997}
+{"kind": "monitor_other", "t": 1791931084.2840064, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931084.2841182, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931084.3046684, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931084.3047404, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931084.4542437, "t_recv": 1791931084.4553583, "rtt_ms": 1.1146068572998047, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931084.4557467}
+{"t_send": 1791931084.9548686, "t_recv": 1791931084.9559193, "rtt_ms": 1.050710678100586, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931084.956481}
+{"t_send": 1791931085.4557652, "t_recv": 1791931085.456973, "rtt_ms": 1.2078285217285156, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931085.4573824}
+{"t_send": 1791931085.9568539, "t_recv": 1791931085.9583607, "rtt_ms": 1.506805419921875, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931085.958806}
+{"t_send": 1791931086.457922, "t_recv": 1791931086.4594333, "rtt_ms": 1.5113353729248047, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931086.4600086}
+{"kind": "monitor_other", "t": 1791931086.9343073, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931086.9344146, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931086.9560056, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931086.95609, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931086.9590776, "t_recv": 1791931086.9600136, "rtt_ms": 0.9360313415527344, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931086.9605193}
+{"kind": "monitor_other", "t": 1791931087.207129, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"t_send": 1791931087.4595754, "t_recv": 1791931087.4606113, "rtt_ms": 1.035928726196289, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931087.4616187}
+{"t_send": 1791931087.9607666, "t_recv": 1791931087.962123, "rtt_ms": 1.356363296508789, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931087.9625812}
+{"t_send": 1791931088.4617538, "t_recv": 1791931088.4630084, "rtt_ms": 1.2545585632324219, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931088.463441}
+{"t_send": 1791931088.9630387, "t_recv": 1791931088.9641395, "rtt_ms": 1.100778579711914, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931088.9645653}
+{"t_send": 1791931089.4636695, "t_recv": 1791931089.4647865, "rtt_ms": 1.1169910430908203, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931089.465452}
+{"kind": "monitor_other", "t": 1791931089.5868833, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931089.5869691, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931089.607435, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931089.6074977, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931089.9646387, "t_recv": 1791931089.9659276, "rtt_ms": 1.2888908386230469, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931089.9664328}
+{"t_send": 1791931090.4655514, "t_recv": 1791931090.4669137, "rtt_ms": 1.3623237609863281, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931090.467812}
+{"t_send": 1791931090.966201, "t_recv": 1791931090.9677587, "rtt_ms": 1.5575885772705078, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931090.9682446}
+{"t_send": 1791931091.4674337, "t_recv": 1791931091.4686944, "rtt_ms": 1.2607574462890625, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931091.4692066}
+{"t_send": 1791931091.9693155, "t_recv": 1791931091.9709792, "rtt_ms": 1.6636848449707031, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931091.9714687}
+{"kind": "monitor_other", "t": 1791931092.2078774, "line": "OFPT_ECHO_REQUEST (xid=0x0): 0 bytes of payload"}
+{"kind": "monitor_other", "t": 1791931092.2420473, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931092.2421398, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23 actions=output:1"}
+{"kind": "monitor_other", "t": 1791931092.2625272, "line": "NXST_FLOW_MONITOR reply (xid=0x0):"}
+{"kind": "monitor", "mode": "ofctl_monitor", "t_rx": 1791931092.2626028, "event": "modified", "table_id": 0, "cookie": "0", "priority": null, "match": "tcp,tp_dst=23"}
+{"t_send": 1791931092.4699526, "t_recv": 1791931092.4714522, "rtt_ms": 1.4996528625488281, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931092.471912}
+{"t_send": 1791931092.9708295, "t_recv": 1791931092.9719682, "rtt_ms": 1.1386871337890625, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931092.9726148}
+{"t_send": 1791931093.4716878, "t_recv": 1791931093.4732072, "rtt_ms": 1.5194416046142578, "n": 3, "tables": [0], "digest": "4f010e97dd778d5e", "kind": "poll", "t": 1791931093.473685}
+{"kind": "monitor_other", "t": 1791931093.5680614, "line": "2026-10-13T22:38:13Z|00001|fatal_signal|WARN|terminating with signal 15 (signal 15)"}

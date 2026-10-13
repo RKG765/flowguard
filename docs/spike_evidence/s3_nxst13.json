@@ -1,0 +1,173 @@
+{
+  "mode": "nxst13",
+  "poll_interval_s": 0.5,
+  "of_flag": "OpenFlow13",
+  "topology": {
+    "datapath": "kernel",
+    "switches": [
+      "s1"
+    ],
+    "dpids": {
+      "s1": "0000000000000001"
+    },
+    "two_switch": false,
+    "controller": "127.0.0.1:6653"
+  },
+  "controller_connected": true,
+  "pingall_loss_percent": 0.0,
+  "tables_in_dump": [
+    0,
+    1
+  ],
+  "log_kinds": {
+    "app_start": 1,
+    "monitor_request": 1,
+    "switch_connected": 1,
+    "poll": 14
+  },
+  "poll_tables_seen": [
+    0
+  ],
+  "poll_rtt_ms_median": 1.39,
+  "initial_monitor_events": 0,
+  "monitor_other_lines": [],
+  "scenarios": [
+    {
+      "scenario": "modify_acl",
+      "n": 5,
+      "monitor_detected": 0,
+      "monitor_ms": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "monitor_ms_median": null,
+      "poll_detected": 5,
+      "poll_ms": [
+        495.83,
+        354.31,
+        215.68,
+        75.71,
+        435.07
+      ],
+      "poll_ms_median": 354.31,
+      "ofctl_cmd_ms_median": 22.2
+    },
+    {
+      "scenario": "revert_acl",
+      "n": 5,
+      "monitor_detected": 0,
+      "monitor_ms": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "monitor_ms_median": null,
+      "poll_detected": 5,
+      "poll_ms": [
+        316.94,
+        170.26,
+        28.85,
+        391.69,
+        248.4
+      ],
+      "poll_ms_median": 248.4,
+      "ofctl_cmd_ms_median": 22.0
+    },
+    {
+      "scenario": "add_forged",
+      "n": 5,
+      "monitor_detected": 0,
+      "monitor_ms": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "monitor_ms_median": null,
+      "poll_detected": 5,
+      "poll_ms": [
+        121.77,
+        483.51,
+        338.54,
+        193.77,
+        48.66
+      ],
+      "poll_ms_median": 193.77,
+      "ofctl_cmd_ms_median": 21.0
+    },
+    {
+      "scenario": "delete_forged",
+      "n": 1,
+      "monitor_detected": 0,
+      "monitor_ms": [
+        null
+      ],
+      "monitor_ms_median": null,
+      "poll_detected": 1,
+      "poll_ms": [
+        430.9
+      ],
+      "poll_ms_median": 430.9,
+      "ofctl_cmd_ms_median": 21.6
+    },
+    {
+      "scenario": "delete_acl",
+      "n": 1,
+      "monitor_detected": 0,
+      "monitor_ms": [
+        null
+      ],
+      "monitor_ms_median": null,
+      "poll_detected": 1,
+      "poll_ms": [
+        310.68
+      ],
+      "poll_ms_median": 310.68,
+      "ofctl_cmd_ms_median": 19.9
+    },
+    {
+      "scenario": "restore_acl",
+      "n": 1,
+      "monitor_detected": 0,
+      "monitor_ms": [
+        null
+      ],
+      "monitor_ms_median": null,
+      "poll_detected": 1,
+      "poll_ms": [
+        189.36
+      ],
+      "poll_ms_median": 189.36,
+      "ofctl_cmd_ms_median": 19.7
+    },
+    {
+      "scenario": "tamper_and_quick_revert",
+      "n": 5,
+      "monitor_detected": 0,
+      "monitor_ms": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "monitor_ms_median": null,
+      "poll_detected": 0,
+      "poll_ms": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "poll_ms_median": null,
+      "ofctl_cmd_ms_median": 46.2
+    }
+  ]
+}

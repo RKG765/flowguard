@@ -1,0 +1,54 @@
+*** Ping: testing ping reachability
+h1 -> h2 h3 h4 
+h2 -> h1 h3 h4 
+h3 -> h1 h2 h4 
+h4 -> h1 h2 h3 
+*** Results: 0% dropped (12/12 received)
+{
+  "mode": "ofctl_monitor",
+  "poll_interval_s": 0.5,
+  "of_flag": "OpenFlow13",
+  "topology": {
+    "datapath": "user",
+    "switches": [
+      "s1"
+    ],
+    "dpids": {
+      "s1": "0000000000000001"
+    },
+    "two_switch": false,
+    "controller": "127.0.0.1:6653"
+  },
+  "controller_connected": true,
+  "pingall_loss_percent": 0.0,
+  "tables_in_dump": [
+    0,
+    1
+  ],
+  "log_kinds": {
+    "poll": 17,
+    "monitor_other": 5,
+    "switch_connected": 1,
+    "app_start": 1,
+    "monitor": 8
+  },
+  "poll_tables_seen": [
+    0
+  ],
+  "poll_rtt_ms_median": 1.23,
+  "initial_monitor_events": 8,
+  "monitor_other_lines": [
+    "NXST_FLOW_MONITOR reply (xid=0x6):",
+    "NXST_FLOW_MONITOR reply (xid=0x0):",
+    "NXST_FLOW_MONITOR reply (xid=0x0):",
+    "NXST_FLOW_MONITOR reply (xid=0x0):",
+    "NXST_FLOW_MONITOR reply (xid=0x0):"
+  ]
+}
+modify_acl                 n=10  monitor 10/10 med=21.72 ms | poll 10/10 med=231.76999999999998 ms | ofctl cmd med=23.55 ms
+revert_acl                 n=10  monitor 10/10 med=22.105 ms | poll 10/10 med=281.605 ms | ofctl cmd med=22.65 ms
+add_forged                 n=10  monitor 10/10 med=20.81 ms | poll 10/10 med=242.06 ms | ofctl cmd med=21.4 ms
+delete_forged              n=1   monitor 1/1 med=18.59 ms | poll 1/1 med=416.33 ms | ofctl cmd med=21.0 ms
+delete_acl                 n=1   monitor 1/1 med=19.79 ms | poll 1/1 med=293.62 ms | ofctl cmd med=21.0 ms
+restore_acl                n=1   monitor 1/1 med=21.6 ms | poll 1/1 med=169.87 ms | ofctl cmd med=22.1 ms
+tamper_and_quick_revert    n=10  monitor 10/10 med=20.89 ms | poll 0/10 med=None ms | ofctl cmd med=41.2 ms

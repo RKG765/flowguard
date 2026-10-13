@@ -1,0 +1,44 @@
+flowchart TB
+  docs_tooling["Living docs + status tooling (update_docs.py)"]:::implemented
+  doctor["Environment doctor + flowguard CLI (doctor only)"]:::implemented
+  setup_script["scripts/setup_ubuntu.sh"]:::partial
+  lab_topology["Mininet lab topology (4 hosts, 1 or 2 switches, explicit dpids)"]:::implemented
+  spike_harness["Phase 0 spike harness (make spike)"]:::implemented
+  engine_crypto["Canonical form + HMAC cookie (dpid, epoch bound)"]:::planned
+  engine_store["Golden store + install_signed_rule"]:::planned
+  engine_verifier["L1 verifier + NXST monitor session"]:::planned
+  engine_responder["Responder (restore, rate limit)"]:::planned
+  event_channel["ZeroMQ event channel + alert spool"]:::planned
+  core_service["Core service (FastAPI, SQLite, WebSocket)"]:::planned
+  core_auth["Auth, roles, audit log"]:::planned
+  helper["Privileged helper (allowlist)"]:::planned
+  attacks["Attacks A1-A7 (A7 SIMULATED)"]:::planned
+  web_design_system["Design system + app shell"]:::planned
+  web_pages["Dashboard pages + Attack Lab"]:::planned
+  engine_prober["L2 data-plane prober"]:::planned
+  ml_worker["L3 ML scorer worker"]:::planned
+  risk_engine["Risk engine + policy"]:::planned
+  reports["Reports (PDF/CSV)"]:::planned
+  packaging["flowguard CLI (start, stop, status, export) and make targets"]:::planned
+  lab_topology --> engine_verifier
+  engine_crypto --> engine_store
+  engine_store --> engine_verifier
+  engine_verifier --> engine_responder
+  engine_verifier --> event_channel
+  engine_prober --> risk_engine
+  ml_worker --> risk_engine
+  event_channel --> core_service
+  risk_engine --> core_service
+  core_auth --> core_service
+  core_service --> web_pages
+  web_design_system --> web_pages
+  core_service --> helper
+  helper --> attacks
+  core_service --> reports
+  classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
+  classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
+  classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;
+  classDef blocked fill:#c53030,stroke:#63171b,color:#ffffff;
+  classDef implemented fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
+  classDef partial fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
+  classDef planned fill:#4a5568,stroke:#1a202c,color:#ffffff;

@@ -1,0 +1,220 @@
+{
+  "mode": "ofctl_monitor",
+  "poll_interval_s": 0.5,
+  "of_flag": "OpenFlow13",
+  "topology": {
+    "datapath": "user",
+    "switches": [
+      "s1"
+    ],
+    "dpids": {
+      "s1": "0000000000000001"
+    },
+    "two_switch": false,
+    "controller": "127.0.0.1:6653"
+  },
+  "controller_connected": true,
+  "pingall_loss_percent": 0.0,
+  "tables_in_dump": [
+    0,
+    1
+  ],
+  "log_kinds": {
+    "poll": 17,
+    "monitor_other": 5,
+    "switch_connected": 1,
+    "app_start": 1,
+    "monitor": 8
+  },
+  "poll_tables_seen": [
+    0
+  ],
+  "poll_rtt_ms_median": 1.23,
+  "initial_monitor_events": 8,
+  "monitor_other_lines": [
+    "NXST_FLOW_MONITOR reply (xid=0x6):",
+    "NXST_FLOW_MONITOR reply (xid=0x0):",
+    "NXST_FLOW_MONITOR reply (xid=0x0):",
+    "NXST_FLOW_MONITOR reply (xid=0x0):",
+    "NXST_FLOW_MONITOR reply (xid=0x0):"
+  ],
+  "scenarios": [
+    {
+      "scenario": "modify_acl",
+      "n": 10,
+      "monitor_detected": 10,
+      "monitor_ms": [
+        18.63,
+        24.87,
+        22.25,
+        24.57,
+        20.26,
+        20.58,
+        23.89,
+        21.19,
+        22.9,
+        20.87
+      ],
+      "monitor_ms_median": 21.72,
+      "poll_detected": 10,
+      "poll_ms": [
+        202.97,
+        59.87,
+        410.23,
+        260.57,
+        113.02,
+        474.08,
+        331.34,
+        187.53,
+        50.04,
+        408.36
+      ],
+      "poll_ms_median": 231.76999999999998,
+      "ofctl_cmd_ms_median": 23.55
+    },
+    {
+      "scenario": "revert_acl",
+      "n": 10,
+      "monitor_detected": 10,
+      "monitor_ms": [
+        20.65,
+        22.29,
+        22.14,
+        23.69,
+        22.96,
+        20.03,
+        20.54,
+        22.07,
+        23.86,
+        21.78
+      ],
+      "monitor_ms_median": 22.105,
+      "poll_detected": 10,
+      "poll_ms": [
+        284.77,
+        147.19,
+        502.17,
+        358.53,
+        212.09,
+        66.8,
+        422.89,
+        278.44,
+        136.85,
+        484.74
+      ],
+      "poll_ms_median": 281.605,
+      "ofctl_cmd_ms_median": 22.65
+    },
+    {
+      "scenario": "add_forged",
+      "n": 10,
+      "monitor_detected": 10,
+      "monitor_ms": [
+        23.59,
+        21.13,
+        17.81,
+        25.0,
+        20.32,
+        21.39,
+        19.39,
+        20.29,
+        22.51,
+        20.49
+      ],
+      "monitor_ms_median": 20.81,
+      "poll_detected": 10,
+      "poll_ms": [
+        363.33,
+        210.23,
+        65.34,
+        424.53,
+        273.89,
+        126.08,
+        480.45,
+        330.12,
+        188.38,
+        38.05
+      ],
+      "poll_ms_median": 242.06,
+      "ofctl_cmd_ms_median": 21.4
+    },
+    {
+      "scenario": "delete_forged",
+      "n": 1,
+      "monitor_detected": 1,
+      "monitor_ms": [
+        18.59
+      ],
+      "monitor_ms_median": 18.59,
+      "poll_detected": 1,
+      "poll_ms": [
+        416.33
+      ],
+      "poll_ms_median": 416.33,
+      "ofctl_cmd_ms_median": 21.0
+    },
+    {
+      "scenario": "delete_acl",
+      "n": 1,
+      "monitor_detected": 1,
+      "monitor_ms": [
+        19.79
+      ],
+      "monitor_ms_median": 19.79,
+      "poll_detected": 1,
+      "poll_ms": [
+        293.62
+      ],
+      "poll_ms_median": 293.62,
+      "ofctl_cmd_ms_median": 21.0
+    },
+    {
+      "scenario": "restore_acl",
+      "n": 1,
+      "monitor_detected": 1,
+      "monitor_ms": [
+        21.6
+      ],
+      "monitor_ms_median": 21.6,
+      "poll_detected": 1,
+      "poll_ms": [
+        169.87
+      ],
+      "poll_ms_median": 169.87,
+      "ofctl_cmd_ms_median": 22.1
+    },
+    {
+      "scenario": "tamper_and_quick_revert",
+      "n": 10,
+      "monitor_detected": 10,
+      "monitor_ms": [
+        20.8,
+        20.11,
+        20.02,
+        20.4,
+        22.91,
+        21.42,
+        20.74,
+        20.98,
+        21.12,
+        21.11
+      ],
+      "monitor_ms_median": 20.89,
+      "poll_detected": 0,
+      "poll_ms": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "poll_ms_median": null,
+      "ofctl_cmd_ms_median": 41.2
+    }
+  ]
+}

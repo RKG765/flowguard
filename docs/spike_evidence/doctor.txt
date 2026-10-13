@@ -1,0 +1,18 @@
+STATUS  CHECK                         DETAIL
+--------------------------------------------------------------------
+PASS    Environment                   env=wsl, kernel=6.6.87.2-microsoft-standard-WSL2
+PASS    Operating system              ubuntu 22.04
+PASS    systemd                       available (units can be used)
+PASS    System Python (core service)  3.10.12
+PASS    Python 3.9 (Ryu engine)       /usr/bin/python3.9
+PASS    Engine venv (.venv-engine)    3.9.25 ryu 4.34 eventlet 0.30.2 pyzmq 26.2.0
+PASS    Core venv (.venv-core)        Python 3.10.12
+PASS    Node.js (dashboard build)     v20.20.2
+PASS    Root / sudo ability           running as root
+PASS    Open vSwitch daemons          ovs-vsctl (Open vSwitch) 2.17.12
+PASS    OVS datapath mode             kernel (openvswitch module loaded)
+PASS    Required ports free           6653, 8787
+PASS    Disk space                    1023.2 GB free at /root/flowguard
+PASS    Mininet ping test             pingall OK with datapath=kernel
+--------------------------------------------------------------------
+PASS=14  WARN=0  FAIL=0  SKIP=0

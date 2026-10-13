@@ -1,0 +1,32 @@
+[1;34m[setup][0m environment: wsl
+[1;34m[setup][0m starting Open vSwitch daemons
+Synchronizing state of openvswitch-switch.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable openvswitch-switch
+[1;34m[setup][0m ovsdb reachable
+[1;34m[setup][0m creating .venv-engine (Python 3.9, Ryu 4.34 pins)
+
+[notice] A new release of pip is available: 23.3.2 -> 26.0.1
+[notice] To update, run: /root/flowguard/.venv-engine/bin/python -m pip install --upgrade pip
+[1;34m[setup][0m creating .venv-core (system Python 3.10.12, sees apt Mininet)
+[1;34m[setup][0m running doctor
+STATUS  CHECK                         DETAIL
+--------------------------------------------------------------------
+PASS    Environment                   env=wsl, kernel=6.6.87.2-microsoft-standard-WSL2
+PASS    Operating system              ubuntu 22.04
+PASS    systemd                       available (units can be used)
+PASS    System Python (core service)  3.10.12
+PASS    Python 3.9 (Ryu engine)       /usr/bin/python3.9
+FAIL    Engine venv (.venv-engine)    AttributeError: module 'ryu' has no attribute '__version__'
+                                      fix: Re-run scripts/setup_ubuntu.sh; pins are in requirements/engine.txt.
+PASS    Core venv (.venv-core)        Python 3.10.12
+PASS    Node.js (dashboard build)     v20.20.2
+PASS    Root / sudo ability           running as root
+PASS    Open vSwitch daemons          ovs-vsctl (Open vSwitch) 2.17.12
+PASS    OVS datapath mode             kernel (openvswitch module loaded)
+PASS    Required ports free           6653, 8787
+PASS    Disk space                    1023.2 GB free at /root/flowguard
+PASS    Mininet ping test             pingall OK with datapath=kernel
+--------------------------------------------------------------------
+PASS=13  WARN=0  FAIL=1  SKIP=0
+[1;33m[setup][warn][0m doctor reported failures; read the fix column above
+[1;34m[setup][0m setup finished

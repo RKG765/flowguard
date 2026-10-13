@@ -1,0 +1,7 @@
+# Ryu engine (Python 3.9 venv). Direct pins only; see engine.lock.txt for the full resolved set.
+# Needs pip==23.3.2 and setuptools==58.0.0 installed first (done by scripts/setup_ubuntu.sh).
+ryu==4.34
+eventlet==0.30.2
+dnspython==1.16.0
+pyzmq==26.2.0
+PyYAML==6.0.2

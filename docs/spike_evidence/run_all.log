@@ -1,0 +1,9 @@
+[spike] S1 datapath
+[spike] S2 mininet
+[spike] S3a OF1.4 flow monitor
+[spike] S3b NXST over OF1.3
+[spike] S3c NXST over OF1.0 (kernel datapath)
+[spike] S3d NXST over OF1.0 (userspace datapath)
+[spike] doctor
+[spike] done. Evidence in /root/flowguard/docs/spike_evidence
+finished rc=0

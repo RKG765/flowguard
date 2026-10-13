@@ -1,0 +1,36 @@
+# FlowGuard configuration template. Copy to config.yaml (gitignored). Values here are defaults/plans;
+# keys marked (planned) are read only by components that are not built yet.
+environment: auto            # auto | wsl | ubuntu
+data_mode: live              # live | replay
+
+network:
+  bind_host: 127.0.0.1       # LAN access is an explicit opt-in: set 0.0.0.0 and accept the risk
+  dashboard_port: 8787
+  openflow_port: 6653
+
+secrets:
+  hmac_key_file: ~/.config/flowguard/hmac.key   # outside the repo, must be mode 0600 (planned, Phase 1)
+  hmac_key_env: FLOWGUARD_HMAC_KEY              # alternative to the file
+
+lab:
+  datapath: auto             # auto | kernel | user
+  of_protocols: [OpenFlow10, OpenFlow13]  # OF1.0 is required for the Nicira flow-monitor session
+  monitor_listen_base_port: 6634          # s1 -> 6634, s2 -> 6635
+  dpids: {s1: "0000000000000001", s2: "0000000000000002"}
+
+engine:                      # (planned, Phase 1)
+  critical_tables: [0]
+  verify_mode: event         # event | poll   (event chosen by the Phase 0 spike, ADR-004)
+  reconcile_poll_seconds: 5
+  grace_window_ms: 500
+  restore_rate_limit_per_minute: 6
+  rotation_grace_seconds: 300  # previous key epoch still accepted this long after rotation
+
+spool:                       # (planned, Phase 1)  ADR-009
+  path: data/spool/alerts.jsonl
+  max_bytes: 10485760        # 10 MiB per file
+  backups: 5                 # 5 rotated files -> 50 MiB cap, then oldest dropped and counted
+
+risk:                        # (planned, Phase 5)
+  dry_run: true
+  weights: {l1: 1.0, l2: 0.8, l3: 0.4}
