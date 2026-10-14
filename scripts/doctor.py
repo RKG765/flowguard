@@ -120,8 +120,13 @@ def check_core_venv() -> Result:
     py = REPO / ".venv-core" / "bin" / "python"
     if not py.exists():
         return res("venv_core", "Core venv (.venv-core)", FAIL, "missing", "Run scripts/setup_ubuntu.sh.")
-    rc, out = run([str(py), "--version"])
-    return res("venv_core", "Core venv (.venv-core)", PASS if rc == 0 else FAIL, out)
+    rc, out = run([str(py), "-c",
+                   "import sys, fastapi, sqlalchemy, alembic, argon2, zmq, mininet; from importlib.metadata import version as v; "
+                   "print(sys.version.split()[0], 'fastapi', v('fastapi'), 'sqlalchemy', v('SQLAlchemy'), 'mininet ok')"])
+    if rc != 0:
+        return res("venv_core", "Core venv (.venv-core)", FAIL, out.splitlines()[-1] if out else "import failed",
+                   "Re-run scripts/setup_ubuntu.sh; pins are in requirements/core.txt.")
+    return res("venv_core", "Core venv (.venv-core)", PASS, out)
 
 
 def check_node() -> Result:
@@ -154,6 +159,9 @@ def check_ovs_daemons() -> Result:
         return res("ovs", "Open vSwitch daemons", FAIL, "not running: " + ", ".join(missing),
                    "sudo systemctl enable --now openvswitch-switch   (or: sudo service openvswitch-switch start)")
     rc, out = run(["ovs-vsctl", "--timeout=5", "show"])
+    if rc != 0 and "Permission denied" in out:
+        return res("ovs", "Open vSwitch daemons", WARN, "running, but this user cannot read the OVS database",
+                   "Run the doctor as root to check OVS fully: sudo bin/flowguard doctor (the lab itself runs as root).")
     if rc != 0:
         return res("ovs", "Open vSwitch daemons", FAIL, out.splitlines()[-1] if out else "ovs-vsctl failed",
                    "Check 'journalctl -u openvswitch-switch' or /var/log/openvswitch/.")

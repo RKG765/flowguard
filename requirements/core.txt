@@ -1,5 +1,15 @@
-# Tooling venv (system Python 3.10). Phase 0 only needs doc tooling and tests;
-# FastAPI/SQLAlchemy/etc. are added in Phase 2.
+# Core service + tooling venv (system Python 3.10, created with --system-site-packages so it sees apt Mininet).
+# Direct pins; the resolved set is frozen in core.lock.txt.
 PyYAML==6.0.2
 pytest==8.3.4
 hypothesis==6.122.3
+# core service (Phase 2)
+fastapi==0.115.6
+uvicorn==0.34.0
+websockets==14.1
+SQLAlchemy==2.0.36
+alembic==1.14.0
+pydantic==2.10.4
+argon2-cffi==23.1.0
+pyzmq==26.2.0
+httpx==0.28.1

@@ -4,6 +4,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/). One entry per phase or 
 
 ## [Unreleased]
 
+### Phase 2: core service, API, storage, auth
+#### Added
+- `core/`: FastAPI app factory, SQLite (WAL) with Alembic migrations, ZeroMQ receiver + ordered spool tail with acknowledgement, incident grouping, WebSocket hub with one-time tickets, argon2id auth with roles/CSRF/lockout, hash-chained audit log, policy store (not enforced yet), session recorder, report summary and CSV export, engine status and key-rotation request.
+- Engine: per-table rule snapshots and periodic status on the channel.
+- Tests: role matrix over every route, auth/CSRF/lockout/expiry, ingest and spool acknowledgement, real ZeroMQ receiver, WebSocket, audit tamper detection, CSV formula injection, migrations-vs-models; live engine-to-core tests including a core restart.
+- `make run-core`; `make test` now includes the API tests.
+#### Fixed
+- Doctor reported a misleading OVS failure when run as a normal user; it now says what to do.
+
 ### Phase 1: engine L1 (signer, store, verifier, responder)
 #### Added
 - `engine/`: `canonical` (deterministic rule bytes), `crypto` (HMAC-in-cookie bound to dpid and epoch, rotation window, key-file checks), `store` (SQLite golden store), `verifier` (missing/altered/shadow/forged, attribution, grace), `responder` (restore/delete, rate limit, dry run), `spool` (durable alert spool with rotation), `channel` (non-blocking ZeroMQ), `monitor_parser`, `policy`, `config`, `ryu_codec`, `app` (the Ryu engine).

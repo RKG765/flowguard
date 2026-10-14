@@ -3,7 +3,8 @@ from engine.canonical import RuleSpec
 from engine.crypto import EpochPolicy, Signer
 from engine.responder import DELETE, NONE, RESTORE, Responder
 from engine.store import GoldenRule
-from engine.verifier import (ALTERED, FORGED, MISSING, SHADOW, Deduper, ObservedRule, Pending, classify, explain)
+from engine.verifier import (ALTERED, FORGED, MISSING, SHADOW, Deduper, ObservedRule, Pending, build_snapshot, classify,
+                             explain)
 
 DPID = 1
 SIGNER = Signer(bytes(range(32)), EpochPolicy(current=1))
@@ -169,3 +170,22 @@ def test_deduper_window():
     assert not d.should_alert(k, now=10.0)
     assert d.should_alert(k, now=31.0)
     assert d.should_alert(("b",), now=31.0)
+
+
+# ---- snapshot for the core/UI --------------------------------------------------------------------------------
+def test_snapshot_lists_every_rule_with_its_status():
+    tampered = RuleSpec.create(0, 100, TELNET.match, [{"type": "apply_actions", "actions": [{"type": "output", "port": 1}]}])
+    evil = RuleSpec.create(0, 300, {"eth_type": 0x0806}, [])
+    observed = [obs(tampered, cookie=GOLD[0].cookie), obs(MISS), obs(evil, cookie=0)]  # SSH rule deleted
+    findings = run(observed)
+    rows = build_snapshot(observed, GOLD, findings)
+    status = {r["priority"]: r["status"] for r in rows}
+    assert status == {300: FORGED, 100: ALTERED, 90: MISSING, 0: "ok"}
+    missing = next(r for r in rows if r["priority"] == 90)
+    assert missing["present"] is False and missing["cookie"] is None and missing["golden"] is True
+    assert [r["priority"] for r in rows] == [300, 100, 90, 0]
+
+
+def test_snapshot_marks_in_flight_slots_as_pending():
+    rows = build_snapshot([obs(TELNET), obs(SSH), obs(MISS)], GOLD, [], in_flight={TELNET.key()})
+    assert {r["priority"]: r["status"] for r in rows} == {100: "pending", 90: "ok", 0: "ok"}

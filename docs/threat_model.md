@@ -33,3 +33,7 @@ The integrity of OpenFlow flow rules (match, priority, instructions) in the *cri
 
 ## Abuse cases for the product itself (reviewed in Phase 10)
 Alert flooding to hide a real attack; copying a valid cookie onto a different rule/table/switch/priority; replaying old signed rules after key rotation; exploiting the grace window; attacking the golden store or event channel; abusing the privileged helper through the web layer; privilege escalation viewer -> admin; leaking key or tags through UI/API/logs/exports.
+
+## Core service (Phase 2): what is in place, what is not
+- In place (tested): argon2id passwords, hashed session tokens, roles enforced on every route (route matrix test), CSRF for cookie sessions, login lockout, one-time WebSocket tickets, hash-chained audit of every change and denial, 127.0.0.1 binding, CSV formula-injection guard, control-character stripping in audit fields.
+- Not in place yet: TLS (the lab is localhost-only), persistent lockout state, protection of the audit chain against someone who can write the database file, separate OS users for engine and core (in the lab tests the core runs as root next to Mininet).

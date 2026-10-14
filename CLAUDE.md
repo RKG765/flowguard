@@ -32,4 +32,4 @@ FlowGuard detects unauthorized changes to OpenFlow flow rules in SDN (Ryu + Open
 8. Never claim the product is "secure", "fully tested" or "production-ready". Persona reviews are AI-simulated and must say so.
 9. If context is running low, update `STATUS.md` and `HANDOFF.md` first.
 10. Owner instruction: never add `Co-Authored-By` trailers or any Claude attribution to commits or PR text.
-11. Git remote is `git@github.com:RKG765/flowguard.git` over SSH. Pushing needs the owner's GitHub key setup; never ask for or handle tokens or passwords.
+11. Git remote is `https://github.com/RKG765/flowguard.git`, authenticated with `gh` (done). Push as user `rkg`. Never ask for or handle tokens or passwords; if auth breaks, start `gh auth login --web` and give the owner the one-time code and link.

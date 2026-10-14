@@ -1,0 +1,14 @@
+FlowGuard Phase 2 test run: 2026-10-14T14:41Z, kernel 6.6.87.2-microsoft-standard-WSL2, ovs-vsctl (Open vSwitch) 2.17.12
+
+## make docs-check
+docs-check: OK
+exit code: 0
+
+## make test (core venv: unit + api; engine venv: unit + engine)
+184 passed in 65.41s (0:01:05)
+116 passed in 5.16s
+exit code: 0
+
+## make test-live (L1 live + engine-to-core live)
+19 passed in 46.52s
+exit code: 0

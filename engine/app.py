@@ -44,8 +44,8 @@ from engine.policy import PolicyError, PolicyRule, diff, file_signature, load_po
 from engine.responder import DELETE, NONE, RESTORE, PlannedAction, Responder
 from engine.spool import AlertSpool
 from engine.store import GoldenStore
-from engine.verifier import (ALTERED, FORGED, MISSING, SHADOW, Deduper, Finding, ObservedRule, Pending, classify,
-                             explain)
+from engine.verifier import (ALTERED, FORGED, MISSING, SHADOW, Deduper, Finding, ObservedRule, Pending, build_snapshot,
+                             classify, explain)
 
 SEVERITY = {MISSING: "high", ALTERED: "high", SHADOW: "high", FORGED: "high", "unattributed_change": "medium",
             "monitor_down": "medium", "restore_rate_limited": "high", "spool_overflow": "high", "policy_invalid": "low",
@@ -134,6 +134,7 @@ class FlowGuardEngine(app_manager.RyuApp):
         self.mac_to_port: Dict[str, Dict[str, int]] = {}
         self.counters = {"alerts": 0, "passes": 0, "events": 0, "events_attributed": 0, "restores": 0, "deletes": 0}
         self.started = time.time()
+        self._snap_last: Dict[Tuple[str, int], Tuple[int, float]] = {}
 
         hub.spawn(self.channel.run, hub.sleep)
         hub.spawn(self._policy_watcher)
@@ -438,6 +439,7 @@ class FlowGuardEngine(app_manager.RyuApp):
         t_event = min(event_ts) if event_ts else None
         detected_by = {"reconcile": "reconcile_poll"}.get(ps.reason, ps.reason)
 
+        self._publish_snapshot(dpid, table, build_snapshot(observed, golden, findings, self.pending.live_slots(dpid, t_classified)))
         bad_slots = {(f.dpid, f.spec.table_id, f.spec.priority, f.spec.match_key()) for f in findings}
         if findings:
             plans = self.responder.plan(findings, t_classified)
@@ -543,7 +545,9 @@ class FlowGuardEngine(app_manager.RyuApp):
                 self.log.exception("policy watcher failed")
 
     def _status_loop(self) -> None:
+        """Every second: engine_status.json for local tools; every 5 s: the same object on the channel for the core."""
         path = os.path.join(self.cfg.run_dir, "engine_status.json")
+        tick = 0
         while True:
             try:
                 status = {
@@ -558,6 +562,20 @@ class FlowGuardEngine(app_manager.RyuApp):
                 with open(tmp, "w") as fh:
                     json.dump(status, fh)
                 os.replace(tmp, path)
+                if tick % 5 == 0:
+                    self.channel.publish(dict(status, type="engine_status"))
             except Exception:
                 self.log.exception("status write failed")
+            tick += 1
             hub.sleep(1.0)
+
+    def _publish_snapshot(self, dpid: str, table: int, rows: List[Dict[str, Any]]) -> None:
+        """Send the table's per-rule integrity view to the core when it changed, or at least every 10 s."""
+        digest = hash(json.dumps(rows, sort_keys=True, default=str))
+        last = self._snap_last.get((dpid, table))
+        now = time.time()
+        if last is not None and last[0] == digest and now - last[1] < 10.0:
+            return
+        self._snap_last[(dpid, table)] = (digest, now)
+        self.channel.publish({"type": "snapshot", "dpid": dpid, "table_id": table, "t": now, "epoch": self.signer.policy.current,
+                              "rules": rows})

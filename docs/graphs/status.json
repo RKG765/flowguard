@@ -1,7 +1,7 @@
 {
   "project": "FlowGuard",
   "updated": "2026-10-14",
-  "current_phase": 1,
+  "current_phase": 2,
   "environments": [
     {
       "name": "WSL2 Ubuntu 22.04",
@@ -38,10 +38,13 @@
     {
       "id": 2,
       "name": "Core service, API, storage, auth",
-      "status": "not_started",
+      "status": "done",
       "depends_on": [
         1
-      ]
+      ],
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified_by": "make test; make test-live; make docs-check"
     },
     {
       "id": 3,
@@ -200,24 +203,30 @@
     },
     {
       "id": "event_channel",
-      "name": "ZeroMQ event channel + durable alert spool",
-      "status": "partial",
+      "name": "Engine to core channel: ZeroMQ + durable spool + ordered acknowledgement",
+      "status": "implemented",
       "phase": 1,
-      "verified_by": "make test (real ZeroMQ + spool unit tests); make test-live (alerts spooled). Core-side receiver and acknowledgements are not built",
+      "verified_by": "make test (ZeroMQ + spool + ack unit tests); make test-live (engine to core, core restart)",
       "verified_on": "2026-10-14",
       "environment": "WSL2"
     },
     {
       "id": "core_service",
-      "name": "Core service (FastAPI, SQLite, WebSocket)",
-      "status": "planned",
-      "phase": 2
+      "name": "Core service (FastAPI, SQLite WAL + Alembic, REST, WebSocket)",
+      "status": "implemented",
+      "phase": 2,
+      "verified_by": "make test (tests/api); make test-live (tests/integration/test_core_live.py); uvicorn smoke test",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
     },
     {
       "id": "core_auth",
-      "name": "Auth, roles, audit log",
-      "status": "planned",
-      "phase": 2
+      "name": "Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log",
+      "status": "implemented",
+      "phase": 2,
+      "verified_by": "make test (role matrix over every route, CSRF, lockout, expiry, audit chain tamper test)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
     },
     {
       "id": "helper",
@@ -263,9 +272,12 @@
     },
     {
       "id": "reports",
-      "name": "Reports (PDF/CSV)",
-      "status": "planned",
-      "phase": 6
+      "name": "Reports (summary + CSV now; PDF later)",
+      "status": "partial",
+      "phase": 6,
+      "verified_by": "make test (summary from stored alerts, CSV with formula-injection guard). PDF and evaluation results: Phase 6/8",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
     },
     {
       "id": "packaging",
@@ -297,6 +309,24 @@
       "status": "implemented",
       "phase": 1,
       "verified_by": "make test; bin/flowguard keygen; make test-live (rotation)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "core_recordings",
+      "name": "Session recorder (record + download; replay planned Phase 6)",
+      "status": "partial",
+      "phase": 2,
+      "verified_by": "make test (tests/api/test_ingest.py::test_recording_*)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "engine_snapshots",
+      "name": "Engine rule snapshots + status events for the core",
+      "status": "implemented",
+      "phase": 2,
+      "verified_by": "make test (build_snapshot); make test-live (rules reach the core)",
       "verified_on": "2026-10-14",
       "environment": "WSL2"
     }
@@ -373,6 +403,14 @@
     [
       "key_management",
       "engine_crypto"
+    ],
+    [
+      "engine_snapshots",
+      "event_channel"
+    ],
+    [
+      "core_recordings",
+      "core_service"
     ]
   ],
   "metrics": [

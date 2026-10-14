@@ -24,3 +24,7 @@ secrets/
 data/spool/*
 !data/spool/.gitkeep
 .scratch/
+# runtime state of the engine and core (databases, sockets, status files)
+data/core/
+data/engine/
+data/run/

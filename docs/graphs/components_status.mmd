@@ -8,9 +8,9 @@ flowchart TB
   engine_store["Golden store + install_signed_rule"]:::implemented
   engine_verifier["L1 verifier + NXST monitor session + attribution"]:::implemented
   engine_responder["Responder (restore, rate limit)"]:::implemented
-  event_channel["ZeroMQ event channel + durable alert spool"]:::partial
-  core_service["Core service (FastAPI, SQLite, WebSocket)"]:::planned
-  core_auth["Auth, roles, audit log"]:::planned
+  event_channel["Engine to core channel: ZeroMQ + durable spool + ordered acknowledgement"]:::implemented
+  core_service["Core service (FastAPI, SQLite WAL + Alembic, REST, WebSocket)"]:::implemented
+  core_auth["Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log"]:::implemented
   helper["Privileged helper (allowlist)"]:::planned
   attacks["Attacks A1-A7 (A7 SIMULATED)"]:::planned
   web_design_system["Design system + app shell"]:::planned
@@ -18,11 +18,13 @@ flowchart TB
   engine_prober["L2 data-plane prober"]:::planned
   ml_worker["L3 ML scorer worker"]:::planned
   risk_engine["Risk engine + policy"]:::planned
-  reports["Reports (PDF/CSV)"]:::planned
+  reports["Reports (summary + CSV now; PDF later)"]:::partial
   packaging["flowguard CLI (start, stop, status, export) and make targets"]:::planned
   engine_app["Ryu engine app (signed installs, monitor supervisor, passes, alerts)"]:::implemented
   engine_policy["Policy file + live policy reload (signed churn)"]:::implemented
   key_management["HMAC key file checks, flowguard keygen, key rotation"]:::implemented
+  core_recordings["Session recorder (record + download; replay planned Phase 6)"]:::partial
+  engine_snapshots["Engine rule snapshots + status events for the core"]:::implemented
   lab_topology --> engine_verifier
   engine_crypto --> engine_store
   engine_store --> engine_verifier
@@ -41,6 +43,8 @@ flowchart TB
   engine_app --> engine_verifier
   engine_policy --> engine_app
   key_management --> engine_crypto
+  engine_snapshots --> event_channel
+  core_recordings --> core_service
   classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
   classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
   classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;

@@ -98,6 +98,33 @@ def classify(dpid: object, observed: Sequence[ObservedRule], golden: Sequence[Go
     return findings
 
 
+def build_snapshot(observed: Sequence[ObservedRule], golden: Sequence[GoldenRule], findings: Sequence[Finding],
+                   in_flight: Optional[Set["Slot"]] = None) -> List[Dict[str, object]]:
+    """Per-rule integrity view of one table for the core/UI: every observed rule plus every missing golden rule.
+
+    status: ok | altered | shadow | forged | missing | pending (an engine change to that slot is still in flight).
+    """
+    flight = in_flight or set()
+    by_slot = {f.spec.key(): f for f in findings}
+    gold = {g.spec.key(): g for g in golden}
+    rows: List[Dict[str, object]] = []
+    for o in observed:
+        k = o.spec.key()
+        f, g = by_slot.get(k), gold.get(k)
+        rows.append({"table_id": o.spec.table_id, "priority": o.spec.priority, "match": o.spec.match,
+                     "instructions": list(o.spec.instructions), "cookie": f"{o.cookie:016x}",
+                     "status": "pending" if k in flight else (f.kind if f else OK), "golden": g is not None,
+                     "golden_cookie": f"{g.cookie:016x}" if g else None, "present": True})
+    for f in findings:
+        if f.kind == MISSING and f.golden is not None:
+            g = f.golden
+            rows.append({"table_id": g.spec.table_id, "priority": g.spec.priority, "match": g.spec.match,
+                         "instructions": list(g.spec.instructions), "cookie": None, "status": MISSING, "golden": True,
+                         "golden_cookie": f"{g.cookie:016x}", "present": False})
+    rows.sort(key=lambda r: (r["table_id"], -int(r["priority"]), str(r["match"])))  # type: ignore[arg-type]
+    return rows
+
+
 def explain(f: Finding) -> str:
     """One plain-language sentence (no OpenFlow knowledge needed) for alerts."""
     where = f.spec.describe()
