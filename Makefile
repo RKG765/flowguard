@@ -21,7 +21,8 @@ help:
 	@echo "  make keygen       create the HMAC key file (mode 0600, outside the repo)"
 	@echo "  make run-core     run the core API on http://127.0.0.1:8787 (development)"
 	@echo "  make spike        re-run the Phase 0 feasibility spikes (needs root)"
-	@echo "  (planned) start demo eval test-security test-soak"
+	@echo "  make demo         sudo: lab + engine + core + dashboard on http://127.0.0.1:8787 (MODE=alert_only optional)"
+	@echo "  (planned) start eval test-security test-soak"
 
 setup:
 	bash scripts/setup_ubuntu.sh
@@ -72,5 +73,9 @@ run-core:
 spike:
 	bash scripts/spike/run_all.sh
 
-start demo eval test-security test-soak:
+MODE ?= restore
+demo:
+	bash scripts/demo.sh $(MODE)
+
+start eval test-security test-soak:
 	@echo "make $@: not implemented yet (planned, see ROADMAP.md)"; exit 2

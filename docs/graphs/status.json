@@ -293,9 +293,12 @@
     },
     {
       "id": "packaging",
-      "name": "flowguard CLI (start, stop, status, export) and make targets",
-      "status": "planned",
-      "phase": 7
+      "name": "Packaging: make demo + core serves the dashboard (flowguard start/stop/status/export: Phase 7)",
+      "status": "partial",
+      "phase": 7,
+      "verified_by": "sudo make demo (end-to-end check); make test (dashboard serving test)",
+      "verified_on": "2026-10-15",
+      "environment": "WSL2"
     },
     {
       "id": "engine_app",

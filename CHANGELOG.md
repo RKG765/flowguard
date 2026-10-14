@@ -4,6 +4,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/). One entry per phase or 
 
 ## [Unreleased]
 
+### Demo packaging (after `demo-v0`, release `v0.4.0-demo`)
+- The core serves the built dashboard (`web/dist`) on its own port with client-route fallback, confined to the build directory (test added).
+- `sudo make demo [MODE=alert_only]`: lab + engine + core + dashboard on http://127.0.0.1:8787 (`scripts/demo.sh`); `RUN_AND_SHOW.md`.
+- GitHub release `v0.4.0-demo` with the prebuilt dashboard archive.
+
 ### Phase 4: core pages and Live Detection (tag `demo-v0`)
 #### Added
 - Rule Inspector (virtualized table, status filters with counts, search, signed-vs-actual diff, admin repair with confirmation, CSV export), Alerts and Incidents (plain-language explanation, measured timeline, diff, acknowledge, assign, notes, close/reopen), Live Topology (React Flow: engine, switches by integrity status, learned hosts), Live Detection page in observation mode.

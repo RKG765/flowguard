@@ -147,3 +147,24 @@ def test_migrations_match_the_models(tmp_path):
     with eng.connect() as conn:
         diff = compare_metadata(MigrationContext.configure(conn), Base.metadata)
     assert diff == [], f"models changed without a migration: {diff}"
+
+
+# ---- built dashboard served by the core (single port for demos and Phase 7) --------------------------------
+def test_core_serves_the_built_dashboard_with_spa_fallback(tmp_path):
+    from fastapi.testclient import TestClient
+    from core.config import load_settings
+    from core.main import create_app
+    dist = tmp_path / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<html>FlowGuard shell</html>")
+    (dist / "assets" / "app.js").write_text("console.log(1)")
+    (tmp_path / "secret.txt").write_text("outside dist")
+    s = load_settings(data_dir=str(tmp_path / "d"), start_receiver=False, web_dist=str(dist))
+    with TestClient(create_app(s)) as c:
+        assert "FlowGuard shell" in c.get("/").text
+        assert "FlowGuard shell" in c.get("/rules").text           # client-side route
+        assert c.get("/assets/app.js").text == "console.log(1)"
+        assert c.get("/assets/missing.js").status_code == 404
+        assert c.get("/..%2Fsecret.txt").status_code == 404        # never outside dist
+        assert c.get("/api/nope").status_code == 404
+        assert c.get("/api/health").json() == {"status": "ok"}       # the API still wins

@@ -24,6 +24,7 @@ class CoreSettings:
     spool_poll_seconds: float = 1.0
     start_receiver: bool = True          # tests turn the ZeroMQ/spool ingest thread off
     event_endpoint: str = ""             # default: ipc://<data_dir>/run/events.ipc (the engine connects here)
+    web_dist: str = str(REPO / "web" / "dist")  # built dashboard; served on the same port when present
 
     # ---- derived paths ----------------------------------------------------------------------------------------
     @property

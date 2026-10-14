@@ -12,6 +12,8 @@ Flow-rule integrity monitoring and unauthorized network-state change detection f
 
 Honest scope: see [docs/threat_model.md](docs/threat_model.md) (including the lab limitation that controller, key and switch share one host).
 
+**Presenting or trying it on a laptop? Follow [RUN_AND_SHOW.md](RUN_AND_SHOW.md)** (install, `sudo make demo`, what to show).
+
 ## Install (Ubuntu 22.04: WSL2 or native)
 ```bash
 git clone git@github.com:RKG765/flowguard.git flowguard && cd flowguard

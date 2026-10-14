@@ -26,7 +26,7 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | L3 ML scorer worker | `planned` | 5 |
 | Risk engine + policy | `planned` | 5 |
 | Reports (summary + CSV now; PDF later) | `partial` | 6 |
-| flowguard CLI (start, stop, status, export) and make targets | `planned` | 7 |
+| Packaging: make demo + core serves the dashboard (flowguard start/stop/status/export: Phase 7) | `partial` | 7 |
 | Ryu engine app (signed installs, monitor supervisor, passes, alerts) | `implemented` | 1 |
 | Policy file + live policy reload (signed churn) | `implemented` | 1 |
 | HMAC key file checks, flowguard keygen, key rotation | `implemented` | 1 |
@@ -203,7 +203,7 @@ flowchart TB
   ml_worker["L3 ML scorer worker"]:::planned
   risk_engine["Risk engine + policy"]:::planned
   reports["Reports (summary + CSV now; PDF later)"]:::partial
-  packaging["flowguard CLI (start, stop, status, export) and make targets"]:::planned
+  packaging["Packaging: make demo + core serves the dashboard (flowguard start/stop/status/export: Phase 7)"]:::partial
   engine_app["Ryu engine app (signed installs, monitor supervisor, passes, alerts)"]:::implemented
   engine_policy["Policy file + live policy reload (signed churn)"]:::implemented
   key_management["HMAC key file checks, flowguard keygen, key rotation"]:::implemented

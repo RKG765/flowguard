@@ -82,7 +82,7 @@ flowchart LR
 | L3 ML scorer worker | planned | - | - | - |
 | Risk engine + policy | planned | - | - | - |
 | Reports (summary + CSV now; PDF later) | partial | `make test (summary from stored alerts, CSV with formula-injection guard). PDF and evaluation results: Phase 6/8` | 2026-10-14 | WSL2 |
-| flowguard CLI (start, stop, status, export) and make targets | planned | - | - | - |
+| Packaging: make demo + core serves the dashboard (flowguard start/stop/status/export: Phase 7) | partial | `sudo make demo (end-to-end check); make test (dashboard serving test)` | 2026-10-15 | WSL2 |
 | Ryu engine app (signed installs, monitor supervisor, passes, alerts) | implemented | `make test-live` | 2026-10-14 | WSL2 |
 | Policy file + live policy reload (signed churn) | implemented | `make test; make test-live (policy edit = zero alerts)` | 2026-10-14 | WSL2 |
 | HMAC key file checks, flowguard keygen, key rotation | implemented | `make test; bin/flowguard keygen; make test-live (rotation)` | 2026-10-14 | WSL2 |
@@ -105,6 +105,7 @@ Each item names the command that proved it on WSL2 Ubuntu 22.04. Test output: `r
   - **Topology:** engine, switches coloured by rule integrity, hosts the switch has learned;
   - **Live Detection** (observation mode): detections appear live with timings and the rule before repair; in alert-only mode an admin repairs from the dashboard and the rule disappears from the real switch (checked against OVS in the test);
   - reachable from the Windows browser at http://127.0.0.1:5173 when `make dev-web` runs in WSL (checked 2026-10-15);
+  - one-command demo: `sudo make demo` serves lab + engine + core + built dashboard on http://127.0.0.1:8787 (checked 2026-10-15: ready, 3/3 rules verified, switch and monitor up, 4 hosts learned); see `RUN_AND_SHOW.md`;
   - accessibility: contrast unit tests for every token, axe with no serious/critical violation on every page shown (incl. live pages).
 
 ## What is simulated

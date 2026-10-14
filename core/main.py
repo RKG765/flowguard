@@ -16,7 +16,10 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse
 
 from . import db as dbmod
 from .api import admin_api, auth, data
@@ -130,4 +133,26 @@ def create_app(settings: Optional[CoreSettings] = None) -> FastAPI:
             sender.cancel()
             app.state.hub.unregister(q)
 
+    _mount_dashboard(app, Path(s.web_dist))
     return app
+
+
+def _mount_dashboard(app: FastAPI, dist: Path) -> None:
+    """Serve the built dashboard (web/dist) on the API's port, with client-side routes falling back to index.html.
+    Registered last, so every /api route wins; paths are confined to the dist directory."""
+    index = dist / "index.html"
+    if not index.is_file():
+        return
+    root = dist.resolve()
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def dashboard(path: str) -> FileResponse:
+        if path == "api" or path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="not found")
+        if path:
+            f = (root / path).resolve()
+            if f.is_file() and root in f.parents:
+                return FileResponse(f)
+            if "." in path.rsplit("/", 1)[-1]:  # a missing asset is a 404, not the app shell
+                raise HTTPException(status_code=404, detail="not found")
+        return FileResponse(index, headers={"Cache-Control": "no-cache"})
