@@ -11,11 +11,11 @@ This file describes what EXISTS. Every component carries a tag: `implemented` (v
 | scripts/setup_ubuntu.sh | `partial` | 0 |
 | Mininet lab topology (4 hosts, 1 or 2 switches, explicit dpids) | `implemented` | 0 |
 | Phase 0 spike harness (make spike) | `implemented` | 0 |
-| Canonical form + HMAC cookie (dpid, epoch bound) | `planned` | 1 |
-| Golden store + install_signed_rule | `planned` | 1 |
-| L1 verifier + NXST monitor session | `planned` | 1 |
-| Responder (restore, rate limit) | `planned` | 1 |
-| ZeroMQ event channel + alert spool | `planned` | 1 |
+| Canonical form + HMAC cookie (dpid, epoch bound) | `implemented` | 1 |
+| Golden store + install_signed_rule | `implemented` | 1 |
+| L1 verifier + NXST monitor session + attribution | `implemented` | 1 |
+| Responder (restore, rate limit) | `implemented` | 1 |
+| ZeroMQ event channel + durable alert spool | `partial` | 1 |
 | Core service (FastAPI, SQLite, WebSocket) | `planned` | 2 |
 | Auth, roles, audit log | `planned` | 2 |
 | Privileged helper (allowlist) | `planned` | 4 |
@@ -27,6 +27,9 @@ This file describes what EXISTS. Every component carries a tag: `implemented` (v
 | Risk engine + policy | `planned` | 5 |
 | Reports (PDF/CSV) | `planned` | 6 |
 | flowguard CLI (start, stop, status, export) and make targets | `planned` | 7 |
+| Ryu engine app (signed installs, monitor supervisor, passes, alerts) | `implemented` | 1 |
+| Policy file + live policy reload (signed churn) | `implemented` | 1 |
+| HMAC key file checks, flowguard keygen, key rotation | `implemented` | 1 |
 <!-- /AUTO:component_tags -->
 
 ## System context (target)
@@ -120,11 +123,11 @@ flowchart TB
   setup_script["scripts/setup_ubuntu.sh"]:::partial
   lab_topology["Mininet lab topology (4 hosts, 1 or 2 switches, explicit dpids)"]:::implemented
   spike_harness["Phase 0 spike harness (make spike)"]:::implemented
-  engine_crypto["Canonical form + HMAC cookie (dpid, epoch bound)"]:::planned
-  engine_store["Golden store + install_signed_rule"]:::planned
-  engine_verifier["L1 verifier + NXST monitor session"]:::planned
-  engine_responder["Responder (restore, rate limit)"]:::planned
-  event_channel["ZeroMQ event channel + alert spool"]:::planned
+  engine_crypto["Canonical form + HMAC cookie (dpid, epoch bound)"]:::implemented
+  engine_store["Golden store + install_signed_rule"]:::implemented
+  engine_verifier["L1 verifier + NXST monitor session + attribution"]:::implemented
+  engine_responder["Responder (restore, rate limit)"]:::implemented
+  event_channel["ZeroMQ event channel + durable alert spool"]:::partial
   core_service["Core service (FastAPI, SQLite, WebSocket)"]:::planned
   core_auth["Auth, roles, audit log"]:::planned
   helper["Privileged helper (allowlist)"]:::planned
@@ -136,6 +139,9 @@ flowchart TB
   risk_engine["Risk engine + policy"]:::planned
   reports["Reports (PDF/CSV)"]:::planned
   packaging["flowguard CLI (start, stop, status, export) and make targets"]:::planned
+  engine_app["Ryu engine app (signed installs, monitor supervisor, passes, alerts)"]:::implemented
+  engine_policy["Policy file + live policy reload (signed churn)"]:::implemented
+  key_management["HMAC key file checks, flowguard keygen, key rotation"]:::implemented
   lab_topology --> engine_verifier
   engine_crypto --> engine_store
   engine_store --> engine_verifier
@@ -151,6 +157,9 @@ flowchart TB
   core_service --> helper
   helper --> attacks
   core_service --> reports
+  engine_app --> engine_verifier
+  engine_policy --> engine_app
+  key_management --> engine_crypto
   classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
   classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
   classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;

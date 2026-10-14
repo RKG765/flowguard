@@ -1,0 +1,8 @@
+# Default lab policy: security/ACL layer in table 0 (critical table). Table 1 is the unsigned learning switch.
+rules:
+  # drop telnet everywhere
+  - {table: 0, priority: 100, match: {eth_type: 0x0800, ip_proto: 6, tcp_dst: 23}, instructions: []}
+  # allow ssh to continue to the learning switch
+  - {table: 0, priority: 90, match: {eth_type: 0x0800, ip_proto: 6, tcp_dst: 22}, instructions: [{type: goto_table, table_id: 1}]}
+  # everything else goes to table 1
+  - {table: 0, priority: 0, match: {}, instructions: [{type: goto_table, table_id: 1}]}

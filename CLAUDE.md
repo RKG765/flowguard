@@ -12,12 +12,13 @@ FlowGuard detects unauthorized changes to OpenFlow flow rules in SDN (Ryu + Open
 `engine/` Ryu app (signer, verifier, prober, responder) | `core/` FastAPI service | `helper/` privileged helper (allowlist) | `topo/` Mininet topology | `attacks/` A1-A7 | `web/` React app | `scripts/` setup, doctor, update_docs, spikes | `docs/` threat model, spike findings, graphs | `tests/` unit, integration, e2e | `data/` sessions, models (gitignored).
 
 ## Commands
-`make setup` | `make doctor` | `make docs` / `make docs-check` | `make test` | `make spike`. Not implemented yet: `make start demo eval test-e2e test-security test-soak` (they exit 2 on purpose).
+`make setup` | `make doctor` | `make docs` / `make docs-check` | `make test` (unit+property, both venvs) | `make test-live` (root; real OVS+Mininet+engine) | `make keygen` | `make spike`. Not implemented yet: `make start demo eval test-e2e test-security test-soak` (they exit 2 on purpose).
 
 ## Environment facts (verified, see `docs/spike_findings.md`)
-- Repo lives in WSL at `/root/flowguard` (WSL default user is root). Edit from Windows via `\\wsl.localhost\Ubuntu-22.04\root\flowguard`.
+- Repo lives in WSL at `/home/rkg/flowguard` (default user `rkg`, created by the owner on 2026-10-14; the repo was moved there from `/root/flowguard` because Windows reaches the distro as `rkg` and `/root` is private). Edit from Windows via `\\wsl.localhost\Ubuntu-22.04\home\rkg\flowguard`.
+- Mininet/OVS need root: run those with `wsl.exe -d Ubuntu-22.04 -u root -- ...` (root has `safe.directory` for the repo). Keep files owned by rkg (`chown -R rkg:rkg .` after root runs). Editing a file from Windows drops its exec bit: re-`chmod +x bin/flowguard scripts/*.sh` after editing one.
 - **All Python runs in a venv**: `.venv-engine` (Python 3.9, Ryu 4.34, pinned) and `.venv-core` (system 3.10, `--system-site-packages` so it sees apt Mininet). The stdlib-only `bin/flowguard` and `scripts/doctor.py` may run on system python.
-- When calling `wsl.exe ... bash -c '...'` from Windows tools, the command string is re-parsed by a shell: `$VAR` is expanded early. Put non-trivial commands in a script file and run `wsl.exe -d Ubuntu-22.04 -- bash /path/script.sh`.
+- When calling `wsl.exe ... bash -c '...'` from Windows tools, the command string is re-parsed by a shell: `$VAR` is expanded early. Put non-trivial commands in a script file and run it, or pipe on stdin (`wsl.exe -d Ubuntu-22.04 -u root -- bash -s < script`). An unanswered first-run prompt ("Create a default Unix user") in any WSL terminal blocks every `wsl.exe` call.
 - `api.launchpad.net` is unreachable from this machine: PPAs are added by hand (see `setup_ubuntu.sh`).
 
 ## Engineering rules (non-negotiable)
@@ -30,3 +31,5 @@ FlowGuard detects unauthorized changes to OpenFlow flow rules in SDN (Ryu + Open
 7. Attacks only target the lab switch the helper created itself; helper accepts allowlisted attack IDs only; no arbitrary shell from the web layer.
 8. Never claim the product is "secure", "fully tested" or "production-ready". Persona reviews are AI-simulated and must say so.
 9. If context is running low, update `STATUS.md` and `HANDOFF.md` first.
+10. Owner instruction: never add `Co-Authored-By` trailers or any Claude attribution to commits or PR text.
+11. Git remote is `git@github.com:RKG765/flowguard.git` over SSH. Pushing needs the owner's GitHub key setup; never ask for or handle tokens or passwords.

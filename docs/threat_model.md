@@ -26,7 +26,7 @@ The integrity of OpenFlow flow rules (match, priority, instructions) in the *cri
 - Anything outside the lab network. The Attack Lab only targets lab switches the privileged helper created itself.
 
 ## Known blind spots (design-level, to be measured not hidden)
-- Tamper-and-revert: the monitor event stream still reports the change, but by the time the confirming stats request runs the table may already match the golden rules. The verifier must therefore also raise an `unattributed_change` alert for any critical-table event that the engine's own FlowMods do not explain (design, Phase 1; ADR-004). If the monitor session is silently dropped, only the slow reconciliation poll remains (default 5 s) and a revert faster than that is missed.
+- Tamper-and-revert: the monitor event stream still reports the change, but by the time the confirming stats request runs the table may already match the golden rules. The verifier therefore also raises an `unattributed_change` alert for any critical-table event that the engine's own FlowMods do not explain (implemented in Phase 1, ADR-004; the live test `test_a5b_tamper_and_quick_revert_is_not_silent` saw one on WSL2; the detection probability is measured in Phase 9). If the monitor session is silently dropped, only the slow reconciliation poll remains (default 5 s) and a revert faster than that is missed.
 - Rules in non-critical tables (default: table 1, learning switch) are not verified.
 - L2 only probes critical rules at a low rate, so it samples behavior rather than proving it.
 - L3 is probabilistic and can be evaded by slow drift (tested in Phase 10).

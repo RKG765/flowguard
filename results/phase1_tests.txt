@@ -1,0 +1,14 @@
+FlowGuard Phase 1 test run: 2026-10-14T14:05Z, kernel 6.6.87.2-microsoft-standard-WSL2, ovs-vsctl (Open vSwitch) 2.17.12
+
+## make docs-check
+docs-check: OK
+exit code: 0
+
+## make test (core venv py3.10, then engine venv py3.9)
+100 passed in 3.91s
+114 passed in 3.90s
+exit code: 0
+
+## make test-live
+14 passed, 2 warnings in 27.93s
+exit code: 0

@@ -122,7 +122,7 @@ make_venvs() {
   log "creating .venv-engine (Python 3.9, Ryu 4.34 pins)"
   [ -d .venv-engine ] || python3.9 -m venv .venv-engine
   .venv-engine/bin/python -m pip install --quiet "pip==${PIP_VERSION}" "setuptools==${SETUPTOOLS_VERSION}" wheel
-  .venv-engine/bin/python -m pip install --quiet -r requirements/engine.txt
+  .venv-engine/bin/python -m pip install --quiet -r requirements/engine.txt -r requirements/engine-dev.txt
 
   # --system-site-packages: the apt `mininet` package installs its Python module system-wide, and the
   # lab/helper must import it. Everything FlowGuard runs in Python still goes through a venv.

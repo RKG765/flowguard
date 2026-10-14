@@ -1,6 +1,6 @@
 # FlowGuard status
 <!-- AUTO:header -->
-Last updated: 2026-10-14 | Current phase: 0, Environment doctor and feasibility spike | Overall: 1 of 12 phases done
+Last updated: 2026-10-14 | Current phase: 1, Engine L1 (signer, store, verifier, responder) | Overall: 2 of 12 phases done
 Verified on: WSL2 Ubuntu 22.04: 2026-10-14 | Native Ubuntu 22.04: not yet
 <!-- /AUTO:header -->
 
@@ -9,7 +9,7 @@ Verified on: WSL2 Ubuntu 22.04: 2026-10-14 | Native Ubuntu 22.04: not yet
 | # | Phase | Status | Started | Finished |
 |---|---|---|---|---|
 | 0 | Environment doctor and feasibility spike | done | 2026-10-14 | 2026-10-14 |
-| 1 | Engine L1 (signer, store, verifier, responder) | not_started | - | - |
+| 1 | Engine L1 (signer, store, verifier, responder) | done | 2026-10-14 | 2026-10-14 |
 | 2 | Core service, API, storage, auth | not_started | - | - |
 | 3 | Design system and dashboard shell | not_started | - | - |
 | 4 | Attack Lab and core pages (tag demo-v0) | not_started | - | - |
@@ -26,7 +26,7 @@ Verified on: WSL2 Ubuntu 22.04: 2026-10-14 | Native Ubuntu 22.04: not yet
 ```mermaid
 flowchart LR
   P0["0: Environment doctor and feasibility spike"]:::done
-  P1["1: Engine L1 (signer, store, verifier, responder)"]:::not_started
+  P1["1: Engine L1 (signer, store, verifier, responder)"]:::done
   P2["2: Core service, API, storage, auth"]:::not_started
   P3["3: Design system and dashboard shell"]:::not_started
   P4["4: Attack Lab and core pages (tag demo-v0)"]:::not_started
@@ -67,11 +67,11 @@ flowchart LR
 | scripts/setup_ubuntu.sh | partial | `bash scripts/setup_ubuntu.sh (re-run on a partly provisioned WSL2; pristine-machine install not yet tested)` | 2026-10-14 | WSL2 |
 | Mininet lab topology (4 hosts, 1 or 2 switches, explicit dpids) | implemented | `scripts/spike/run_all.sh (standalone pingall, controller-attached run, two-switch standalone pingall)` | 2026-10-14 | WSL2 |
 | Phase 0 spike harness (make spike) | implemented | `scripts/spike/run_all.sh S1-S3 + doctor; s4_ovs_monitor_cli.sh and the two-switch pingall run individually afterwards` | 2026-10-14 | WSL2 |
-| Canonical form + HMAC cookie (dpid, epoch bound) | planned | - | - | - |
-| Golden store + install_signed_rule | planned | - | - | - |
-| L1 verifier + NXST monitor session | planned | - | - | - |
-| Responder (restore, rate limit) | planned | - | - | - |
-| ZeroMQ event channel + alert spool | planned | - | - | - |
+| Canonical form + HMAC cookie (dpid, epoch bound) | implemented | `make test (unit + Hypothesis property tests, both venvs); make test-live (rotation)` | 2026-10-14 | WSL2 |
+| Golden store + install_signed_rule | implemented | `make test; make test-live` | 2026-10-14 | WSL2 |
+| L1 verifier + NXST monitor session + attribution | implemented | `make test; make test-live (forged, altered, missing, shadow, unattributed_change)` | 2026-10-14 | WSL2 |
+| Responder (restore, rate limit) | implemented | `make test; make test-live (restore, removal, zero alerts on churn)` | 2026-10-14 | WSL2 |
+| ZeroMQ event channel + durable alert spool | partial | `make test (real ZeroMQ + spool unit tests); make test-live (alerts spooled). Core-side receiver and acknowledgements are not built` | 2026-10-14 | WSL2 |
 | Core service (FastAPI, SQLite, WebSocket) | planned | - | - | - |
 | Auth, roles, audit log | planned | - | - | - |
 | Privileged helper (allowlist) | planned | - | - | - |
@@ -83,32 +83,39 @@ flowchart LR
 | Risk engine + policy | planned | - | - | - |
 | Reports (PDF/CSV) | planned | - | - | - |
 | flowguard CLI (start, stop, status, export) and make targets | planned | - | - | - |
+| Ryu engine app (signed installs, monitor supervisor, passes, alerts) | implemented | `make test-live` | 2026-10-14 | WSL2 |
+| Policy file + live policy reload (signed churn) | implemented | `make test; make test-live (policy edit = zero alerts)` | 2026-10-14 | WSL2 |
+| HMAC key file checks, flowguard keygen, key rotation | implemented | `make test; bin/flowguard keygen; make test-live (rotation)` | 2026-10-14 | WSL2 |
 <!-- /AUTO:component_table -->
 
 ## What works (verified)
-Each item names the command that proved it on WSL2 Ubuntu 22.04 on 2026-10-14.
-- **Environment doctor:** `bin/flowguard doctor` -> 14 PASS, 0 WARN, 0 FAIL (`docs/spike_evidence/doctor.txt`). Includes a real Mininet ping test.
-- **OVS datapaths:** kernel module loads on this WSL2 kernel and the userspace datapath also works (`docs/spike_evidence/s1_datapath.txt`).
-- **Mininet lab:** `topo/topo_basic.py` pingall 0% loss standalone, attached to Ryu, and in the two-switch standalone variant (`s2_mininet.txt`, `s2_two_switch_standalone.txt`, `s3_*.json`).
-- **Ryu 4.34 on Python 3.9** controls OVS with the agreed table layout (ACL table 0, learning switch table 1) on OF1.3 and OF1.4 (`s3_*.json`).
-- **Event-driven change detection is feasible:** an OpenFlow 1.0 Nicira flow-monitor session sees every tamper, including fast tamper-and-revert, where polling does not (`docs/spike_findings.md`, numbers below).
-- **Docs tooling:** `make docs-check` and `make test` (unit tests for `update_docs.py`, doctor, CLI).
+Each item names the command that proved it on WSL2 Ubuntu 22.04 on 2026-10-14. Test output: `results/phase1_tests.txt`.
+- **Environment doctor:** `bin/flowguard doctor` (all checks PASS, `docs/spike_evidence/doctor.txt`), including a real Mininet ping test.
+- **Datapaths and lab:** kernel and userspace OVS datapaths work; `topo/topo_basic.py` runs 4 hosts on 1 switch (2-switch variant verified standalone) (`docs/spike_findings.md`).
+- **Signed rules (L1 core):** canonical form, HMAC-in-cookie bound to dpid and epoch, key rotation with a grace window, key-file checks (`make test`: unit and Hypothesis property tests under Python 3.9 and 3.10).
+- **Live detection and repair against real OVS** (`make test-live`, 14 tests): a forged rule, a modified rule, a deleted rule, a shadowing rule, a cookie copied from a valid rule, and a tamper-and-quick-revert are all detected from the monitor event (not from the poll) and, except the revert, repaired or removed. A signed policy edit and a key rotation raise **zero** alerts. The engine refuses to start without a valid key.
+- **Event-driven detection** over an OpenFlow 1.0 Nicira monitor session confirmed by a targeted table-0 stats request (ADR-004; `docs/spike_findings.md`).
+- **Alert pipeline, engine side:** durable fsynced spool with rotation and a size cap, non-blocking ZeroMQ channel with counted drops (`make test`).
+- **Docs tooling:** `make docs-check`.
 
 ## What is simulated
-Nothing yet. (The lying switch, attack A7, will be a SIMULATED wrapper in Phase 5 and badged as such.)
+Nothing yet. (The lying switch, attack A7, will be a SIMULATED wrapper in Phase 5 and badged as such.) All attacks so far are real `ovs-ofctl` commands against the lab switch.
 
 ## Test and review status
-- Unit tests: `make test` covers docs tooling, doctor and CLI only. There is no product code to test yet.
-- Integration: the Phase 0 spikes (`make spike`) are measurements, not pass/fail test suites.
+- Unit + property tests: `make test` (core venv and engine venv), output in `results/phase1_tests.txt`.
+- Live integration: `make test-live`, 14 tests, same file.
+- Not covered yet: rate-limit behaviour live, engine restart / switch reconnect storms, SQLite corruption at runtime, several switches, monitor drop and recovery live, `alert_only` mode live, tamper timing races (Phase 9).
 - QA / UX / security reviews: not started (Phases 9-10). Open findings: none recorded because no review has run.
 - Environments: WSL2 only. Native Ubuntu not verified.
 
 ## Known issues and workarounds
 - `api.launchpad.net` unreachable from this machine: PPAs are added manually in `setup_ubuntu.sh` (ADR-010).
-- OVS 2.17.12 here does not support the OF1.4 flow monitor nor NXST over OF1.3; the L1 design uses an OF1.0 monitor session (ADR-004).
-- `wsl.exe -- bash -c '...$VAR...'` expands `$VAR` too early; use script files (see `CLAUDE.md`).
+- OVS 2.17.12 here does not support the OF1.4 flow monitor nor NXST over OF1.3; the L1 design uses an OF1.0 monitor session (ADR-004). Other OVS builds are untested.
+- The engine reads rules by table over the OF1.3 connection; a tamper that is applied AND reverted inside the grace window of the engine's own change to the same slot is judged only after the window (ADR-011); its probability is not measured yet.
+- Detect latency includes a 15 ms event debounce (`verify_debounce_ms`), by design.
+- Windows reaches WSL as user `rkg`; the repo is in `/home/rkg/flowguard` (ADR-001). Editing a file from Windows tools removes its exec bit.
+- GitHub push is not done: needs the owner to add the SSH public key to GitHub (see `HANDOFF.md`).
 - `setup_ubuntu.sh` was verified by re-running on an already partly provisioned WSL2, not on a pristine machine.
-- The optional second switch has only been verified standalone (no controller, no monitor ports).
 
 ## Measured numbers so far
 <!-- AUTO:metrics -->
@@ -119,15 +126,18 @@ Nothing yet. (The lying switch, attack A7, will be a SIMULATED wrapper in Phase 
 | Spike: monitor median latency, modify of an ACL rule (includes ovs-ofctl start-up, upper bound) | 21.6 ms | `docs/spike_evidence/s3_ofctl_monitor.json` |
 | Spike: polling (0.5 s) median latency, same scenario | 261.7 ms | `docs/spike_evidence/s3_ofctl_monitor.json` |
 | Spike: targeted table-0 stats request round trip, median | 1.12 ms | `docs/spike_evidence/s3_ofctl_monitor.json` |
+| Phase 1 live, one run: altered rule, engine detect latency (monitor event to classified; includes the 15 ms debounce) | 18.07 ms | `results/phase1_live_alert_timings.json` |
+| Phase 1 live, one run: altered rule, classified to restore sent | 0.36 ms | `results/phase1_live_alert_timings.json` |
+| Phase 1 live, one run: altered rule, classified to switch confirmation event | 10.2 ms | `results/phase1_live_alert_timings.json` |
 <!-- /AUTO:metrics -->
-These are Phase 0 spike measurements on one machine, not evaluation results.
+Phase 0 rows are spike measurements. Phase 1 rows are a single live run (one sample per attack), not an evaluation; the evaluation is Phase 8.
 
 ## Next 5 steps
-1. Owner reviews the Phase 0 summary and says "continue".
-2. Phase 1: `canonical.py` and `crypto.py` (dpid + epoch bound, rotation window) with unit and property tests.
-3. Golden store + `install_signed_rule()`.
-4. Verifier fed by the OF1.0 NXST monitor, with `unattributed_change` and the pending-set grace window.
-5. Responder (restore, rate limit) + alert spool, then a Mininet integration test.
+1. Owner reviews the Phase 1 summary, adds the SSH key to GitHub, and says "continue".
+2. Phase 2: core service skeleton (FastAPI, Alembic, SQLite), ZeroMQ receiver and alert acknowledgements (closes the spool loop).
+3. REST resources, WebSocket stream, argon2 auth with roles, audit log.
+4. OpenAPI docs and API tests including the role matrix.
+5. Engine-to-core ingest verified with the live engine.
 
 ## Open questions for the owner
-- None blocking. Optional: add the GitHub remote when ready (`HANDOFF.md` has the commands).
+- Add the printed SSH public key to GitHub so the repo can be pushed (HANDOFF.md).

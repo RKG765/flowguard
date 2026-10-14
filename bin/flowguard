@@ -21,9 +21,24 @@ USAGE = """usage: flowguard <command> [options]
 
 commands:
   doctor [--json] [--quick]   check the environment (implemented)
+  keygen [path]               create the HMAC key file, mode 0600 (implemented)
   start | stop | status       supervisor (planned, Phase 7)
   export                      export a session (planned, Phase 7)
 """
+
+
+def keygen(args: list[str]) -> int:
+    """Create the HMAC master key file (0600, outside the repo). Never overwrites an existing key."""
+    sys.path.insert(0, str(REPO))
+    from engine.crypto import generate_key_file
+    path = args[0] if args else "~/.config/flowguard/hmac.key"
+    try:
+        fp = generate_key_file(path)
+    except FileExistsError:
+        print(f"flowguard keygen: {path} already exists; refusing to overwrite a key that signs live rules.", file=sys.stderr)
+        return 1
+    print(f"created {path} (mode 0600), key fingerprint {fp}")
+    return 0
 
 
 def main(argv: list[str]) -> int:
@@ -33,6 +48,8 @@ def main(argv: list[str]) -> int:
     cmd, rest = argv[0], argv[1:]
     if cmd == "doctor":
         return subprocess.call([sys.executable, str(REPO / "scripts" / "doctor.py"), *rest])
+    if cmd == "keygen":
+        return keygen(rest)
     if cmd in PLANNED:
         print(f"flowguard {cmd}: not implemented yet (planned for {PLANNED[cmd]}).", file=sys.stderr)
         return 2

@@ -1,76 +1,428 @@
 {
   "project": "FlowGuard",
   "updated": "2026-10-14",
-  "current_phase": 0,
+  "current_phase": 1,
   "environments": [
-    {"name": "WSL2 Ubuntu 22.04", "status": "verified", "verified_on": "2026-10-14"},
-    {"name": "Native Ubuntu 22.04", "status": "not_yet", "verified_on": null}
+    {
+      "name": "WSL2 Ubuntu 22.04",
+      "status": "verified",
+      "verified_on": "2026-10-14"
+    },
+    {
+      "name": "Native Ubuntu 22.04",
+      "status": "not_yet",
+      "verified_on": null
+    }
   ],
   "phases": [
-    {"id": 0, "name": "Environment doctor and feasibility spike", "status": "done", "started": "2026-10-14", "finished": "2026-10-14",
-     "verified_by": "bin/flowguard doctor (14 PASS); scripts/spike/run_all.sh; make docs-check; make test", "depends_on": []},
-    {"id": 1, "name": "Engine L1 (signer, store, verifier, responder)", "status": "not_started", "depends_on": [0]},
-    {"id": 2, "name": "Core service, API, storage, auth", "status": "not_started", "depends_on": [1]},
-    {"id": 3, "name": "Design system and dashboard shell", "status": "not_started", "depends_on": [2]},
-    {"id": 4, "name": "Attack Lab and core pages (tag demo-v0)", "status": "not_started", "depends_on": [3]},
-    {"id": 5, "name": "L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete)", "status": "not_started", "depends_on": [4]},
-    {"id": 6, "name": "Remaining pages, reports, polish", "status": "not_started", "depends_on": [5]},
-    {"id": 7, "name": "Packaging and hardening", "status": "not_started", "depends_on": [6]},
-    {"id": 8, "name": "Evaluation and docs", "status": "not_started", "depends_on": [7]},
-    {"id": 9, "name": "Rigorous testing (full QA pass)", "status": "not_started", "depends_on": [8]},
-    {"id": 10, "name": "Persona-based review", "status": "not_started", "depends_on": [9]},
-    {"id": 11, "name": "Fix loop and release gate", "status": "not_started", "depends_on": [10]}
+    {
+      "id": 0,
+      "name": "Environment doctor and feasibility spike",
+      "status": "done",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified_by": "bin/flowguard doctor (14 PASS); scripts/spike/run_all.sh; make docs-check; make test",
+      "depends_on": []
+    },
+    {
+      "id": 1,
+      "name": "Engine L1 (signer, store, verifier, responder)",
+      "status": "done",
+      "depends_on": [
+        0
+      ],
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified_by": "make test; make test-live; make docs-check"
+    },
+    {
+      "id": 2,
+      "name": "Core service, API, storage, auth",
+      "status": "not_started",
+      "depends_on": [
+        1
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Design system and dashboard shell",
+      "status": "not_started",
+      "depends_on": [
+        2
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Attack Lab and core pages (tag demo-v0)",
+      "status": "not_started",
+      "depends_on": [
+        3
+      ]
+    },
+    {
+      "id": 5,
+      "name": "L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete)",
+      "status": "not_started",
+      "depends_on": [
+        4
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Remaining pages, reports, polish",
+      "status": "not_started",
+      "depends_on": [
+        5
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Packaging and hardening",
+      "status": "not_started",
+      "depends_on": [
+        6
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Evaluation and docs",
+      "status": "not_started",
+      "depends_on": [
+        7
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Rigorous testing (full QA pass)",
+      "status": "not_started",
+      "depends_on": [
+        8
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Persona-based review",
+      "status": "not_started",
+      "depends_on": [
+        9
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Fix loop and release gate",
+      "status": "not_started",
+      "depends_on": [
+        10
+      ]
+    }
   ],
   "components": [
-    {"id": "docs_tooling", "name": "Living docs + status tooling (update_docs.py)", "status": "implemented", "phase": 0,
-     "verified_by": "make docs-check && make test", "verified_on": "2026-10-14", "environment": "WSL2"},
-    {"id": "doctor", "name": "Environment doctor + flowguard CLI (doctor only)", "status": "implemented", "phase": 0,
-     "verified_by": "bin/flowguard doctor", "verified_on": "2026-10-14", "environment": "WSL2"},
-    {"id": "setup_script", "name": "scripts/setup_ubuntu.sh", "status": "partial", "phase": 0,
-     "verified_by": "bash scripts/setup_ubuntu.sh (re-run on a partly provisioned WSL2; pristine-machine install not yet tested)", "verified_on": "2026-10-14", "environment": "WSL2"},
-    {"id": "lab_topology", "name": "Mininet lab topology (4 hosts, 1 or 2 switches, explicit dpids)", "status": "implemented", "phase": 0,
-     "verified_by": "scripts/spike/run_all.sh (standalone pingall, controller-attached run, two-switch standalone pingall)", "verified_on": "2026-10-14", "environment": "WSL2"},
-    {"id": "spike_harness", "name": "Phase 0 spike harness (make spike)", "status": "implemented", "phase": 0,
-     "verified_by": "scripts/spike/run_all.sh S1-S3 + doctor; s4_ovs_monitor_cli.sh and the two-switch pingall run individually afterwards", "verified_on": "2026-10-14", "environment": "WSL2"},
-    {"id": "engine_crypto", "name": "Canonical form + HMAC cookie (dpid, epoch bound)", "status": "planned", "phase": 1},
-    {"id": "engine_store", "name": "Golden store + install_signed_rule", "status": "planned", "phase": 1},
-    {"id": "engine_verifier", "name": "L1 verifier + NXST monitor session", "status": "planned", "phase": 1},
-    {"id": "engine_responder", "name": "Responder (restore, rate limit)", "status": "planned", "phase": 1},
-    {"id": "event_channel", "name": "ZeroMQ event channel + alert spool", "status": "planned", "phase": 1},
-    {"id": "core_service", "name": "Core service (FastAPI, SQLite, WebSocket)", "status": "planned", "phase": 2},
-    {"id": "core_auth", "name": "Auth, roles, audit log", "status": "planned", "phase": 2},
-    {"id": "helper", "name": "Privileged helper (allowlist)", "status": "planned", "phase": 4},
-    {"id": "attacks", "name": "Attacks A1-A7 (A7 SIMULATED)", "status": "planned", "phase": 4},
-    {"id": "web_design_system", "name": "Design system + app shell", "status": "planned", "phase": 3},
-    {"id": "web_pages", "name": "Dashboard pages + Attack Lab", "status": "planned", "phase": 4},
-    {"id": "engine_prober", "name": "L2 data-plane prober", "status": "planned", "phase": 5},
-    {"id": "ml_worker", "name": "L3 ML scorer worker", "status": "planned", "phase": 5},
-    {"id": "risk_engine", "name": "Risk engine + policy", "status": "planned", "phase": 5},
-    {"id": "reports", "name": "Reports (PDF/CSV)", "status": "planned", "phase": 6},
-    {"id": "packaging", "name": "flowguard CLI (start, stop, status, export) and make targets", "status": "planned", "phase": 7}
+    {
+      "id": "docs_tooling",
+      "name": "Living docs + status tooling (update_docs.py)",
+      "status": "implemented",
+      "phase": 0,
+      "verified_by": "make docs-check && make test",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "doctor",
+      "name": "Environment doctor + flowguard CLI (doctor only)",
+      "status": "implemented",
+      "phase": 0,
+      "verified_by": "bin/flowguard doctor",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "setup_script",
+      "name": "scripts/setup_ubuntu.sh",
+      "status": "partial",
+      "phase": 0,
+      "verified_by": "bash scripts/setup_ubuntu.sh (re-run on a partly provisioned WSL2; pristine-machine install not yet tested)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "lab_topology",
+      "name": "Mininet lab topology (4 hosts, 1 or 2 switches, explicit dpids)",
+      "status": "implemented",
+      "phase": 0,
+      "verified_by": "scripts/spike/run_all.sh (standalone pingall, controller-attached run, two-switch standalone pingall)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "spike_harness",
+      "name": "Phase 0 spike harness (make spike)",
+      "status": "implemented",
+      "phase": 0,
+      "verified_by": "scripts/spike/run_all.sh S1-S3 + doctor; s4_ovs_monitor_cli.sh and the two-switch pingall run individually afterwards",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "engine_crypto",
+      "name": "Canonical form + HMAC cookie (dpid, epoch bound)",
+      "status": "implemented",
+      "phase": 1,
+      "verified_by": "make test (unit + Hypothesis property tests, both venvs); make test-live (rotation)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "engine_store",
+      "name": "Golden store + install_signed_rule",
+      "status": "implemented",
+      "phase": 1,
+      "verified_by": "make test; make test-live",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "engine_verifier",
+      "name": "L1 verifier + NXST monitor session + attribution",
+      "status": "implemented",
+      "phase": 1,
+      "verified_by": "make test; make test-live (forged, altered, missing, shadow, unattributed_change)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "engine_responder",
+      "name": "Responder (restore, rate limit)",
+      "status": "implemented",
+      "phase": 1,
+      "verified_by": "make test; make test-live (restore, removal, zero alerts on churn)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "event_channel",
+      "name": "ZeroMQ event channel + durable alert spool",
+      "status": "partial",
+      "phase": 1,
+      "verified_by": "make test (real ZeroMQ + spool unit tests); make test-live (alerts spooled). Core-side receiver and acknowledgements are not built",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "core_service",
+      "name": "Core service (FastAPI, SQLite, WebSocket)",
+      "status": "planned",
+      "phase": 2
+    },
+    {
+      "id": "core_auth",
+      "name": "Auth, roles, audit log",
+      "status": "planned",
+      "phase": 2
+    },
+    {
+      "id": "helper",
+      "name": "Privileged helper (allowlist)",
+      "status": "planned",
+      "phase": 4
+    },
+    {
+      "id": "attacks",
+      "name": "Attacks A1-A7 (A7 SIMULATED)",
+      "status": "planned",
+      "phase": 4
+    },
+    {
+      "id": "web_design_system",
+      "name": "Design system + app shell",
+      "status": "planned",
+      "phase": 3
+    },
+    {
+      "id": "web_pages",
+      "name": "Dashboard pages + Attack Lab",
+      "status": "planned",
+      "phase": 4
+    },
+    {
+      "id": "engine_prober",
+      "name": "L2 data-plane prober",
+      "status": "planned",
+      "phase": 5
+    },
+    {
+      "id": "ml_worker",
+      "name": "L3 ML scorer worker",
+      "status": "planned",
+      "phase": 5
+    },
+    {
+      "id": "risk_engine",
+      "name": "Risk engine + policy",
+      "status": "planned",
+      "phase": 5
+    },
+    {
+      "id": "reports",
+      "name": "Reports (PDF/CSV)",
+      "status": "planned",
+      "phase": 6
+    },
+    {
+      "id": "packaging",
+      "name": "flowguard CLI (start, stop, status, export) and make targets",
+      "status": "planned",
+      "phase": 7
+    },
+    {
+      "id": "engine_app",
+      "name": "Ryu engine app (signed installs, monitor supervisor, passes, alerts)",
+      "status": "implemented",
+      "phase": 1,
+      "verified_by": "make test-live",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "engine_policy",
+      "name": "Policy file + live policy reload (signed churn)",
+      "status": "implemented",
+      "phase": 1,
+      "verified_by": "make test; make test-live (policy edit = zero alerts)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    },
+    {
+      "id": "key_management",
+      "name": "HMAC key file checks, flowguard keygen, key rotation",
+      "status": "implemented",
+      "phase": 1,
+      "verified_by": "make test; bin/flowguard keygen; make test-live (rotation)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
+    }
   ],
   "component_links": [
-    ["lab_topology", "engine_verifier"],
-    ["engine_crypto", "engine_store"],
-    ["engine_store", "engine_verifier"],
-    ["engine_verifier", "engine_responder"],
-    ["engine_verifier", "event_channel"],
-    ["engine_prober", "risk_engine"],
-    ["ml_worker", "risk_engine"],
-    ["event_channel", "core_service"],
-    ["risk_engine", "core_service"],
-    ["core_auth", "core_service"],
-    ["core_service", "web_pages"],
-    ["web_design_system", "web_pages"],
-    ["core_service", "helper"],
-    ["helper", "attacks"],
-    ["core_service", "reports"]
+    [
+      "lab_topology",
+      "engine_verifier"
+    ],
+    [
+      "engine_crypto",
+      "engine_store"
+    ],
+    [
+      "engine_store",
+      "engine_verifier"
+    ],
+    [
+      "engine_verifier",
+      "engine_responder"
+    ],
+    [
+      "engine_verifier",
+      "event_channel"
+    ],
+    [
+      "engine_prober",
+      "risk_engine"
+    ],
+    [
+      "ml_worker",
+      "risk_engine"
+    ],
+    [
+      "event_channel",
+      "core_service"
+    ],
+    [
+      "risk_engine",
+      "core_service"
+    ],
+    [
+      "core_auth",
+      "core_service"
+    ],
+    [
+      "core_service",
+      "web_pages"
+    ],
+    [
+      "web_design_system",
+      "web_pages"
+    ],
+    [
+      "core_service",
+      "helper"
+    ],
+    [
+      "helper",
+      "attacks"
+    ],
+    [
+      "core_service",
+      "reports"
+    ],
+    [
+      "engine_app",
+      "engine_verifier"
+    ],
+    [
+      "engine_policy",
+      "engine_app"
+    ],
+    [
+      "key_management",
+      "engine_crypto"
+    ]
   ],
   "metrics": [
-    {"name": "Spike: monitor (NXST over OF1.0) detections, tamper-and-quick-revert, kernel datapath", "value": "30/30", "unit": "trials", "source": "docs/spike_evidence/s3_ofctl_monitor.json"},
-    {"name": "Spike: polling table 0 every 0.5 s detections, same scenario", "value": "0/30", "unit": "trials", "source": "docs/spike_evidence/s3_ofctl_monitor.json"},
-    {"name": "Spike: monitor median latency, modify of an ACL rule (includes ovs-ofctl start-up, upper bound)", "value": "21.6", "unit": "ms", "source": "docs/spike_evidence/s3_ofctl_monitor.json"},
-    {"name": "Spike: polling (0.5 s) median latency, same scenario", "value": "261.7", "unit": "ms", "source": "docs/spike_evidence/s3_ofctl_monitor.json"},
-    {"name": "Spike: targeted table-0 stats request round trip, median", "value": "1.12", "unit": "ms", "source": "docs/spike_evidence/s3_ofctl_monitor.json"}
+    {
+      "name": "Spike: monitor (NXST over OF1.0) detections, tamper-and-quick-revert, kernel datapath",
+      "value": "30/30",
+      "unit": "trials",
+      "source": "docs/spike_evidence/s3_ofctl_monitor.json"
+    },
+    {
+      "name": "Spike: polling table 0 every 0.5 s detections, same scenario",
+      "value": "0/30",
+      "unit": "trials",
+      "source": "docs/spike_evidence/s3_ofctl_monitor.json"
+    },
+    {
+      "name": "Spike: monitor median latency, modify of an ACL rule (includes ovs-ofctl start-up, upper bound)",
+      "value": "21.6",
+      "unit": "ms",
+      "source": "docs/spike_evidence/s3_ofctl_monitor.json"
+    },
+    {
+      "name": "Spike: polling (0.5 s) median latency, same scenario",
+      "value": "261.7",
+      "unit": "ms",
+      "source": "docs/spike_evidence/s3_ofctl_monitor.json"
+    },
+    {
+      "name": "Spike: targeted table-0 stats request round trip, median",
+      "value": "1.12",
+      "unit": "ms",
+      "source": "docs/spike_evidence/s3_ofctl_monitor.json"
+    },
+    {
+      "name": "Phase 1 live, one run: altered rule, engine detect latency (monitor event to classified; includes the 15 ms debounce)",
+      "value": "18.07",
+      "unit": "ms",
+      "source": "results/phase1_live_alert_timings.json"
+    },
+    {
+      "name": "Phase 1 live, one run: altered rule, classified to restore sent",
+      "value": "0.36",
+      "unit": "ms",
+      "source": "results/phase1_live_alert_timings.json"
+    },
+    {
+      "name": "Phase 1 live, one run: altered rule, classified to switch confirmation event",
+      "value": "10.2",
+      "unit": "ms",
+      "source": "results/phase1_live_alert_timings.json"
+    }
   ]
 }

@@ -1,0 +1,3 @@
+# Test tooling for the Python 3.9 engine venv (the engine's pure modules must also pass under 3.9).
+pytest==8.3.4
+hypothesis==6.122.3

@@ -2,7 +2,7 @@
 
 Flow-rule integrity monitoring and unauthorized network-state change detection for SDN (Ryu + Open vSwitch).
 
-> **Status: Phase 0 of 11 (environment doctor and feasibility spike).** The detection engine, API and dashboard are **not built yet**. What exists and was verified is listed in [STATUS.md](STATUS.md). Nothing here claims a working detector.
+> **Status: Phases 0-1 of 11 done.** The L1 engine (signed rules, event-driven detection, automatic repair) works against real Open vSwitch + Mininet on WSL2 and is covered by live tests. L2, L3, the risk engine, the API and the dashboard are **not built yet**. Exactly what was verified is in [STATUS.md](STATUS.md).
 
 ## What it will do
 1. **L1 authenticated rules:** an HMAC tag in the 64-bit OpenFlow `cookie` of every controller-installed rule; a verifier flags forged, altered, shadowing and missing rules and restores the signed rule.
@@ -14,7 +14,7 @@ Honest scope: see [docs/threat_model.md](docs/threat_model.md) (including the la
 
 ## Install (Ubuntu 22.04: WSL2 or native)
 ```bash
-git clone <your-remote> flowguard && cd flowguard
+git clone git@github.com:RKG765/flowguard.git flowguard && cd flowguard
 sudo bash scripts/setup_ubuntu.sh     # apt packages, Python 3.9 venv for Ryu, Node 20, OVS daemons
 bin/flowguard doctor                  # PASS/WARN/FAIL table with a fix for every problem
 ```
@@ -28,7 +28,9 @@ Native Ubuntu: the same commands. It has **not** been verified there yet; see [H
 | `make setup` | run `scripts/setup_ubuntu.sh` |
 | `make doctor` / `bin/flowguard doctor [--json] [--quick]` | environment check |
 | `make docs` / `make docs-check` | regenerate / verify generated docs |
-| `make test` | unit tests available in this phase |
+| `make test` | unit + property tests (both venvs) |
+| `sudo make test-live` | live attacks (forge, modify, delete, shadow, replay, tamper-and-revert) against the real engine on a lab switch |
+| `bin/flowguard keygen` | create the HMAC key file (mode 0600, outside the repo) |
 | `make spike` | re-run the Phase 0 feasibility spikes (root) |
 
 `start`, `demo`, `eval`, `test-e2e`, `test-security`, `test-soak` are planned and exit with code 2.
@@ -43,7 +45,7 @@ Screenshots will appear in `docs/img/` from Phase 4.
 | # | Phase | Status | Started | Finished |
 |---|---|---|---|---|
 | 0 | Environment doctor and feasibility spike | done | 2026-10-14 | 2026-10-14 |
-| 1 | Engine L1 (signer, store, verifier, responder) | not_started | - | - |
+| 1 | Engine L1 (signer, store, verifier, responder) | done | 2026-10-14 | 2026-10-14 |
 | 2 | Core service, API, storage, auth | not_started | - | - |
 | 3 | Design system and dashboard shell | not_started | - | - |
 | 4 | Attack Lab and core pages (tag demo-v0) | not_started | - | - |

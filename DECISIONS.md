@@ -2,17 +2,18 @@
 
 Format: context, decision, alternatives, consequences. Status is `accepted` unless noted. Evidence files are in `docs/spike_evidence/`.
 
-## ADR-001: Repo lives on the WSL ext4 filesystem
+## ADR-001: Repo lives on the WSL ext4 filesystem, in the default user's home
 - **Context:** The development machine is Windows 11 + WSL2; the product needs `chmod 0600` key files, fast `npm install`, and SQLite WAL.
-- **Decision:** Repo at `/root/flowguard` (the only WSL user is root). Windows access via `\\wsl.localhost\Ubuntu-22.04\root\flowguard`. `D:\sds` holds the plan and a pointer file only. The owner will add a GitHub remote and clone on the native Ubuntu laptop.
+- **Decision:** Repo at `~/flowguard` = `/home/rkg/flowguard` (owner `rkg`). Windows access via `\\wsl.localhost\Ubuntu-22.04\home\rkg\flowguard`. `D:\sds` holds the plan and a pointer file only. Remote: `git@github.com:RKG765/flowguard.git` over SSH (key generated in WSL; the owner adds the public key to GitHub).
+- **History:** Phase 0 and the start of Phase 1 lived in `/root/flowguard` while root was the only WSL user. When the owner created the default user `rkg`, Windows (which reaches the distro as the default user) could no longer read `/root`, so the repo was moved to `/home/rkg/flowguard` and the venvs were rebuilt.
 - **Alternatives:** `/mnt/d/sds` (slow, no real permissions, unreliable SQLite WAL).
-- **Consequences:** Development as root in WSL; the privilege-separated services (non-root core, root helper) are still built as specified and tested in Phases 2/7 with a dedicated service user.
+- **Consequences:** Mininet/OVS tests run as root against an rkg-owned repo (root has `safe.directory`); the privilege-separated services (non-root core, root helper) are tested in Phases 2/7 with a dedicated service user.
 
 ## ADR-002: Separate processes; ZeroMQ between engine and core
 - **Context:** Ryu runs on eventlet, FastAPI on asyncio; the Ryu loop must never block.
-- **Decision:** Separate processes. Engine -> core over ZeroMQ PUSH/PULL on a Unix socket. In Ryu, events go into a bounded in-memory queue drained by one green thread using `zmq.green`; on overflow events are dropped and counted (`events_dropped_total`, a health metric). The web server never runs as root; the privileged helper is its own small process with a command allowlist.
+- **Decision:** Separate processes. Engine -> core over ZeroMQ PUSH/PULL on a Unix socket. In Ryu, events go into a bounded in-memory queue drained by one green thread that sends with `zmq.NOBLOCK` (plain pyzmq is safe because a non-blocking send never waits; `zmq.green` is gevent-specific); on overflow events are dropped and counted (`events_dropped_total`, a health metric). The web server never runs as root; the privileged helper is its own small process with a command allowlist.
 - **Alternatives:** local HTTP + queue (heavier, more failure modes), shared SQLite (couples the two loops).
-- **Consequences:** `pyzmq` in the engine venv (pinned, installed and import-checked by `flowguard doctor`). Status: `planned` for Phase 1/2; only the dependency is verified so far.
+- **Consequences:** `pyzmq` in the engine venv (pinned, installed and import-checked by `flowguard doctor`). Status: engine side implemented and unit-tested in Phase 1 (`engine/channel.py`, real ZeroMQ PUSH/PULL tests); the core (PULL) side and the ack path arrive in Phase 2.
 
 ## ADR-003: Ryu 4.34 on Python 3.9 with pinned build tooling; os-ken is the fallback
 - **Context:** Ryu 4.34 does not install/run cleanly on current tooling.
@@ -25,10 +26,12 @@ Format: context, decision, alternatives, consequences. Status is `accepted` unle
 - **Decision:** Mode = **event-driven**. Each lab switch exposes a passive OpenFlow port (`ptcp:6634+`). The engine runs a monitor session (`ovs-ofctl monitor tcp:127.0.0.1:<port> watch:` supervised as a subprocess in Phase 1) as a *trigger*. A trigger for a critical table causes a targeted `OFPFlowStatsRequest(table_id=...)` over the controller's OF1.3 connection, which is the ground truth the verifier checks against signed rules. A slow reconciliation poll (configurable, default 5 s) remains as a safety net for monitor drops.
 - **Alternatives:** polling only (simpler, misses fast revert); OF1.4 monitor (not supported by this OVS); a native Python NXST client (more code; revisit if text parsing proves fragile).
 - **Consequences:** If the attacker reverts before the confirming stats request, the table already matches the golden rules, so state comparison alone says "ok". The verifier therefore also raises `unattributed_change` for any critical-table event not explained by the engine's own FlowMods (tracked via the pending set). The monitor text format is parsed (events ADDED/DELETED/MODIFIED with table and cookie; priority is not printed). Limitation to document: events do not carry instructions, hence the confirm step. Whether the same holds on the native Ubuntu laptop's OVS build is `unverified` until re-run there.
+- **Implemented in Phase 1** (`engine/app.py`, `engine/monitor_parser.py`): the monitor is `stdbuf -oL ovs-ofctl monitor tcp:127.0.0.1:<port> watch:!initial` (`!initial` skips the initial flow dump, found in the man page); the supervisor restarts it with backoff and raises `monitor_down`. `unattributed_change` is raised when a critical-table event leaves the table equal to the golden rules. Live evidence: `tests/integration/test_l1_live.py`, `results/phase1_live_alert_timings.json`.
 
 ## ADR-005: HMAC input binds dpid and epoch; short rotation window
 - **Decision:** `tag = first 48 bits of HMAC-SHA256(K_epoch, canonical_bytes)` where `canonical_bytes` covers (dpid, epoch16, table_id, priority, normalized match, normalized instructions) and excludes counters, durations, timeouts, flags and the cookie. `cookie = (tag << 16) | epoch16`. `K_epoch = HMAC-SHA256(master_key, "flowguard-epoch" || epoch16)` so old epochs can be re-derived. After rotation the previous epoch is accepted for `rotation_grace_seconds` (config, default 300) and then rejected. dpids are explicit in the Mininet topology (`s1=0000000000000001`, `s2=0000000000000002`).
 - **Why dpid:** otherwise a valid cookie could be reused on the same rule on a different switch.
+- **Implemented in Phase 1** (`engine/canonical.py`, `engine/crypto.py`; unit + Hypothesis tests; live rotation test). The key file must be mode 0600 and owned by the current user or the engine refuses to start; the environment variable `FLOWGUARD_HMAC_KEY` is the alternative.
 - **Consequences:** 48-bit tag: forgery needs 2^47 expected online guesses against a verifier that restores on first sight; the realistic attack is copying/replaying, which the binding addresses. Status `planned` (Phase 1).
 
 ## ADR-006: Table layout
@@ -43,8 +46,17 @@ Format: context, decision, alternatives, consequences. Status is `accepted` unle
 - **Decision:** `.venv-engine` (3.9) for Ryu; `.venv-core` (3.10, `--system-site-packages`, because apt installs Mininet's module system-wide) for the lab, helper, core and tests. `bin/flowguard` and `scripts/doctor.py` use only the standard library so they work before venvs exist.
 
 ## ADR-009: Alert spool (no silent alert loss)
-- **Decision:** Every alert is appended to `data/spool/alerts.jsonl` (fsync) before it is sent over ZeroMQ; the core acknowledges by sequence number. Unacknowledged records are replayed on reconnect. Rotation at 10 MiB per file, keep 5 files (50 MiB cap). When the cap is reached the oldest file is dropped, `spool_dropped_total` is incremented and a synthetic `spool_overflow` alert is emitted. All three numbers are in `config.example.yaml`. Status `planned` (Phase 1).
+- **Decision (implemented in Phase 1, `engine/spool.py`):** Every alert is appended to `data/spool/alerts.jsonl` (fsync) before it is sent over ZeroMQ; the core acknowledges by sequence number. Unacknowledged records are replayed on reconnect. Rotation at 10 MiB per file, keep 5 files (50 MiB cap). When the cap is reached the oldest file is dropped, `spool_dropped_total` is incremented and a synthetic `spool_overflow` alert is emitted. All three numbers are in `config.example.yaml`. A torn last line left by a crash is healed on open (regression test).
 
 ## ADR-010: Deadsnakes PPA is added manually
 - **Context:** `add-apt-repository` needs `api.launchpad.net`, which timed out from this machine (`docs/spike_evidence/setup_run1.log`), while the PPA mirror and keyserver are reachable.
 - **Decision:** `setup_ubuntu.sh` fetches the signing key from `keyserver.ubuntu.com`, checks its fingerprint (`F23C5A6C...5776`), and writes a `signed-by` source entry itself.
+
+## ADR-011: The engine's own changes are attributed by cookie, but in-flight rules are exempted by SLOT
+- **Context:** The engine's own FlowMods produce monitor events and briefly make the switch differ from the golden store. The first Phase 1 live run showed that exempting rules by *cookie* let an attacker copy a golden cookie onto a different rule and hide inside the grace window (it was only caught 2 s later by the reconcile poll).
+- **Decision:** `Pending` records, for every FlowMod the engine sends, the cookie (to attribute the monitor event) and the rule slot `(table, priority, canonical match)` (to defer judgement). `classify(..., skip_slots=...)` skips only those slots. Every attributed event also schedules a verification pass after the grace window, because attribution by cookie can be spoofed. A pass scheduled earlier supersedes a slower queued pass, so a live event is never held back by a delayed confirmation pass.
+- **Consequences:** Regression tests: `test_copying_a_golden_cookie_cannot_hide_inside_the_grace_window` and the live `test_a5_cookie_copied_from_a_valid_rule_...`. Known residual limit: an attacker who changes the *same slot* the engine is touching within the grace window (default 500 ms) is judged only after the window; the post-grace pass and the reconcile poll cover that. To be measured in Phase 9.
+
+## ADR-012: Repair semantics and classification
+- **Repair:** Restore and re-sign use `OFPFC_ADD`, which atomically replaces a rule with the same table/priority/match (no window where the rule is absent). Forged and shadow rules are removed with `OFPFC_DELETE_STRICT`. Nothing is deleted when a rule cannot be normalized (`unparseable_rule`: alert only). Repairs are limited per switch per minute (`restore_rate_limit_per_minute`, default 30) and then become alerts (`restore_rate_limited`). `response_mode: alert_only` is the dry run.
+- **Classes:** `missing` (golden rule absent), `altered` (same slot, different instructions or cookie), `shadow` (not golden, equal or higher priority, overlaps a protected rule; golden table-miss rules are ignored for this test because they overlap everything), `forged` (any other non-golden rule). `signature_valid` is reported for non-golden rules so a replayed old signed rule is visible as such.

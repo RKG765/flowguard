@@ -26,7 +26,10 @@ from typing import Dict, Optional
 LAB_SWITCH_PREFIX = "s"
 DPIDS = {"s1": "0000000000000001", "s2": "0000000000000002"}
 HOSTS = {f"h{i}": {"ip": f"10.0.0.{i}/24", "mac": f"00:00:00:00:00:0{i}"} for i in range(1, 5)}
-OF_PROTOCOLS = "OpenFlow13,OpenFlow14"
+# OpenFlow 1.0 must stay enabled: the engine's change monitor is a Nicira NXST session that only works over OF1.0
+# (ADR-004). The engine's controller connection itself negotiates OpenFlow 1.3.
+OF_PROTOCOLS = "OpenFlow10,OpenFlow13"
+MONITOR_PORT = 6634  # passive OpenFlow port for the monitor session (s2 uses 6635)
 
 
 def resolve_datapath(requested: str) -> str:
@@ -99,8 +102,12 @@ def main(argv: Optional[list] = None) -> int:
     ap.add_argument("--two-switch", action="store_true")
     ap.add_argument("--no-controller", action="store_true", help="standalone learning bridge (connectivity test)")
     ap.add_argument("--controller-port", type=int, default=6653)
+    ap.add_argument("--monitor-port", type=int, default=MONITOR_PORT, help="passive OpenFlow port for the engine's change monitor")
     ap.add_argument("--test", choices=["pingall"], help="run a test, print JSON, exit")
     ap.add_argument("--hold", action="store_true", help="keep the lab up until SIGTERM/SIGINT")
+    ap.add_argument("--clean", action="store_true",
+                    help="run Mininet's full cleanup before and after (WARNING: it kills every ryu-manager process, "
+                         "including a running FlowGuard engine)")
     args = ap.parse_args(argv)
 
     if os.geteuid() != 0:
@@ -109,9 +116,10 @@ def main(argv: Optional[list] = None) -> int:
     from mininet.log import setLogLevel
     from mininet.clean import cleanup
     setLogLevel("warning")
-    cleanup()
+    if args.clean or args.no_controller:  # a standalone lab has no engine to protect
+        cleanup()
     net, info = build_net(args.datapath, args.two_switch, None if args.no_controller else "127.0.0.1",
-                          args.controller_port)
+                          args.controller_port, listen_port=None if args.no_controller else args.monitor_port)
     stop = {"flag": False}
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, lambda *_: stop.update(flag=True))
@@ -132,7 +140,8 @@ def main(argv: Optional[list] = None) -> int:
         return 0
     finally:
         net.stop()
-        cleanup()
+        if args.clean or args.no_controller:
+            cleanup()
 
 
 if __name__ == "__main__":

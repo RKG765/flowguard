@@ -1,0 +1,96 @@
+{
+  "note": "single run of tests/integration/test_l1_live.py on WSL2; one sample per attack, not an evaluation (Phase 8 does that)",
+  "source": "engine alert records (spool) from that run",
+  "alerts": [
+    {
+      "kind": "forged",
+      "action": "removed",
+      "priority": 300,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 18.12,
+      "respond_latency_ms": 0.25,
+      "time_to_restore_ms": 7.57
+    },
+    {
+      "kind": "altered",
+      "action": "restored",
+      "priority": 100,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 18.07,
+      "respond_latency_ms": 0.36,
+      "time_to_restore_ms": 10.2
+    },
+    {
+      "kind": "missing",
+      "action": "restored",
+      "priority": 100,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 17.33,
+      "respond_latency_ms": 0.3,
+      "time_to_restore_ms": 8.23
+    },
+    {
+      "kind": "shadow",
+      "action": "removed",
+      "priority": 200,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 19.58,
+      "respond_latency_ms": 0.26,
+      "time_to_restore_ms": 12.81
+    },
+    {
+      "kind": "forged",
+      "action": "removed",
+      "priority": 250,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 17.66,
+      "respond_latency_ms": 0.2,
+      "time_to_restore_ms": 19.44
+    },
+    {
+      "kind": "altered",
+      "action": "restored",
+      "priority": 100,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 17.56,
+      "respond_latency_ms": 0.27,
+      "time_to_restore_ms": 6.13
+    },
+    {
+      "kind": "unattributed_change",
+      "action": "none",
+      "priority": null,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 20.02,
+      "respond_latency_ms": null,
+      "time_to_restore_ms": null
+    },
+    {
+      "kind": "shadow",
+      "action": "removed",
+      "priority": 90,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 18.09,
+      "respond_latency_ms": 0.22,
+      "time_to_restore_ms": 17.14
+    },
+    {
+      "kind": "forged",
+      "action": "removed",
+      "priority": 60,
+      "detected_by": "monitor_event",
+      "detect_latency_ms": 17.66,
+      "respond_latency_ms": 0.22,
+      "time_to_restore_ms": 6.31
+    },
+    {
+      "kind": "monitor_down",
+      "action": null,
+      "priority": null,
+      "detected_by": null,
+      "detect_latency_ms": null,
+      "respond_latency_ms": null,
+      "time_to_restore_ms": null
+    }
+  ]
+}
