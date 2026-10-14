@@ -202,3 +202,22 @@ def test_recording_captures_ingested_records(client, tokens):
     lines = [json.loads(l) for l in dl.text.splitlines()]
     assert [l["record"]["type"] for l in lines] == ["alert", "snapshot"]
     assert client.post("/api/sessions", json={"name": "../../etc/passwd"}, headers=h).status_code == 422
+
+
+# ---- dashboard-requested repair --------------------------------------------------------------------------------
+def test_repair_request_is_validated_written_for_the_engine_and_audited(client, tokens, settings):
+    ingest(client, snapshot_rec())
+    h = bearer(tokens["admin"])
+    ok_rule = {"dpid": DPID, "table_id": 0, "priority": 100, "match": {"tcp_dst": 23}}
+    forged = {"dpid": DPID, "table_id": 0, "priority": 300, "match": {"eth_type": 2054}}
+    assert client.post("/api/rules/repair", json=ok_rule, headers=h).status_code == 409   # nothing to repair
+    assert client.post("/api/rules/repair", json=dict(forged, priority=301), headers=h).status_code == 404
+    assert client.post("/api/rules/repair", json=dict(forged, dpid="../../etc"), headers=h).status_code == 422
+    r = client.post("/api/rules/repair", json=forged, headers=h)
+    assert r.status_code == 202 and r.json()["status_before"] == "forged"
+    rid = r.json()["request_id"]
+    path = os.path.join(settings.control_dir, f"repair-{rid}.json")
+    req = json.load(open(path))
+    assert req == {"request_id": rid, "dpid": DPID, "table_id": 0, "priority": 300, "match": {"eth_type": 2054}, "requested_by": "admin"}
+    audit = client.get("/api/audit", params={"action": "rule_repair_requested"}, headers=h).json()
+    assert audit["total"] == 1 and audit["items"][0]["details"]["status_before"] == "forged"

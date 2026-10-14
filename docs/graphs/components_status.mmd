@@ -11,10 +11,10 @@ flowchart TB
   event_channel["Engine to core channel: ZeroMQ + durable spool + ordered acknowledgement"]:::implemented
   core_service["Core service (FastAPI, SQLite WAL + Alembic, REST, WebSocket)"]:::implemented
   core_auth["Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log"]:::implemented
-  helper["Privileged helper (allowlist)"]:::planned
-  attacks["Attacks A1-A7 (A7 SIMULATED)"]:::planned
+  helper["Privileged attack-execution helper (descoped from Phase 4 by the owner; see ADR-019)"]:::planned
+  attacks["Attack scripts A1-A7 (descoped from Phase 4 by the owner; see ADR-019)"]:::planned
   web_design_system["Design system (tokens, glass/data surfaces, components, /design style guide)"]:::implemented
-  web_pages["Dashboard: shell, setup, sign-in, Overview (other pages Phase 4-6)"]:::partial
+  web_pages["Dashboard: shell, setup, sign-in, Overview, Rules, Alerts/Incidents, Topology, Live Detection (Phase 5-6 pages pending)"]:::partial
   engine_prober["L2 data-plane prober"]:::planned
   ml_worker["L3 ML scorer worker"]:::planned
   risk_engine["Risk engine + policy"]:::planned
@@ -26,6 +26,8 @@ flowchart TB
   core_recordings["Session recorder (record + download; replay planned Phase 6)"]:::partial
   engine_snapshots["Engine rule snapshots + status events for the core"]:::implemented
   stitch_designs["Google Stitch design system + screens (via Stitch MCP)"]:::partial
+  live_detection["Live Detection page (observation mode)"]:::implemented
+  manual_repair["Dashboard-requested repair (admin, audited; works in alert-only mode)"]:::implemented
   lab_topology --> engine_verifier
   engine_crypto --> engine_store
   engine_store --> engine_verifier
@@ -47,6 +49,8 @@ flowchart TB
   engine_snapshots --> event_channel
   core_recordings --> core_service
   stitch_designs --> web_design_system
+  live_detection --> web_pages
+  manual_repair --> engine_responder
   classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
   classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
   classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;

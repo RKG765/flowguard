@@ -4,7 +4,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Toaster, toast } from "sonner";
 import { Bell, LogOut, Moon, Search, Sun } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { engineFresh, useLive } from "@/lib/live";
+import { api } from "@/lib/api";
+import { engineFresh, useLive, type LiveEngineStatus } from "@/lib/live";
 import { usePrefs } from "@/lib/prefs";
 import { cn } from "@/lib/cn";
 import { Badge, Button, ModeBadge } from "@/components/ui/primitives";
@@ -164,6 +165,12 @@ export function AppShell() {
         }),
     });
     connect();
+    // the engine pushes its status every 5 s; seed it now so the top bar is right immediately after a reload
+    void api<{ known: boolean; status?: LiveEngineStatus }>("/api/engine/status")
+      .then((r) => {
+        if (r.known && r.status && !useLive.getState().engine) useLive.setState({ engine: r.status });
+      })
+      .catch(() => undefined);
     return () => disconnect();
   }, [qc, navigate, connect, disconnect]);
 

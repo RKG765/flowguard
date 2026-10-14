@@ -10,6 +10,7 @@ Strategy: tests ship with every feature (unit + integration in the phase that ad
 | `make spike` | Phase 0 feasibility measurements (root, Mininet) | exists |
 | `make test-e2e` | Playwright in Chromium against a throw-away core: setup, sign-in, lockout, palette, theme, reduced motion/transparency, keyboard, axe on every page shown | exists (Phase 3) |
 | `make test-web` | web typecheck + Vitest unit tests (also run by `make test`) | exists (Phase 3) |
+| `make test-e2e-live` | Playwright against a throw-away lab + engine (alert-only) + core (`tests/e2e_live/stack.py`): rules and topology from the live engine, a live detection with its explanation, an admin repair that removes the rule from the switch, audit entry (root) | exists (Phase 4) |
 | `make test-security` | static analysis, dependency audit, authz/fuzz, helper allowlist | planned (Phase 7/9) |
 | `make test-soak` | multi-hour soak | planned (Phase 9) |
 

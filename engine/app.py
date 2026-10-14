@@ -111,6 +111,10 @@ class FlowGuardEngine(app_manager.RyuApp):
         self.pending = Pending(self.cfg.grace_window_ms / 1000.0)
         self.deduper = Deduper(self.cfg.alert_dedupe_seconds)
         self.responder = Responder(self.cfg.response_mode, self.cfg.restore_rate_limit_per_minute)
+        # dashboard-requested repairs act even in alert_only mode, but share the per-switch rate limit
+        self.manual_responder = Responder("restore", self.cfg.restore_rate_limit_per_minute)
+        self.manual_responder.limiter = self.responder.limiter
+        self._repairs: Dict[Tuple[str, int], Dict[Tuple[int, int, str], str]] = {}
         self.spool = AlertSpool(self.cfg.spool_path, self.cfg.spool_max_bytes, self.cfg.spool_backups)
         self.channel = EventChannel(self.cfg.event_endpoint, self.cfg.event_queue_max)
         self.eventlog = open(self.cfg.eventlog_path, "a", buffering=1)
@@ -441,10 +445,26 @@ class FlowGuardEngine(app_manager.RyuApp):
 
         self._publish_snapshot(dpid, table, build_snapshot(observed, golden, findings, self.pending.live_slots(dpid, t_classified)))
         bad_slots = {(f.dpid, f.spec.table_id, f.spec.priority, f.spec.match_key()) for f in findings}
+        requested = self._repairs.pop((dpid, table), {})
+        if requested:
+            forced = [f for f in findings if f.spec.key() in requested]
+            rest = [f for f in findings if f.spec.key() not in requested]
+            done = {f.spec.key() for f in forced}
+            for slot, rid in requested.items():
+                if slot not in done:
+                    self.emit("repair_not_needed", dpid=dpid, table_id=table, priority=slot[1], request_id=rid,
+                              summary="The rule already matches its signed version; nothing to repair.")
+        else:
+            forced, rest = [], findings
         if findings:
-            plans = self.responder.plan(findings, t_classified)
+            plans = self.responder.plan(rest, t_classified) + self.manual_responder.plan(forced, t_classified)
             for plan in plans:
-                self._handle_finding(dp, plan, ps, t_event, t_reply, t_classified, detected_by)
+                if plan.finding in forced:
+                    self.emit("repair_done", dpid=dpid, table_id=table, priority=plan.finding.spec.priority,
+                              request_id=requested.get(plan.finding.spec.key()), op=plan.op, reason=plan.reason)
+            for plan in plans:
+                by = "manual_repair" if plan.finding in forced else detected_by
+                self._handle_finding(dp, plan, ps, t_event, t_reply, t_classified, by)
             self.schedule_pass(dpid, table, "confirm", delay=self.pending.grace + 0.1)
         elif ps.triggers:
             # changes happened, but the table already equals the golden rules: a tamper-and-revert
@@ -541,8 +561,33 @@ class FlowGuardEngine(app_manager.RyuApp):
                 if os.path.exists(rot):
                     os.remove(rot)
                     self.rotate_key()
+                for name in sorted(os.listdir(control)):
+                    if name.startswith("repair-") and name.endswith(".json"):
+                        self._take_repair_request(os.path.join(control, name))
             except Exception:
                 self.log.exception("policy watcher failed")
+
+    def _take_repair_request(self, path: str) -> None:
+        """A repair of one rule slot requested from the dashboard (admin, audited by the core). It is carried out on the
+        next verification pass even when the engine runs in alert_only mode; the rate limit still applies."""
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                req = json.load(fh)
+            os.remove(path)
+            dpid = dpid_hex(req["dpid"])
+            slot = RuleSpec.create(req["table_id"], req["priority"], req.get("match") or {}, []).key()
+        except (OSError, ValueError, KeyError, CanonicalError) as exc:
+            self.log.warning("bad repair request %s: %s", path, exc)
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+            return
+        rid = str(req.get("request_id") or "")[:64]
+        self._repairs.setdefault((dpid, slot[0]), {})[slot] = rid
+        self.emit("repair_requested", dpid=dpid, table_id=slot[0], priority=slot[1], request_id=rid,
+                  requested_by=str(req.get("requested_by") or "")[:64])
+        self.schedule_pass(dpid, slot[0], "manual_repair", delay=0.0)
 
     def _status_loop(self) -> None:
         """Every second: engine_status.json for local tools; every 5 s: the same object on the channel for the core."""
@@ -557,6 +602,8 @@ class FlowGuardEngine(app_manager.RyuApp):
                     "golden_rules": self.store.count(), "counters": self.counters, "channel": self.channel.health(),
                     "spool": {"dropped_total": self.spool.dropped_total, "acked": self.spool.acked(), "bytes": self.spool.total_bytes()},
                     "response_mode": self.cfg.response_mode,
+                    # hosts the table-1 learning switch has seen: {dpid: {mac: port}} (for the topology view)
+                    "hosts": {d: dict(m) for d, m in self.mac_to_port.items()},
                 }
                 tmp = path + ".tmp"
                 with open(tmp, "w") as fh:

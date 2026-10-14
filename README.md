@@ -2,7 +2,7 @@
 
 Flow-rule integrity monitoring and unauthorized network-state change detection for SDN (Ryu + Open vSwitch).
 
-> **Status: Phases 0-3 of 11 done.** The L1 engine (signed rules, event-driven detection, automatic repair), the core API service (storage, REST + WebSocket, auth with roles, audit log) and the dashboard shell (design system, sign-in, first-run setup, live Overview) work on WSL2 and are covered by tests. The Rule Inspector, Alerts, Topology and Attack Lab pages (Phase 4), L2, L3 and the risk engine (Phase 5) are **not built yet**. Exactly what was verified is in [STATUS.md](STATUS.md).
+> **Status: Phases 0-4 of 11 done (tag `demo-v0`).** The L1 engine, the core API service and the dashboard (Overview, Rules, Alerts and Incidents, Topology, Live Detection) work against a real Open vSwitch + Mininet lab on WSL2 and are covered by live tests. FlowGuard does not execute attacks; the Live Detection page observes changes made outside the controller (ADR-019). L2, L3 and the risk engine (Phase 5) are **not built yet**. Exactly what was verified is in [STATUS.md](STATUS.md).
 
 ## What it will do
 1. **L1 authenticated rules:** an HMAC tag in the 64-bit OpenFlow `cookie` of every controller-installed rule; a verifier flags forged, altered, shadowing and missing rules and restores the signed rule.
@@ -41,12 +41,16 @@ Native Ubuntu: the same commands. It has **not** been verified there yet; see [H
 ## Documentation
 [STATUS.md](STATUS.md) · [HANDOFF.md](HANDOFF.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [DECISIONS.md](DECISIONS.md) · [ROADMAP.md](ROADMAP.md) · [TESTING.md](TESTING.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/spike_findings.md](docs/spike_findings.md) · [docs/threat_model.md](docs/threat_model.md)
 
-## Screenshots (captured by the Playwright run, real UI with no engine attached)
+## Screenshots (captured by the Playwright runs; "live engine" ones are from a real Mininet lab)
 | Overview (dark) | Design system (light) |
 |---|---|
 | ![Overview](docs/img/overview-dark.png) | ![Design system](docs/img/design-light.png) |
 | First-run setup | Sign-in error |
 | ![Setup](docs/img/setup-dark.png) | ![Sign-in](docs/img/login-error-dark.png) |
+| Live Detection (live engine) | Topology (live engine) |
+| ![Live Detection](docs/img/live-detection.png) | ![Topology](docs/img/topology-live.png) |
+| Rules (live engine) | Alerts after a dashboard repair |
+| ![Rules](docs/img/rules-live.png) | ![Alerts](docs/img/alerts-live.png) |
 
 ## Phase progress
 <!-- AUTO:phase_table -->
@@ -56,7 +60,7 @@ Native Ubuntu: the same commands. It has **not** been verified there yet; see [H
 | 1 | Engine L1 (signer, store, verifier, responder) | done | 2026-10-14 | 2026-10-14 |
 | 2 | Core service, API, storage, auth | done | 2026-10-14 | 2026-10-14 |
 | 3 | Design system and dashboard shell | done | 2026-10-14 | 2026-10-14 |
-| 4 | Attack Lab and core pages (tag demo-v0) | not_started | - | - |
+| 4 | Core pages + Live Detection (tag demo-v0; attack execution descoped) | done | 2026-10-14 | 2026-10-15 |
 | 5 | L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete) | not_started | - | - |
 | 6 | Remaining pages, reports, polish | not_started | - | - |
 | 7 | Packaging and hardening | not_started | - | - |

@@ -35,7 +35,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   <Command.Item key={n.to} value={`${n.label} ${n.keywords ?? ""}`} onSelect={() => run(() => navigate(n.to))} className={item}>
                     <n.icon aria-hidden className="h-4 w-4 text-muted" />
                     <span className="flex-1 text-fg">{n.label}</span>
-                    {n.phase > 3 && <span className="text-[11px] text-muted">planned · Phase {n.phase}</span>}
+                    {n.phase > 3 && !n.built && <span className="text-[11px] text-muted">planned · Phase {n.phase}</span>}
                   </Command.Item>
                 ))}
               </Command.Group>

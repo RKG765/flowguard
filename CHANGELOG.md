@@ -4,6 +4,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/). One entry per phase or 
 
 ## [Unreleased]
 
+### Phase 4: core pages and Live Detection (tag `demo-v0`)
+#### Added
+- Rule Inspector (virtualized table, status filters with counts, search, signed-vs-actual diff, admin repair with confirmation, CSV export), Alerts and Incidents (plain-language explanation, measured timeline, diff, acknowledge, assign, notes, close/reopen), Live Topology (React Flow: engine, switches by integrity status, learned hosts), Live Detection page in observation mode.
+- Engine: `golden_instructions` in snapshots, learned hosts in the status, dashboard-requested repairs (works in alert-only mode). Core: `POST /api/rules/repair` (admin, audited).
+- Tests: repair API test; web unit tests for formatting, virtualization and switch health; Playwright against a live lab + engine + core (`make test-e2e-live`); Windows browser access to the WSL dev server verified.
+#### Changed
+- The Attack Lab is the Live Detection page; attack execution from the product was descoped (ADR-019).
+#### Fixed (found by tests)
+- Rule table header row sat outside its table role (axe `aria-required-parent`).
+- Topology over-zoomed with few nodes and hid hosts; React Flow painted its own background.
+- The top bar showed "Waiting for engine status" for up to 5 s after a reload.
+
 ### Phase 3: design system and dashboard shell
 #### Added
 - Google Stitch (via MCP): project, "FlowGuard Glass" design system, generated Overview design (ADR-017).

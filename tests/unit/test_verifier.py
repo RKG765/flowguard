@@ -183,6 +183,10 @@ def test_snapshot_lists_every_rule_with_its_status():
     assert status == {300: FORGED, 100: ALTERED, 90: MISSING, 0: "ok"}
     missing = next(r for r in rows if r["priority"] == 90)
     assert missing["present"] is False and missing["cookie"] is None and missing["golden"] is True
+    assert missing["instructions"] == [] and missing["golden_instructions"] == list(SSH.instructions)
+    altered = next(r for r in rows if r["priority"] == 100)
+    assert altered["golden_instructions"] == [] and altered["instructions"] != altered["golden_instructions"]
+    assert next(r for r in rows if r["priority"] == 300)["golden_instructions"] is None
     assert [r["priority"] for r in rows] == [300, 100, 90, 0]
 
 

@@ -44,6 +44,12 @@ export function describe(msg: { type: string; data: Record<string, unknown> }): 
     return { key: `u-${str(d.alert_id)}`, t, type: "alert_update", kind: "restored", severity: "info",
              text: `Rule restored${ms !== undefined ? ` in ${ms} ms` : ""}`, alertId: str(d.alert_id) };
   }
+  if (msg.type === "event" && String(d.kind).startsWith("repair_")) {
+    const what = d.kind === "repair_requested" ? `Repair requested by ${str(d.requested_by) || "an admin"}`
+      : d.kind === "repair_done" ? `Repair applied (${str(d.op)})` : "Repair not needed: the rule already matched";
+    return { key: `r-${t}-${str(d.kind)}`, t, type: "event", kind: str(d.kind), severity: "info",
+             text: `${what} · switch ${str(d.dpid)} priority ${str(d.priority)}`, dpid: (d.dpid as string) ?? null };
+  }
   if (msg.type === "event") {
     return { key: `e-${t}-${str(d.kind)}`, t, type: "event", kind: str(d.kind), severity: "info",
              text: `${str(d.kind).replace(/_/g, " ")}${d.dpid ? ` (${str(d.dpid)})` : ""}`, dpid: (d.dpid as string) ?? null };

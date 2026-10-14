@@ -63,6 +63,15 @@
   }
 }
 
+/* React Flow canvas uses the page background and the theme's colours */
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-background-color-default: transparent;
+  --xy-controls-button-background-color: rgb(var(--surface));
+  --xy-controls-button-color: rgb(var(--fg));
+  --xy-controls-button-border-color: rgb(var(--line));
+}
+
 /* Reduced transparency: OS setting, or the user's choice stored on <html data-transparency="reduced"> */
 @media (prefers-reduced-transparency: reduce) {
   .glass {

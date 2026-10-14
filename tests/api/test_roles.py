@@ -21,6 +21,7 @@ EXPECTED = {
     ("GET", "/api/switches/{dpid}"): "viewer",
     ("GET", "/api/rules"): "viewer",
     ("GET", "/api/rules/summary"): "viewer",
+    ("POST", "/api/rules/repair"): "admin",
     ("GET", "/api/alerts"): "viewer",
     ("GET", "/api/alerts/{alert_id}"): "viewer",
     ("POST", "/api/alerts/{alert_id}/ack"): "analyst",

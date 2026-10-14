@@ -66,8 +66,8 @@ test("Ctrl+K palette navigates, and planned pages say so", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /Color tokens and measured contrast/ })).toBeVisible();
   await axe(page);
   await page.screenshot({ path: `${IMG}/design-dark.png`, fullPage: true });
-  await page.goto("/topology");
-  await expect(page.getByText("Topology is planned")).toBeVisible();
+  await page.goto("/probes");
+  await expect(page.getByText("Probes is planned")).toBeVisible();
 });
 
 test("theme toggle switches to light and persists", async ({ page }) => {

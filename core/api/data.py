@@ -3,15 +3,17 @@ plus the analyst actions on alerts and incidents."""
 from __future__ import annotations
 
 import json
+import os
 import time
+import uuid
 from typing import Any, Dict, List, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from ..deps import Principal, analyst, audit_event, get_db, viewer
+from ..deps import Principal, admin, analyst, audit_event, get_db, viewer
 from ..models import Alert, EngineEvent, Incident, IncidentNote, MlScore, ProbeResult, RuleSnapshot, Switch
 
 router = APIRouter(prefix="/api", tags=["data"])
@@ -92,6 +94,43 @@ def rules_summary(p: Principal = Depends(viewer), db: Session = Depends(get_db))
     return {"rules": len(rows), "protected": len(protected), "verified": verified,
             "verified_percent": round(100.0 * verified / len(protected), 1) if protected else None, "by_status": by_status,
             "as_of": max((r["last_verified"] for r in rows), default=None)}
+
+
+class RepairIn(BaseModel):
+    dpid: str = Field(pattern=r"^[0-9a-f]{16}$")
+    table_id: int = Field(ge=0, le=254)
+    priority: int = Field(ge=0, le=65535)
+    match: Dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("match")
+    @classmethod
+    def small_match(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        if len(v) > 32:
+            raise ValueError("match has too many fields")
+        return v
+
+
+@router.post("/rules/repair", status_code=202)
+def repair_rule(body: RepairIn, request: Request, p: Principal = Depends(admin), db: Session = Depends(get_db)) -> Dict[str, Any]:
+    """Ask the engine to repair one rule slot now (restore the signed rule, or remove an unsigned one). Only for a rule
+    the latest snapshot reports as not ok. The engine acts on its next pass, even in alert_only mode."""
+    rows = _rules(db, body.dpid, body.table_id, None)
+    row = next((r for r in rows if r.get("priority") == body.priority and r.get("match") == body.match), None)
+    if row is None:
+        raise HTTPException(status_code=404, detail="no such rule in the latest snapshot of that switch")
+    if row.get("status") in ("ok", "pending"):
+        raise HTTPException(status_code=409, detail="the rule already matches its signed version")
+    rid = uuid.uuid4().hex
+    d = request.app.state.settings.control_dir
+    os.makedirs(d, exist_ok=True)
+    final = os.path.join(d, f"repair-{rid}.json")
+    with open(final + ".tmp", "w", encoding="utf-8") as fh:  # write-then-rename: the engine never reads half a file
+        json.dump({"request_id": rid, "dpid": body.dpid, "table_id": body.table_id, "priority": body.priority,
+                   "match": body.match, "requested_by": p.username}, fh)
+    os.replace(final + ".tmp", final)
+    audit_event(request, db, "rule_repair_requested", p, target=f"{body.dpid}/t{body.table_id}/p{body.priority}",
+                details={"request_id": rid, "status_before": row.get("status"), "match": body.match})
+    return {"requested": True, "request_id": rid, "status_before": row.get("status")}
 
 
 # ---- alerts -----------------------------------------------------------------------------------------------------

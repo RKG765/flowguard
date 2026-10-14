@@ -18,10 +18,10 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | Engine to core channel: ZeroMQ + durable spool + ordered acknowledgement | `implemented` | 1 |
 | Core service (FastAPI, SQLite WAL + Alembic, REST, WebSocket) | `implemented` | 2 |
 | Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log | `implemented` | 2 |
-| Privileged helper (allowlist) | `planned` | 4 |
-| Attacks A1-A7 (A7 SIMULATED) | `planned` | 4 |
+| Privileged attack-execution helper (descoped from Phase 4 by the owner; see ADR-019) | `planned` | 4 |
+| Attack scripts A1-A7 (descoped from Phase 4 by the owner; see ADR-019) | `planned` | 4 |
 | Design system (tokens, glass/data surfaces, components, /design style guide) | `implemented` | 3 |
-| Dashboard: shell, setup, sign-in, Overview (other pages Phase 4-6) | `partial` | 4 |
+| Dashboard: shell, setup, sign-in, Overview, Rules, Alerts/Incidents, Topology, Live Detection (Phase 5-6 pages pending) | `partial` | 4 |
 | L2 data-plane prober | `planned` | 5 |
 | L3 ML scorer worker | `planned` | 5 |
 | Risk engine + policy | `planned` | 5 |
@@ -33,6 +33,8 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | Session recorder (record + download; replay planned Phase 6) | `partial` | 2 |
 | Engine rule snapshots + status events for the core | `implemented` | 2 |
 | Google Stitch design system + screens (via Stitch MCP) | `partial` | 3 |
+| Live Detection page (observation mode) | `implemented` | 4 |
+| Dashboard-requested repair (admin, audited; works in alert-only mode) | `implemented` | 4 |
 <!-- /AUTO:component_tags -->
 
 ## System context
@@ -57,7 +59,7 @@ flowchart LR
   Spool -->|ordered tail + .ack| Core
   Core --- CoreDB
   Core -->|control file run/control/rotate| Engine
-  Core -.->|planned| Helper
+  Core -.->|descoped, ADR-019| Helper
   Core -.->|planned| ML
 ```
 
@@ -67,8 +69,8 @@ flowchart LR
 | Engine (`engine/app.py`) | Ryu 4.34, Python 3.9, eventlet | sign + install policy rules, watch the switch (OF1.0 monitor), verify tables, repair, raise alerts, publish rule snapshots and status | implemented |
 | Core (`core/main.py`) | FastAPI + uvicorn, Python 3.10, asyncio | store alerts/incidents/snapshots, REST + WebSocket API, auth and roles, audit log, policy store, recordings, reports | implemented |
 | Ingest thread (`core/ipc/receiver.py`) | thread inside the core | ZeroMQ PULL (bind) + ordered spool tail, acknowledgement | implemented |
-| Dashboard (`web/`) | React + TypeScript (Vite dev server in development; served by the core in Phase 7) | sign-in, first-run setup, shell with live status, Overview, `/design` style guide | partial (other pages Phase 4-6) |
-| Privileged helper | small root process | start the lab, run allowlisted attacks | planned (Phase 4) |
+| Dashboard (`web/`) | React + TypeScript (Vite dev server in development; served by the core in Phase 7) | sign-in, first-run setup, shell with live status, Overview, Rules, Alerts and Incidents, Topology, Live Detection, `/design` style guide | partial (Probes, ML, Policy, Reports, Audit, Settings pages: Phases 5-6) |
+| Privileged helper | small root process | start the lab, run allowlisted attacks | descoped (ADR-019): FlowGuard does not execute attacks |
 | ML worker | separate process | L3 scoring | planned (Phase 5) |
 
 The engine and the core never share an event loop (ADR-002). The engine never blocks on the core: it writes alerts to its spool, then hands them to a bounded non-blocking queue.
@@ -114,7 +116,7 @@ Every route and its minimum role is listed and enforced by `tests/api/test_roles
 | Session | `GET /api/auth/me`, `POST /api/auth/logout`, `POST /api/auth/ws-ticket` | viewer |
 | Read data | switches, rules (+summary), alerts, incidents, events, probes, ML scores, policies, sessions, reports summary, engine status, health detail | viewer |
 | Triage | `POST /api/alerts/{id}/ack`, `PATCH /api/incidents/{id}`, `POST /api/incidents/{id}/notes`, audit log, policy history, CSV export, session download | analyst |
-| Administration | users, `PUT /api/policies`, start/stop recordings, `POST /api/engine/rotate-key`, `GET /api/audit/verify` | admin |
+| Administration | users, `PUT /api/policies`, start/stop recordings, `POST /api/engine/rotate-key`, `POST /api/rules/repair`, `GET /api/audit/verify` | admin |
 | Live stream | `WS /api/ws?ticket=` (one-time ticket from `POST /api/auth/ws-ticket`) | viewer |
 
 OpenAPI: `/openapi.json`, interactive docs at `/docs`.
@@ -193,10 +195,10 @@ flowchart TB
   event_channel["Engine to core channel: ZeroMQ + durable spool + ordered acknowledgement"]:::implemented
   core_service["Core service (FastAPI, SQLite WAL + Alembic, REST, WebSocket)"]:::implemented
   core_auth["Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log"]:::implemented
-  helper["Privileged helper (allowlist)"]:::planned
-  attacks["Attacks A1-A7 (A7 SIMULATED)"]:::planned
+  helper["Privileged attack-execution helper (descoped from Phase 4 by the owner; see ADR-019)"]:::planned
+  attacks["Attack scripts A1-A7 (descoped from Phase 4 by the owner; see ADR-019)"]:::planned
   web_design_system["Design system (tokens, glass/data surfaces, components, /design style guide)"]:::implemented
-  web_pages["Dashboard: shell, setup, sign-in, Overview (other pages Phase 4-6)"]:::partial
+  web_pages["Dashboard: shell, setup, sign-in, Overview, Rules, Alerts/Incidents, Topology, Live Detection (Phase 5-6 pages pending)"]:::partial
   engine_prober["L2 data-plane prober"]:::planned
   ml_worker["L3 ML scorer worker"]:::planned
   risk_engine["Risk engine + policy"]:::planned
@@ -208,6 +210,8 @@ flowchart TB
   core_recordings["Session recorder (record + download; replay planned Phase 6)"]:::partial
   engine_snapshots["Engine rule snapshots + status events for the core"]:::implemented
   stitch_designs["Google Stitch design system + screens (via Stitch MCP)"]:::partial
+  live_detection["Live Detection page (observation mode)"]:::implemented
+  manual_repair["Dashboard-requested repair (admin, audited; works in alert-only mode)"]:::implemented
   lab_topology --> engine_verifier
   engine_crypto --> engine_store
   engine_store --> engine_verifier
@@ -229,6 +233,8 @@ flowchart TB
   engine_snapshots --> event_channel
   core_recordings --> core_service
   stitch_designs --> web_design_system
+  live_detection --> web_pages
+  manual_repair --> engine_responder
   classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
   classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
   classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;

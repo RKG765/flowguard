@@ -8,6 +8,10 @@ import { Button, EmptyState, GlassCard } from "@/components/ui/primitives";
 import { LoginScreen, SetupScreen } from "@/pages/AuthScreen";
 import { DesignGallery } from "@/pages/DesignGallery";
 import { Overview } from "@/pages/Overview";
+import { Alerts } from "@/pages/Alerts";
+import { LiveDetection } from "@/pages/LiveDetection";
+import { Rules } from "@/pages/Rules";
+import { Topology } from "@/pages/Topology";
 import { NotFound, Planned } from "@/pages/Planned";
 
 function Centered({ children }: { children: ReactNode }) {
@@ -57,7 +61,12 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route index element={<Overview />} />
           <Route path="design" element={<DesignGallery />} />
-          {NAV.filter((n) => n.phase > 3).map((n) => (
+          <Route path="rules" element={<Rules />} />
+          <Route path="alerts" element={<Alerts />} />
+          <Route path="topology" element={<Topology />} />
+          <Route path="live" element={<LiveDetection />} />
+          <Route path="attack-lab" element={<Navigate to="/live" replace />} />
+          {NAV.filter((n) => n.phase > 3 && !n.built).map((n) => (
             <Route key={n.to} path={n.to.slice(1)} element={<Planned />} />
           ))}
           <Route path="*" element={<NotFound />} />

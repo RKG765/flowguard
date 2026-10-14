@@ -114,13 +114,15 @@ def build_snapshot(observed: Sequence[ObservedRule], golden: Sequence[GoldenRule
         rows.append({"table_id": o.spec.table_id, "priority": o.spec.priority, "match": o.spec.match,
                      "instructions": list(o.spec.instructions), "cookie": f"{o.cookie:016x}",
                      "status": "pending" if k in flight else (f.kind if f else OK), "golden": g is not None,
-                     "golden_cookie": f"{g.cookie:016x}" if g else None, "present": True})
+                     "golden_cookie": f"{g.cookie:016x}" if g else None,
+                     "golden_instructions": list(g.spec.instructions) if g else None, "present": True})
     for f in findings:
         if f.kind == MISSING and f.golden is not None:
             g = f.golden
             rows.append({"table_id": g.spec.table_id, "priority": g.spec.priority, "match": g.spec.match,
-                         "instructions": list(g.spec.instructions), "cookie": None, "status": MISSING, "golden": True,
-                         "golden_cookie": f"{g.cookie:016x}", "present": False})
+                         "instructions": [], "cookie": None, "status": MISSING, "golden": True,
+                         "golden_cookie": f"{g.cookie:016x}", "golden_instructions": list(g.spec.instructions),
+                         "present": False})
     rows.sort(key=lambda r: (r["table_id"], -int(r["priority"]), str(r["match"])))  # type: ignore[arg-type]
     return rows
 
