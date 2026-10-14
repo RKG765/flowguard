@@ -4,7 +4,7 @@ ENGINE_PY ?= $(CURDIR)/.venv-engine/bin/python
 SHELL := /bin/bash
 PYTEST_FLAGS := -q -p no:cacheprovider -W ignore::DeprecationWarning
 
-.PHONY: help setup doctor docs docs-check test test-live keygen run-core spike demo start eval test-e2e test-security test-soak
+.PHONY: help setup doctor docs docs-check test test-web test-e2e build-web dev-web test-live keygen run-core spike demo start eval test-security test-soak
 
 help:
 	@echo "FlowGuard targets:"
@@ -12,12 +12,15 @@ help:
 	@echo "  make doctor       check the environment"
 	@echo "  make docs         regenerate tables and graphs from docs/graphs/status.json"
 	@echo "  make docs-check   fail if generated docs are stale"
-	@echo "  make test         unit + property tests (both venvs) and core API tests"
+	@echo "  make test         unit + property tests (both venvs), core API tests, web typecheck + unit tests"
+	@echo "  make test-e2e     Playwright: real browser against a throw-away core (axe accessibility checks)"
+	@echo "  make dev-web      dashboard dev server on http://127.0.0.1:5173 (proxies /api to the core)"
+	@echo "  make build-web    production build of the dashboard (web/dist)"
 	@echo "  make test-live    live tests (root; real OVS + Mininet + engine + core)"
 	@echo "  make keygen       create the HMAC key file (mode 0600, outside the repo)"
 	@echo "  make run-core     run the core API on http://127.0.0.1:8787 (development)"
 	@echo "  make spike        re-run the Phase 0 feasibility spikes (needs root)"
-	@echo "  (planned) start demo eval test-e2e test-security test-soak"
+	@echo "  (planned) start demo eval test-security test-soak"
 
 setup:
 	bash scripts/setup_ubuntu.sh
@@ -35,6 +38,19 @@ docs-check:
 test:
 	$(PY) -m pytest tests/unit tests/api $(PYTEST_FLAGS)
 	$(ENGINE_PY) -m pytest tests/unit tests/engine $(PYTEST_FLAGS)
+	$(MAKE) test-web
+
+test-web:
+	cd web && npm run -s typecheck && npx vitest run
+
+test-e2e:
+	cd web && npx playwright test
+
+build-web:
+	cd web && npm run -s build
+
+dev-web:
+	cd web && npx vite
 
 # needs root: boots Open vSwitch + Mininet + the real engine (and the core) and attacks it with ovs-ofctl
 test-live:
@@ -49,5 +65,5 @@ run-core:
 spike:
 	bash scripts/spike/run_all.sh
 
-start demo eval test-e2e test-security test-soak:
+start demo eval test-security test-soak:
 	@echo "make $@: not implemented yet (planned, see ROADMAP.md)"; exit 2

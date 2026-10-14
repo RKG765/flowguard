@@ -1,7 +1,7 @@
 {
   "project": "FlowGuard",
   "updated": "2026-10-14",
-  "current_phase": 2,
+  "current_phase": 3,
   "environments": [
     {
       "name": "WSL2 Ubuntu 22.04",
@@ -49,10 +49,13 @@
     {
       "id": 3,
       "name": "Design system and dashboard shell",
-      "status": "not_started",
+      "status": "done",
       "depends_on": [
         2
-      ]
+      ],
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified_by": "make test (incl. web); make test-e2e; make docs-check"
     },
     {
       "id": 4,
@@ -242,15 +245,21 @@
     },
     {
       "id": "web_design_system",
-      "name": "Design system + app shell",
-      "status": "planned",
-      "phase": 3
+      "name": "Design system (tokens, glass/data surfaces, components, /design style guide)",
+      "status": "implemented",
+      "phase": 3,
+      "verified_by": "make test-web (104 tests incl. contrast of every text token, both themes); make test-e2e (axe, reduced motion/transparency)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
     },
     {
       "id": "web_pages",
-      "name": "Dashboard pages + Attack Lab",
-      "status": "planned",
-      "phase": 4
+      "name": "Dashboard: shell, setup, sign-in, Overview (other pages Phase 4-6)",
+      "status": "partial",
+      "phase": 4,
+      "verified_by": "make test-e2e (setup, sign-in, lockout, palette, theme, keyboard, axe on every page shown)",
+      "verified_on": "2026-10-14",
+      "environment": "WSL2"
     },
     {
       "id": "engine_prober",
@@ -329,6 +338,15 @@
       "verified_by": "make test (build_snapshot); make test-live (rules reach the core)",
       "verified_on": "2026-10-14",
       "environment": "WSL2"
+    },
+    {
+      "id": "stitch_designs",
+      "name": "Google Stitch design system + screens (via Stitch MCP)",
+      "status": "partial",
+      "phase": 3,
+      "verified_by": "Stitch MCP: create_project, create/update_design_system, generate_screen_from_text (Overview render retrieved; list_screens returned no screens)",
+      "verified_on": "2026-10-14",
+      "environment": "Stitch (cloud)"
     }
   ],
   "component_links": [
@@ -411,6 +429,10 @@
     [
       "core_recordings",
       "core_service"
+    ],
+    [
+      "stitch_designs",
+      "web_design_system"
     ]
   ],
   "metrics": [

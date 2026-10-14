@@ -1,0 +1,58 @@
+/* FlowGuard Glass design tokens (mirrors the Stitch design system "FlowGuard Glass").
+   Colors are "R G B" triplets so Tailwind can apply alpha: rgb(var(--ok) / 0.15).
+   Semantics (never color alone; always icon + label): ok = verified, warn = suspicious, danger = tampered/critical,
+   info = informational, ml = probabilistic/L3. Contrast of fg/muted/semantic text vs bg and surfaces is checked by
+   src/styles/contrast.test.ts (WCAG AA 4.5:1 for text). */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: 11 18 32;            /* #0B1220 */
+  --surface: 17 26 43;       /* #111A2B  opaque dense-data surface */
+  --surface-2: 22 33 54;     /* #162136  raised rows / hover */
+  --surface-solid: 18 27 45; /* #121B2D  glass fallback (reduced transparency) */
+  --line: 31 42 64;          /* #1F2A40 */
+  --fg: 230 236 245;         /* #E6ECF5 */
+  --muted: 152 164 186;      /* #98A4BA */
+  --primary: 91 140 255;     /* #5B8CFF */
+  --ok: 45 212 164;          /* #2DD4A4 */
+  --warn: 245 181 68;        /* #F5B544 */
+  --danger: 255 122 128;     /* #FF7A80 text/icons (#F2545B measured 4.17:1 on a red badge tint) */
+  --info: 127 166 255;       /* #7FA6FF text/icons (#5B8CFF measured 4.29:1 on a blue badge tint) */
+  --primary-strong: 47 101 235;  /* #2F65EB filled buttons: white text 5.1:1 */
+  --danger-strong: 201 50 58;    /* #C9323A filled danger buttons/counters: white text 5.3:1 */
+  --ml: 157 143 248;         /* #9D8FF8 (lightened #8B7CF6 for AA on dark) */
+  --glass-fill: 255 255 255;
+  --glass-alpha: 0.07;
+  --glass-border-alpha: 0.10;
+  --glass-blur: 20px;
+  --mesh-a: 91 140 255;
+  --mesh-b: 139 124 246;
+  --mesh-alpha: 0.10;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: 241 244 250;         /* #F1F4FA */
+  --surface: 255 255 255;
+  --surface-2: 246 248 252;
+  --surface-solid: 255 255 255;
+  --line: 220 226 236;
+  --fg: 15 23 42;            /* #0F172A */
+  --muted: 71 85 105;        /* #475569 */
+  --primary: 37 85 214;      /* #2555D6 */
+  --ok: 4 120 87;            /* #047857 */
+  --warn: 146 88 6;          /* #925806 (darkened: #A16207 measured 4.47:1 on bg, below AA) */
+  --danger: 185 28 28;       /* #B91C1C */
+  --info: 37 85 214;         /* #2555D6 */
+  --ml: 109 40 217;          /* #6D28D9 */
+  --primary-strong: 37 85 214;
+  --danger-strong: 185 28 28;
+  --glass-fill: 255 255 255;
+  --glass-alpha: 0.62;
+  --glass-border-alpha: 0.65;
+  --glass-blur: 18px;
+  --mesh-a: 91 140 255;
+  --mesh-b: 139 124 246;
+  --mesh-alpha: 0.14;
+}

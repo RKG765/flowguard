@@ -8,7 +8,8 @@ Strategy: tests ship with every feature (unit + integration in the phase that ad
 | `make test-live` | `tests/integration`: real OVS + Mininet + the real engine process, attacked with `ovs-ofctl`, plus the core service fed live by the engine (root) | exists (Phases 1-2) |
 | `make docs-check` | generated docs are current and obey the evidence rules | exists |
 | `make spike` | Phase 0 feasibility measurements (root, Mininet) | exists |
-| `make test-e2e` | Playwright UI flows | planned (Phase 4) |
+| `make test-e2e` | Playwright in Chromium against a throw-away core: setup, sign-in, lockout, palette, theme, reduced motion/transparency, keyboard, axe on every page shown | exists (Phase 3) |
+| `make test-web` | web typecheck + Vitest unit tests (also run by `make test`) | exists (Phase 3) |
 | `make test-security` | static analysis, dependency audit, authz/fuzz, helper allowlist | planned (Phase 7/9) |
 | `make test-soak` | multi-hour soak | planned (Phase 9) |
 
@@ -28,3 +29,9 @@ Environments covered so far: WSL2 Ubuntu 22.04 only. Native Ubuntu: not yet.
 
 ## Live core tests (`tests/integration/test_core_live.py`)
 Rule integrity and switch status reach the core; an attack reaches the WebSocket and REST with its restore confirmation and the spool is acknowledged; an alert raised while the core is down is stored after restart; policy churn is silent; key rotation requested through the API is carried out by the engine.
+
+## Dashboard tests (`web/`, Phase 3)
+- `src/styles/contrast.test.ts`: WCAG AA for every text token on bg, surface, surface-2, glass and its own badge tint, in both themes; white text on filled buttons. Reads `tokens.css` directly.
+- `src/lib/lib.test.ts`: API client sends the CSRF token on changes only and maps errors (incl. Retry-After); auth bootstrap decides setup / sign-in / restored session / offline; live feed wording, 50-item cap, unseen count, refetch triggers.
+- `src/components/ui/ui.test.tsx`: every rule-status and severity badge has an icon and a text label; field labels/hints/errors are wired with aria; KPI cards show an honest empty text.
+- `e2e/shell.spec.ts` (Playwright, serial, fresh core in `/tmp/fg-e2e`): see the table above; screenshots land in `docs/img/`. Needs Chromium: `cd web && npx playwright install chromium` (system libraries: `sudo npx playwright install-deps chromium`).

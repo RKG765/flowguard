@@ -6,11 +6,11 @@ Phase list and status live in `STATUS.md` (generated from `docs/graphs/status.js
 - `demo-v0` after Phase 4 (Attack Lab with A1-A6).
 - `novelty-complete` after Phase 5 (L2, L3, risk engine, lying switch).
 
-## Done: Phase 0 (doctor + spike), Phase 1 (engine L1), Phase 2 (core service)
+## Done: Phase 0 (doctor + spike), Phase 1 (engine L1), Phase 2 (core service), Phase 3 (design system + shell)
 See `STATUS.md`.
 
-## Next: Phase 3 (design system and dashboard shell)
-Design tokens and glass components, app shell (sidebar, top bar with live status, Ctrl+K, theme toggle, toasts), `/design` living style guide, Stitch brief for the owner. React + TypeScript + Vite, served by the core in production (Phase 7).
+## Next: Phase 4 (Attack Lab and core pages, tag `demo-v0`)
+Live Topology (React Flow), Rule Inspector (virtualized, golden vs observed diff, restore with confirmation), Alerts and Incidents (timeline, triage, plain-language explanations), Attack Lab (A1-A6 through the privileged helper with an allowlist, live split view, timing, before/after diff). Stitch screens for these pages first.
 
 ## Backlog and known gaps
 - Core: persistent login limiter, external anchor for the audit chain head, separate OS users for engine/core with a shared group for the spool (Phase 7), replay of recorded sessions (Phase 6), PDF reports (Phase 6).

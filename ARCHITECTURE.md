@@ -20,8 +20,8 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log | `implemented` | 2 |
 | Privileged helper (allowlist) | `planned` | 4 |
 | Attacks A1-A7 (A7 SIMULATED) | `planned` | 4 |
-| Design system + app shell | `planned` | 3 |
-| Dashboard pages + Attack Lab | `planned` | 4 |
+| Design system (tokens, glass/data surfaces, components, /design style guide) | `implemented` | 3 |
+| Dashboard: shell, setup, sign-in, Overview (other pages Phase 4-6) | `partial` | 4 |
 | L2 data-plane prober | `planned` | 5 |
 | L3 ML scorer worker | `planned` | 5 |
 | Risk engine + policy | `planned` | 5 |
@@ -32,12 +32,13 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | HMAC key file checks, flowguard keygen, key rotation | `implemented` | 1 |
 | Session recorder (record + download; replay planned Phase 6) | `partial` | 2 |
 | Engine rule snapshots + status events for the core | `implemented` | 2 |
+| Google Stitch design system + screens (via Stitch MCP) | `partial` | 3 |
 <!-- /AUTO:component_tags -->
 
 ## System context
 ```mermaid
 flowchart LR
-  Admin[Admin browser - dashboard planned Phase 3-4] -->|http 127.0.0.1:8787 REST + WebSocket| Core
+  Admin[Admin browser - dashboard shell implemented, pages Phase 4-6] -->|http 127.0.0.1 REST + WebSocket| Core
   subgraph Host[Lab host: WSL2 or native Ubuntu]
     Core[Core service FastAPI - implemented]
     Engine[Ryu engine L1 - implemented]
@@ -66,6 +67,7 @@ flowchart LR
 | Engine (`engine/app.py`) | Ryu 4.34, Python 3.9, eventlet | sign + install policy rules, watch the switch (OF1.0 monitor), verify tables, repair, raise alerts, publish rule snapshots and status | implemented |
 | Core (`core/main.py`) | FastAPI + uvicorn, Python 3.10, asyncio | store alerts/incidents/snapshots, REST + WebSocket API, auth and roles, audit log, policy store, recordings, reports | implemented |
 | Ingest thread (`core/ipc/receiver.py`) | thread inside the core | ZeroMQ PULL (bind) + ordered spool tail, acknowledgement | implemented |
+| Dashboard (`web/`) | React + TypeScript (Vite dev server in development; served by the core in Phase 7) | sign-in, first-run setup, shell with live status, Overview, `/design` style guide | partial (other pages Phase 4-6) |
 | Privileged helper | small root process | start the lab, run allowlisted attacks | planned (Phase 4) |
 | ML worker | separate process | L3 scoring | planned (Phase 5) |
 
@@ -193,8 +195,8 @@ flowchart TB
   core_auth["Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log"]:::implemented
   helper["Privileged helper (allowlist)"]:::planned
   attacks["Attacks A1-A7 (A7 SIMULATED)"]:::planned
-  web_design_system["Design system + app shell"]:::planned
-  web_pages["Dashboard pages + Attack Lab"]:::planned
+  web_design_system["Design system (tokens, glass/data surfaces, components, /design style guide)"]:::implemented
+  web_pages["Dashboard: shell, setup, sign-in, Overview (other pages Phase 4-6)"]:::partial
   engine_prober["L2 data-plane prober"]:::planned
   ml_worker["L3 ML scorer worker"]:::planned
   risk_engine["Risk engine + policy"]:::planned
@@ -205,6 +207,7 @@ flowchart TB
   key_management["HMAC key file checks, flowguard keygen, key rotation"]:::implemented
   core_recordings["Session recorder (record + download; replay planned Phase 6)"]:::partial
   engine_snapshots["Engine rule snapshots + status events for the core"]:::implemented
+  stitch_designs["Google Stitch design system + screens (via Stitch MCP)"]:::partial
   lab_topology --> engine_verifier
   engine_crypto --> engine_store
   engine_store --> engine_verifier
@@ -225,6 +228,7 @@ flowchart TB
   key_management --> engine_crypto
   engine_snapshots --> event_channel
   core_recordings --> core_service
+  stitch_designs --> web_design_system
   classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
   classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
   classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;

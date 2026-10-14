@@ -1,0 +1,95 @@
+@import "@fontsource-variable/inter";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  /* very subtle animated mesh gradient behind everything */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(40% 35% at 20% 15%, rgb(var(--mesh-a) / var(--mesh-alpha)), transparent 70%),
+      radial-gradient(35% 30% at 85% 80%, rgb(var(--mesh-b) / var(--mesh-alpha)), transparent 70%);
+    animation: mesh-drift 28s ease-in-out infinite alternate;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--primary));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes mesh-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(3%, -2%, 0) scale(1.05); }
+}
+
+@layer components {
+  /* Glass: containers only (cards, sidebar, top bar, modals). Never stack more than two. */
+  .glass {
+    background: rgb(var(--glass-fill) / var(--glass-alpha));
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    border: 1px solid rgb(255 255 255 / var(--glass-border-alpha));
+    border-radius: 18px;
+    @apply shadow-glass;
+  }
+  /* Opaque surface for dense data: tables, rule diffs, logs, code. Readability over glass. */
+  .data-surface {
+    @apply rounded-data border border-line bg-surface;
+  }
+  .mono {
+    @apply font-mono text-[12px] leading-[18px];
+  }
+}
+
+/* Reduced transparency: OS setting, or the user's choice stored on <html data-transparency="reduced"> */
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: rgb(var(--surface-solid));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+[data-transparency="reduced"] .glass {
+  background: rgb(var(--surface-solid));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Reduced motion: no mesh animation, no pulses, near-instant transitions */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+[data-motion="reduced"] body::before,
+[data-motion="reduced"]::before { animation: none; }
+[data-motion="reduced"] *, [data-motion="reduced"] *::before, [data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}

@@ -1,0 +1,20 @@
+FlowGuard Phase 3 test run: 2026-10-14T15:22Z, kernel 6.6.87.2-microsoft-standard-WSL2, node v20.20.2
+
+## make docs-check
+docs-check: OK
+exit code: 0
+
+## make test (Python both venvs + core API + web typecheck/unit)
+184 passed in 67.06s (0:01:07)
+116 passed in 5.50s
+ Test Files  3 passed (3)
+      Tests  104 passed (104)
+exit code: 0
+
+## make test-e2e (Playwright, Chromium, axe)
+  8 passed (26.4s)
+exit code: 0
+
+## make test-live (root: L1 live + engine-to-core live; engine unchanged in Phase 3, re-run as a regression check)
+19 passed in 49.33s
+exit code: 0
