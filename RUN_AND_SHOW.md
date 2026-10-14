@@ -1,6 +1,14 @@
 # FlowGuard: run and show (Ubuntu 22.04, Phases 0-4)
 
-## 1. Install (once, needs internet, ~10 min)
+Needs: a laptop booted into **Ubuntu 22.04** (other versions are not supported by the setup script),
+internet for the first install, about 5 GB free disk, and a user with `sudo`.
+
+## 0. Fresh laptop (once)
+```bash
+sudo apt update && sudo apt install -y git curl
+```
+
+## 1. Install (once, ~10-15 min)
 ```bash
 git clone https://github.com/RKG765/flowguard.git && cd flowguard
 sudo bash scripts/setup_ubuntu.sh
@@ -11,10 +19,10 @@ sudo bin/flowguard doctor          # every line should say PASS
 ```bash
 make build-web                     # uses Node 20 from the setup script
 ```
-or the prebuilt one from the GitHub release `v0.4.0-demo`:
+or the prebuilt one from the GitHub release `v0.4.0-demo` (no Node needed):
 ```bash
-gh release download v0.4.0-demo -R RKG765/flowguard -p 'flowguard-web-dist-*.tar.gz'
-tar xzf flowguard-web-dist-*.tar.gz -C web
+curl -fLO https://github.com/RKG765/flowguard/releases/download/v0.4.0-demo/flowguard-web-dist-v0.4.0-demo.tar.gz
+tar xzf flowguard-web-dist-v0.4.0-demo.tar.gz -C web
 ```
 
 ## 3. Start
@@ -22,7 +30,8 @@ tar xzf flowguard-web-dist-*.tar.gz -C web
 sudo make demo                     # automatic repair
 sudo make demo MODE=alert_only     # repairs need an admin click (shows the Repair button)
 ```
-Wait for `FLOWGUARD-STACK-READY`, open **http://127.0.0.1:8787**, create the admin, sign in.
+Wait for `FLOWGUARD-STACK-READY`, open **http://127.0.0.1:8787** in Firefox on the same laptop,
+create the admin, sign in.
 Stop with **Ctrl+C**. If a run was interrupted: `sudo mn -c`.
 
 ## 4. What to show
@@ -41,3 +50,10 @@ make test                          # unit, property, API, web
 sudo make test-live                # 19 live tests on a real OVS + Mininet lab
 ```
 Screenshots: `docs/img/`. Status and evidence: `STATUS.md`, `results/phase4_tests.txt`.
+
+## Troubleshooting
+| Symptom | Fix |
+|---|---|
+| `doctor` says Open vSwitch is not running | `sudo systemctl restart openvswitch-switch` |
+| `Missing .venv-core` / `.venv-engine` | re-run `sudo bash scripts/setup_ubuntu.sh` |
+| port 8787 busy, or a previous run is stuck | `sudo pkill -f "[r]yu-manager"; sudo mn -c`, then start again |
