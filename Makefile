@@ -4,7 +4,7 @@ ENGINE_PY ?= $(CURDIR)/.venv-engine/bin/python
 SHELL := /bin/bash
 PYTEST_FLAGS := -q -p no:cacheprovider -W ignore::DeprecationWarning
 
-.PHONY: help setup doctor docs docs-check test test-web test-e2e test-e2e-live build-web dev-web test-live keygen run-core spike demo start eval test-security test-soak
+.PHONY: help setup doctor docs docs-check test test-web test-e2e test-e2e-live build-web dev-web test-live keygen run-core spike demo present start eval test-security test-soak
 
 help:
 	@echo "FlowGuard targets:"
@@ -22,6 +22,7 @@ help:
 	@echo "  make run-core     run the core API on http://127.0.0.1:8787 (development)"
 	@echo "  make spike        re-run the Phase 0 feasibility spikes (needs root)"
 	@echo "  make demo         sudo: lab + engine + core + dashboard on http://127.0.0.1:8787 (MODE=alert_only optional)"
+	@echo "  make present      sudo: guided presentation demo (each step: what to show and say; detection + repair)"
 	@echo "  (planned) start eval test-security test-soak"
 
 setup:
@@ -76,6 +77,9 @@ spike:
 MODE ?= restore
 demo:
 	bash scripts/demo.sh $(MODE)
+
+present:
+	.venv-core/bin/python scripts/present.py
 
 start eval test-security test-soak:
 	@echo "make $@: not implemented yet (planned, see ROADMAP.md)"; exit 2

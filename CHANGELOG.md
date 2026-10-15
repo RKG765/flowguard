@@ -8,6 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/). One entry per phase or 
 - The core serves the built dashboard (`web/dist`) on its own port with client-route fallback, confined to the build directory (test added).
 - `sudo make demo [MODE=alert_only]`: lab + engine + core + dashboard on http://127.0.0.1:8787 (`scripts/demo.sh`); `RUN_AND_SHOW.md`.
 - GitHub release `v0.4.0-demo` with the prebuilt dashboard archive.
+- `sudo make present`: guided presentation demo (`scripts/present.py`, ADR-021). Checked end to end on WSL2 2026-10-15: altered, forged and missing each detected (about 18 ms) and repaired from alert-only mode, a policy change gave 4/4 verified with 0 alerts, and restore mode repaired automatically.
 
 ### Phase 4: core pages and Live Detection (tag `demo-v0`)
 #### Added

@@ -26,6 +26,14 @@ tar xzf flowguard-web-dist-v0.4.0-demo.tar.gz -C web
 ```
 
 ## 3. Start
+**For a presentation (recommended):** one guided command. It starts everything, creates the login
+(`admin` / `flowguard-demo`), tells you at each step what to show and say, makes the same switch changes as
+the Phase 1 live tests (altered, forged, missing), shows the detection and the repair, a zero-alert policy
+change, and automatic repair. Press Enter to go to the next step; Ctrl+C stops everything.
+```bash
+sudo make present
+```
+**Free-running dashboard** (no guided steps):
 ```bash
 sudo make demo                     # automatic repair
 sudo make demo MODE=alert_only     # repairs need an admin click (shows the Repair button)
