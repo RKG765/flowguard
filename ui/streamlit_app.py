@@ -225,31 +225,101 @@ def rules_page():
             st.caption("Only an admin can request a repair.")
 
 
+KIND_TEXT = {"altered": "A signed rule was changed on the switch",
+             "forged": "A rule the controller never installed appeared",
+             "missing": "A signed rule was deleted from the switch",
+             "shadow": "A new higher-priority rule hides a signed rule",
+             "unattributed_change": "The table changed and changed back (tamper-and-revert)"}
+REASON_TEXT = {"not_in_golden_store": "no signed rule exists for this slot", "instructions_differ": "actions differ from "
+               "the signed rule", "missing_on_switch": "signed rule is absent from the switch"}
+
+
+def repair_bad_rules():
+    for row in [r for r in (get("/api/rules") or []) if r.get("status") not in ("ok", "pending")]:
+        api("POST", "/api/rules/repair", json={"dpid": row["dpid"], "table_id": row["table_id"],
+                                              "priority": row["priority"], "match": row.get("match") or {}})
+
+
 @st.fragment(run_every=2)
 def live_page():
-    eng, _ = engine_banner()
-    st.caption("Observation mode: shows what the engine reports for changes made to the lab switch outside the "
-               "controller. FlowGuard does not run attacks.")
-    items = (get("/api/alerts?limit=50") or {}).get("items", [])
+    engine_banner()
+    items = (get("/api/alerts?limit=100") or {}).get("items", [])
+    seen = st.session_state.setdefault("seen_alerts", {a["id"] for a in items})
+    new = [a for a in items if a["id"] not in seen]
+    for a in reversed(new):
+        st.toast(f"🚨 {a['kind'].upper()} detected · priority {a['priority']}", icon="🚨")
+        seen.add(a["id"])
+    if new:
+        st.session_state.last_alarm = (time.time(), new[0])
+    t_alarm, last = st.session_state.get("last_alarm", (0, None))
+    bad = [r for r in (get("/api/rules") or []) if r.get("status") not in ("ok", "pending")]
+
+    # ---- alarm / all-clear banner
+    if last and time.time() - t_alarm < 45:
+        lat = last.get("detect_latency_ms")
+        st.markdown(f'<div class="fg-card" style="border-color:#ef4444;background:#450a0a"><h4>🚨 TAMPERING DETECTED · '
+                    f'{last["kind"].upper()}</h4><p style="color:#fecaca">{KIND_TEXT.get(last["kind"], last["summary"])} · '
+                    f'table {last["table_id"]}, priority {last["priority"]} · detected '
+                    f'{f"in {lat} ms" if lat is not None else "by " + str(last["detected_by"])} · action: {last["action"]}</p>'
+                    '</div>', unsafe_allow_html=True)
+    elif not bad:
+        st.markdown('<div class="fg-card" style="border-color:#10b981"><h4>✅ All signed rules match the switch</h4>'
+                    '<p>Watching every change on the switch. Any change made outside the controller appears here '
+                    'within milliseconds.</p></div>', unsafe_allow_html=True)
+    st.write("")
+
+    # ---- rules that are wrong right now
+    if bad:
+        st.error(f"{len(bad)} rule(s) on the switch differ from the signed policy right now")
+        for r in bad:
+            c1, c2 = st.columns([4, 1])
+            c1.markdown(f"**{r['status'].upper()}** · table {r['table_id']} · priority {r['priority']} · "
+                        f"`{fmt_match(r.get('match'))}` · signed: `{fmt_instr(r.get('golden_instructions'))}` · "
+                        f"on switch: `{fmt_instr(r.get('instructions')) if r.get('present') else 'absent'}`")
+        if is_admin and st.button("🔧 Repair all now", type="primary", key="repair_all"):
+            repair_bad_rules()
+            st.success("Repair requested; the engine restores the signed policy within about a second.")
+
+    # ---- counters per kind
+    by_kind = (get("/api/reports/summary") or {}).get("alerts_by_kind") or {}
+    cols = st.columns(5)
+    for col, k in zip(cols, KINDS):
+        col.metric(k.replace("_", " ").title(), by_kind.get(k, 0))
+
     if not items:
-        st.info("Waiting for detections. Nothing has changed on the switch outside the controller.")
+        st.info("No detections yet.")
         return
-    for a in items[:15]:
+
+    # ---- timeline
+    df = pd.DataFrame([{"time": datetime.fromtimestamp(a["t"]), "kind": a["kind"],
+                        "detect ms": a["detect_latency_ms"] if a["detect_latency_ms"] is not None else 0} for a in items])
+    st.markdown("#### Detection timeline")
+    st.scatter_chart(df, x="time", y="detect ms", color="kind", height=230)
+
+    # ---- detections
+    st.markdown("#### Detections (newest first)")
+    for a in items[:12]:
         icon = "🔴" if a["severity"] in ("high", "critical") else "🟠"
-        with st.expander(f"{icon} {ts(a['t'])}  {a['kind']} · priority {a['priority']} · {a['action']}", expanded=False):
-            c = st.columns(3)
-            c[0].metric("Detect", f"{a['detect_latency_ms']} ms" if a["detect_latency_ms"] is not None else "-")
-            c[1].metric("Restore", f"{a['time_to_restore_ms']} ms" if a["time_to_restore_ms"] is not None else "-")
-            c[2].metric("Detected by", a["detected_by"] or "-")
-            st.write(a["summary"])
-            full = get(f"/api/alerts/{a['id']}") or {}
-            d = full.get("details") or {}
-            t = d.get("timing") or {}
-            if t:
-                st.markdown("**Timeline**")
-                st.json({k: v for k, v in t.items()}, expanded=False)
+        with st.expander(f"{icon} {ts(a['t'])} · {a['kind']} · priority {a['priority']} · {a['action']}"
+                         f"{' · ✔ acknowledged' if a['status'] == 'acknowledged' else ''}", expanded=a in new):
+            d = (get(f"/api/alerts/{a['id']}") or {}).get("details") or {}
+            st.markdown(f"**What happened:** {a['summary']}")
             if d.get("reasons"):
-                st.markdown("**Why:** " + ", ".join(d["reasons"]))
+                st.markdown("**Why it was flagged:** " + "; ".join(REASON_TEXT.get(x, x) for x in d["reasons"]))
+            g, o = d.get("golden") or {}, d.get("observed") or {}
+            c1, c2 = st.columns(2)
+            c1.markdown("**Signed by the controller**")
+            c1.code(f"{fmt_instr(g.get('instructions')) if g else '(no signed rule)'}\ncookie {g.get('cookie', '-') if g else '-'}")
+            c2.markdown("**Found on the switch**")
+            c2.code(f"{fmt_instr(o.get('instructions')) if o else '(rule absent)'}\ncookie {o.get('cookie', '-') if o else '-'}")
+            t = d.get("timing") or {}
+            m = st.columns(4)
+            m[0].metric("Detect", f"{a['detect_latency_ms']} ms" if a["detect_latency_ms"] is not None else "-")
+            m[1].metric("Respond", f"{t.get('respond_latency_ms')} ms" if t.get("respond_latency_ms") is not None else "-")
+            m[2].metric("Restore", f"{a['time_to_restore_ms']} ms" if a["time_to_restore_ms"] is not None else "-")
+            m[3].metric("Detected by", a["detected_by"] or "-")
+            if is_analyst and a["status"] != "acknowledged" and st.button("Acknowledge", key=f"ack_{a['id']}"):
+                api("POST", f"/api/alerts/{a['id']}/ack")
 
 
 def alerts_page():
