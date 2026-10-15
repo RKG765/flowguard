@@ -47,7 +47,8 @@ Once (needs internet): `make ui-setup`. Then, while `make demo` or `make present
 ```bash
 cd ~/flowguard && make ui
 ```
-Open **http://127.0.0.1:8501** and sign in with the same account. Pages: Overview, Rules (signed vs on-switch,
+Open **http://127.0.0.1:8501**. No login screen: the console only listens on 127.0.0.1 and signs in to the local core
+with the demo account (`admin` / `flowguard-demo`, created by `make present`; override with `FG_USER=... FG_PASSWORD=... make ui`). Pages: Overview, Rules (signed vs on-switch,
 admin Repair), Live Detection, Alerts & Incidents, Topology, Policy, Reports (CSV), Audit log (hash-chain check),
 Engine (key rotation), Users, L2/L3 (planned). Screenshots: `docs/img/streamlit-*.png`.
 

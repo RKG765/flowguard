@@ -1,7 +1,8 @@
 """FlowGuard operator console (Streamlit). A second front end over the same core API the React dashboard uses.
 
 Run (with `sudo make demo` or `sudo make present` already running):  make ui   ->  http://127.0.0.1:8501
-Read-only monitoring plus the operator actions the API allows (acknowledge, incidents, admin repair, users, key
+Local-only console: it listens on 127.0.0.1 and signs in to the local core automatically (FG_USER / FG_PASSWORD,
+default: the demo account `make present` creates). Read-only monitoring plus the operator actions the API allows (acknowledge, incidents, admin repair, users, key
 rotation). Like the main dashboard it has no attack execution (ADR-019). L2 probes and L3 ML are Phase 5 placeholders.
 """
 import json
@@ -67,68 +68,87 @@ def fmt_instr(ins):
     return "; ".join(out)
 
 
-# ---- login ---------------------------------------------------------------------------------------------------------
-def login_screen():
-    st.title("🛡️ FlowGuard")
-    st.caption("SDN flow-rule integrity monitoring - operator console")
+# ---- look ----------------------------------------------------------------------------------------------------------
+st.markdown("""
+<style>
+  .block-container {padding-top: 1.6rem; max-width: 1400px;}
+  [data-testid="stSidebar"] {background: linear-gradient(180deg, #0f172a 0%, #111827 100%); border-right: 1px solid #1f2937;}
+  [data-testid="stSidebar"] label p {font-size: 0.98rem;}
+  [data-testid="stMetric"] {background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 14px 18px;}
+  [data-testid="stMetricLabel"] p {color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: .04em;}
+  [data-testid="stMetricValue"] {font-size: 2.1rem;}
+  .fg-hero {display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 22px;
+            border-radius:16px; background: linear-gradient(120deg, #1e3a8a 0%, #0f766e 100%); margin-bottom: 18px;}
+  .fg-hero h1 {font-size: 1.7rem; margin: 0; color: #f8fafc;}
+  .fg-hero p {margin: 2px 0 0 0; color: #dbeafe; font-size: .95rem;}
+  .fg-pill {padding: 6px 14px; border-radius: 999px; font-weight: 600; font-size: .9rem; white-space: nowrap;}
+  .fg-ok {background:#064e3b; color:#a7f3d0; border:1px solid #10b981;}
+  .fg-warn {background:#78350f; color:#fde68a; border:1px solid #f59e0b;}
+  .fg-bad {background:#7f1d1d; color:#fecaca; border:1px solid #ef4444;}
+  .fg-card {background:#111827; border:1px solid #1f2937; border-radius:14px; padding:16px 18px; height:100%;}
+  .fg-card h4 {margin:0 0 6px 0; font-size:1.02rem;}
+  .fg-card p {margin:0; color:#94a3b8; font-size:.9rem;}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ---- automatic local sign-in (no login screen) ----------------------------------------------------------------------
+# The console only listens on 127.0.0.1 and signs in to the local core with the demo account that `make present`
+# creates. Override with FG_USER / FG_PASSWORD if the lab admin was created with other credentials.
+DEMO_USER = os.environ.get("FG_USER", "admin")
+DEMO_PASSWORD = os.environ.get("FG_PASSWORD", "flowguard-demo")
+
+
+def auto_sign_in():
     code, _ = api("GET", "/api/health")
     if code != 200:
-        st.error(f"Core not reachable at {CORE}. Start it first:  `sudo make demo`  or  `sudo make present`")
+        st.error(f"Core not reachable at {CORE}. Start the lab first:  `sudo make present`  or  `sudo make demo`")
         st.stop()
-    needs = (get("/api/setup/status") or {}).get("needs_setup")
-    with st.form("auth"):
-        st.subheader("Create the first admin" if needs else "Sign in")
-        u = st.text_input("Username")
-        p = st.text_input("Password", type="password")
-        if st.form_submit_button("Create admin" if needs else "Sign in", type="primary"):
-            if needs:
-                c, b = api("POST", "/api/setup", json={"username": u, "password": p})
-                if c != 201:
-                    st.error(b.get("detail") if isinstance(b, dict) else b)
-                    st.stop()
-            c, b = api("POST", "/api/auth/login", json={"username": u, "password": p})
-            if c == 200:
-                st.session_state.token = b["token"]
-                st.rerun()
-            st.error(b.get("detail", "sign-in failed") if isinstance(b, dict) else "sign-in failed")
-    st.stop()
+    if (get("/api/setup/status") or {}).get("needs_setup"):
+        api("POST", "/api/setup", json={"username": DEMO_USER, "password": DEMO_PASSWORD})
+    c, b = api("POST", "/api/auth/login", json={"username": DEMO_USER, "password": DEMO_PASSWORD})
+    if c != 200:
+        st.error(f"Automatic sign-in as '{DEMO_USER}' failed. Start the console with the lab admin's credentials:  "
+                 "`FG_USER=<name> FG_PASSWORD=<password> make ui`")
+        st.stop()
+    st.session_state.token = b["token"]
 
 
 if not st.session_state.get("token"):
-    login_screen()
+    auto_sign_in()
 me = get("/api/auth/me") or {}
 if not me:
-    login_screen()
+    auto_sign_in()
+    me = get("/api/auth/me") or {}
 role = me.get("role", "viewer")
 is_admin, is_analyst = role == "admin", role in ("admin", "analyst")
 
 
 # ---- sidebar -------------------------------------------------------------------------------------------------------
+NAV = ["📊 Overview", "🛡️ Rules", "⚡ Live Detection", "🚨 Alerts & Incidents", "🕸️ Topology", "📜 Policy",
+       "📈 Reports", "🔏 Audit log", "⚙️ Engine", "👥 Users", "🧪 L2 Probes / L3 ML (planned)"]
 with st.sidebar:
-    st.title("🛡️ FlowGuard")
-    st.caption(f"signed in as **{me.get('username')}** ({role})")
-    page = st.radio("Page", ["Overview", "Rules", "Live Detection", "Alerts & Incidents", "Topology", "Policy",
-                             "Reports", "Audit log", "Engine", "Users", "L2 Probes / L3 ML (planned)"])
+    st.markdown("## 🛡️ FlowGuard")
+    st.caption("SDN flow-rule integrity · operator console")
+    page = st.radio("Navigate", NAV, label_visibility="collapsed")
     st.divider()
-    if st.button("Sign out"):
-        api("POST", "/api/auth/logout")
-        st.session_state.pop("token", None)
-        st.rerun()
+    st.caption(f"Local console · {me.get('username')} ({role}) · core {CORE}")
 
 
 def engine_banner():
     eng = get("/api/engine/status") or {}
     sws = get("/api/switches") or []
     if not eng.get("known"):
-        st.warning("Engine has not reported yet.")
+        pill = '<span class="fg-pill fg-warn">Engine has not reported yet</span>'
     elif eng.get("stale"):
-        st.error(f"Engine not reporting (last status {eng.get('age_seconds')} s ago). Is the lab running?")
+        pill = f'<span class="fg-pill fg-bad">Engine not reporting ({eng.get("age_seconds")} s)</span>'
     else:
         up = all(s.get("connected") and s.get("monitor_up") for s in sws) and sws
         mode = (eng.get("status") or {}).get("response_mode", "?")
-        (st.success if up else st.warning)(
-            f"Engine connected · monitor {'up' if up else 'DOWN'} · response mode **{mode}** · "
-            f"status {eng.get('age_seconds')} s old")
+        pill = (f'<span class="fg-pill {"fg-ok" if up else "fg-warn"}">● Engine connected · monitor '
+                f'{"up" if up else "DOWN"} · {mode}</span>')
+    st.markdown(f'<div class="fg-hero"><div><h1>{page.split(" ", 1)[1]}</h1><p>FlowGuard · signed flow rules, '
+                f'verified live on the switch</p></div>{pill}</div>', unsafe_allow_html=True)
     return eng, sws
 
 
@@ -146,9 +166,13 @@ def overview():
     c[4].metric("Open incidents", rep.get("open_incidents", 0))
     st.subheader("Detection layers")
     l = st.columns(3)
-    l[0].success("**L1 signed-rule verification**\n\nactive")
-    l[1].info("**L2 data-plane probes**\n\nplanned (Phase 5)")
-    l[2].info("**L3 ML scoring**\n\nplanned (Phase 5)")
+    for col, (name, text, cls) in zip(l, [
+            ("L1 · Signed-rule verification", "HMAC-signed rules checked on every switch change", "fg-ok"),
+            ("L2 · Data-plane probes", "Planned for Phase 5", "fg-warn"),
+            ("L3 · ML scoring", "Planned for Phase 5", "fg-warn")]):
+        status = "active" if cls == "fg-ok" else "planned"
+        col.markdown(f'<div class="fg-card"><h4>{name}</h4><p>{text}</p><br><span class="fg-pill {cls}">{status}</span>'
+                     '</div>', unsafe_allow_html=True)
     st.subheader("Live feed (latest alerts)")
     items = (get("/api/alerts?limit=10") or {}).get("items", [])
     if items:
@@ -375,8 +399,9 @@ def planned_page():
     st.json({"probes": get("/api/probes"), "ml": get("/api/ml/scores")}, expanded=False)
 
 
-PAGES = {"Overview": overview, "Rules": rules_page, "Live Detection": live_page, "Alerts & Incidents": alerts_page,
-         "Topology": topology_page, "Policy": policy_page, "Reports": reports_page, "Audit log": audit_page,
-         "Engine": engine_page, "Users": users_page, "L2 Probes / L3 ML (planned)": planned_page}
-st.header(page)
+PAGES = dict(zip(NAV, [overview, rules_page, live_page, alerts_page, topology_page, policy_page, reports_page,
+                       audit_page, engine_page, users_page, planned_page]))
+SHOWS_BANNER = {overview, rules_page, live_page, alerts_page, topology_page, engine_page}
+if PAGES[page] not in SHOWS_BANNER:
+    engine_banner()
 PAGES[page]()
