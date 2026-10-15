@@ -102,8 +102,13 @@ DEMO_PASSWORD = os.environ.get("FG_PASSWORD", "flowguard-demo")
 def auto_sign_in():
     code, _ = api("GET", "/api/health")
     if code != 200:
-        st.error(f"Core not reachable at {CORE}. Start the lab first:  `sudo make present`  or  `sudo make demo`")
-        st.stop()
+        st.markdown("## 🛡️ FlowGuard")
+        st.warning(f"Waiting for the FlowGuard core at {CORE} ...")
+        st.markdown("The lab is not running yet. In **another terminal** start it (this page connects by itself "
+                    "within a few seconds, no refresh needed):")
+        st.code("cd ~/flowguard && sudo make present", language="bash")
+        time.sleep(3)
+        st.rerun()
     if (get("/api/setup/status") or {}).get("needs_setup"):
         api("POST", "/api/setup", json={"username": DEMO_USER, "password": DEMO_PASSWORD})
     c, b = api("POST", "/api/auth/login", json={"username": DEMO_USER, "password": DEMO_PASSWORD})
