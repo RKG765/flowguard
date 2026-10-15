@@ -4,7 +4,7 @@ ENGINE_PY ?= $(CURDIR)/.venv-engine/bin/python
 SHELL := /bin/bash
 PYTEST_FLAGS := -q -p no:cacheprovider -W ignore::DeprecationWarning
 
-.PHONY: help setup doctor docs docs-check test test-web test-e2e test-e2e-live build-web dev-web test-live keygen run-core spike demo present start eval test-security test-soak
+.PHONY: help setup doctor docs docs-check test test-web test-e2e test-e2e-live build-web dev-web test-live keygen run-core spike demo present ui-setup ui start eval test-security test-soak
 
 help:
 	@echo "FlowGuard targets:"
@@ -23,6 +23,8 @@ help:
 	@echo "  make spike        re-run the Phase 0 feasibility spikes (needs root)"
 	@echo "  make demo         sudo: lab + engine + core + dashboard on http://127.0.0.1:8787 (MODE=alert_only optional)"
 	@echo "  make present      sudo: guided presentation demo (each step: what to show and say; detection + repair)"
+	@echo "  make ui-setup     once: Streamlit console venv (.venv-ui)"
+	@echo "  make ui           Streamlit operator console on http://127.0.0.1:8501 (needs make demo/present running)"
 	@echo "  (planned) start eval test-security test-soak"
 
 setup:
@@ -80,6 +82,14 @@ demo:
 
 present:
 	.venv-core/bin/python scripts/present.py
+
+ui-setup:
+	[ -d .venv-ui ] || python3 -m venv .venv-ui
+	.venv-ui/bin/python -m pip install --quiet -r requirements/ui.txt
+
+ui:
+	@[ -x .venv-ui/bin/streamlit ] || { echo "run once: make ui-setup"; exit 1; }
+	.venv-ui/bin/streamlit run ui/streamlit_app.py --server.address 127.0.0.1 --server.port 8501 --server.headless true --browser.gatherUsageStats false
 
 start eval test-security test-soak:
 	@echo "make $@: not implemented yet (planned, see ROADMAP.md)"; exit 2

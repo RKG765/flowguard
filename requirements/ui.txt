@@ -1,0 +1,4 @@
+# Streamlit operator console (ui/streamlit_app.py), in its own venv (.venv-ui) so the core pins stay untouched.
+streamlit==1.40.2
+requests==2.32.3
+pandas==2.2.3

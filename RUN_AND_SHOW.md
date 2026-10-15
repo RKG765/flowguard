@@ -42,6 +42,15 @@ Wait for `FLOWGUARD-STACK-READY`, open **http://127.0.0.1:8787** in Firefox on t
 create the admin, sign in.
 Stop with **Ctrl+C**. If a run was interrupted: `sudo mn -c`.
 
+## 3b. Streamlit operator console (optional second dashboard)
+Once (needs internet): `make ui-setup`. Then, while `make demo` or `make present` is running, in another terminal:
+```bash
+cd ~/flowguard && make ui
+```
+Open **http://127.0.0.1:8501** and sign in with the same account. Pages: Overview, Rules (signed vs on-switch,
+admin Repair), Live Detection, Alerts & Incidents, Topology, Policy, Reports (CSV), Audit log (hash-chain check),
+Engine (key rotation), Users, L2/L3 (planned). Screenshots: `docs/img/streamlit-*.png`.
+
 ## 4. What to show
 | Page | Show |
 |---|---|

@@ -34,3 +34,4 @@ web/dist/
 web/test-results/
 web/playwright-report/
 web/*.tsbuildinfo
+.venv-ui/
