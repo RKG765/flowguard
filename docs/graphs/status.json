@@ -1,7 +1,7 @@
 {
   "project": "FlowGuard",
-  "updated": "2026-10-15",
-  "current_phase": 4,
+  "updated": "2026-11-17",
+  "current_phase": 11,
   "environments": [
     {
       "name": "WSL2 Ubuntu 22.04",
@@ -71,58 +71,75 @@
     {
       "id": 5,
       "name": "L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete)",
-      "status": "not_started",
+      "status": "done",
       "depends_on": [
         4
-      ]
+      ],
+      "started": "2026-11-16",
+      "verified_by": "make test (tests/unit/test_phase5.py, API tests); make test-live (L2 probes, risk decision, policy enforcement, port quarantine on a real Open vSwitch lab: 26 passed)",
+      "finished": "2026-11-17"
     },
     {
       "id": 6,
       "name": "Remaining pages, reports, polish",
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         5
-      ]
+      ],
+      "started": "2026-11-16",
+      "verified_by": "Pages built (Policy, Reports, Audit, Settings, Probes, ML, Demo Lab; make test-e2e axe on all 12 pages). Still missing: PDF reports and session replay"
     },
     {
       "id": 7,
       "name": "Packaging and hardening",
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         6
-      ]
+      ],
+      "started": "2026-11-17",
+      "verified_by": "flowguard start/stop/status/export, scripts/prototype.sh (checked end to end on WSL2). Still missing: separate OS users for engine and core, packaging for a pristine machine"
     },
     {
       "id": 8,
       "name": "Evaluation and docs",
-      "status": "not_started",
+      "status": "done",
       "depends_on": [
         7
-      ]
+      ],
+      "started": "2026-11-17",
+      "verified_by": "sudo make eval (40/40 trials detected, 0 false alerts; docs/results.md, results/eval.json); sudo make test-soak (PASS)",
+      "finished": "2026-11-17"
     },
     {
       "id": 9,
       "name": "Rigorous testing (full QA pass)",
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         8
-      ]
+      ],
+      "started": "2026-11-17",
+      "verified_by": "make test, make test-security, make test-e2e, sudo make test-live, soak. Not yet run: reconnect storms, SQLite corruption, many switches, load, native Ubuntu"
     },
     {
       "id": 10,
       "name": "Persona-based review",
-      "status": "not_started",
+      "status": "done",
       "depends_on": [
         9
-      ]
+      ],
+      "started": "2026-11-17",
+      "verified_by": "AI-simulated security review, code review and design review; see SECURITY_REVIEW.md and UX_REVIEW.md (no human testers)",
+      "finished": "2026-11-17"
     },
     {
       "id": 11,
       "name": "Fix loop and release gate",
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         10
-      ]
+      ],
+      "started": "2026-11-17",
+      "verified_by": "Review findings fixed and re-tested; release checklist has open items (see RELEASE_CHECKLIST.md)"
     }
   ],
   "components": [
@@ -248,39 +265,48 @@
     },
     {
       "id": "web_design_system",
-      "name": "Design system (tokens, glass/data surfaces, components, /design style guide)",
+      "name": "Design system \"Patch Panel\" (tokens, panels, port strip, tag stripe, light and dark)",
       "status": "implemented",
       "phase": 3,
-      "verified_by": "make test-web (104 tests incl. contrast of every text token, both themes); make test-e2e (axe, reduced motion/transparency)",
-      "verified_on": "2026-10-14",
+      "verified_by": "make test-web (115 tests incl. contrast of every text token, both themes); make test-e2e (axe)",
+      "verified_on": "2026-11-17",
       "environment": "WSL2"
     },
     {
       "id": "web_pages",
-      "name": "Dashboard: shell, setup, sign-in, Overview, Rules, Alerts/Incidents, Topology, Live Detection (Phase 5-6 pages pending)",
-      "status": "partial",
+      "name": "Dashboard: all pages (Overview, Topology, Rules, Alerts, Live Detection, Demo Lab, Probes, ML, Policy, Reports, Audit, Settings)",
+      "status": "implemented",
       "phase": 4,
-      "verified_by": "make test-e2e; make test-e2e-live (live engine: rules, topology, detection, admin repair)",
-      "verified_on": "2026-10-15",
+      "verified_by": "make test-e2e (10 browser tests, axe on every page in both themes); live captures in .impeccable/review/",
+      "verified_on": "2026-11-17",
       "environment": "WSL2"
     },
     {
       "id": "engine_prober",
-      "name": "L2 data-plane prober",
-      "status": "planned",
-      "phase": 5
+      "name": "L2 canary prober (counter-based probes of signed rules)",
+      "status": "implemented",
+      "phase": 5,
+      "verified_by": "make test (unit); make test-live (tests/integration/test_l2_live.py: healthy pass, shadowing rule fails, ICMP/ARP/IPv6/in_port/masked rules probed)",
+      "verified_on": "2026-11-17",
+      "environment": "WSL2"
     },
     {
       "id": "ml_worker",
-      "name": "L3 ML scorer worker",
-      "status": "planned",
-      "phase": 5
+      "name": "L3 anomaly scorer (statistical baseline inside the engine, not a neural network)",
+      "status": "implemented",
+      "phase": 5,
+      "verified_by": "make test (tests/unit/test_phase5.py); make test-live (score and reasons reach the core API)",
+      "verified_on": "2026-11-17",
+      "environment": "WSL2"
     },
     {
       "id": "risk_engine",
-      "name": "Risk engine + policy",
-      "status": "planned",
-      "phase": 5
+      "name": "Risk engine, policy enforcement and port quarantine",
+      "status": "implemented",
+      "phase": 5,
+      "verified_by": "make test; make test-live (tests/integration/test_phase5_live.py: policy decides repair; quarantine cuts and releases a port)",
+      "verified_on": "2026-11-17",
+      "environment": "WSL2"
     },
     {
       "id": "reports",
@@ -293,11 +319,11 @@
     },
     {
       "id": "packaging",
-      "name": "Packaging: make demo + core serves the dashboard (flowguard start/stop/status/export: Phase 7)",
+      "name": "Packaging: flowguard start/stop/status/export, one-command prototype (separate OS users and pristine-machine install still open)",
       "status": "partial",
       "phase": 7,
-      "verified_by": "sudo make demo (end-to-end check); make test (dashboard serving test)",
-      "verified_on": "2026-10-15",
+      "verified_by": "bin/flowguard start (lab, engine, core, website and console up; status checked)",
+      "verified_on": "2026-11-17",
       "environment": "WSL2"
     },
     {
@@ -370,6 +396,33 @@
       "phase": 4,
       "verified_by": "make test (core API); make test-e2e-live (rule removed from the switch)",
       "verified_on": "2026-10-15",
+      "environment": "WSL2"
+    },
+    {
+      "id": "demo_lab",
+      "name": "Demo Lab (simulated four-switch topology; labelled Simulated; touches no switch)",
+      "status": "implemented",
+      "phase": 5,
+      "verified_by": "make test-e2e (simulate, detect, repair); make test-web (tamper/repair model)",
+      "verified_on": "2026-11-17",
+      "environment": "WSL2"
+    },
+    {
+      "id": "console",
+      "name": "Streamlit operator console (same palette; Demo Lab, quarantine release, L2/L3 pages)",
+      "status": "partial",
+      "phase": 5,
+      "verified_by": "compiled and exercised against the live stack; screenshots in .impeccable/review/console-*.png; no automated UI test",
+      "verified_on": "2026-11-17",
+      "environment": "WSL2"
+    },
+    {
+      "id": "eval_tools",
+      "name": "make eval, make test-soak, make test-security",
+      "status": "implemented",
+      "phase": 8,
+      "verified_by": "sudo make eval; sudo make test-soak; make test-security",
+      "verified_on": "2026-11-17",
       "environment": "WSL2"
     }
   ],
@@ -465,6 +518,26 @@
     [
       "manual_repair",
       "engine_responder"
+    ],
+    [
+      "engine_prober",
+      "engine_verifier"
+    ],
+    [
+      "risk_engine",
+      "engine_prober"
+    ],
+    [
+      "risk_engine",
+      "ml_worker"
+    ],
+    [
+      "demo_lab",
+      "web_pages"
+    ],
+    [
+      "console",
+      "core_service"
     ]
   ],
   "metrics": [
@@ -515,6 +588,36 @@
       "value": "10.2",
       "unit": "ms",
       "source": "results/phase1_live_alert_timings.json"
+    },
+    {
+      "name": "Eval (live lab): tampering trials detected (forged, altered, missing, shadow; 10 each)",
+      "value": "40/40",
+      "unit": "trials",
+      "source": "results/eval.json"
+    },
+    {
+      "name": "Eval (live lab): false alerts over 10 legitimate policy install/retire cycles",
+      "value": "0",
+      "unit": "alerts",
+      "source": "results/eval.json"
+    },
+    {
+      "name": "Eval (live lab): altered rule, change to alert (wall clock, median)",
+      "value": "25.2",
+      "unit": "ms",
+      "source": "results/eval.json"
+    },
+    {
+      "name": "Eval (live lab): altered rule, engine detect latency (median)",
+      "value": "16.2",
+      "unit": "ms",
+      "source": "results/eval.json"
+    },
+    {
+      "name": "Eval (live lab): altered rule, time to restore (median)",
+      "value": "12.3",
+      "unit": "ms",
+      "source": "results/eval.json"
     }
   ]
 }

@@ -1,5 +1,5 @@
 import {
-  Activity, Bell, BookOpen, Brain, Eye, FileBarChart2, LayoutDashboard, Network, Radar, ScrollText, Settings, ShieldHalf,
+  Activity, Bell, FlaskConical, BookOpen, Brain, Eye, FileBarChart2, LayoutDashboard, Network, Radar, ScrollText, Settings, ShieldHalf,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,11 +20,12 @@ export const NAV: NavItem[] = [
   { to: "/rules", label: "Rules", icon: ShieldHalf, phase: 4, built: true, keywords: "rule inspector flows integrity" },
   { to: "/alerts", label: "Alerts", icon: Bell, phase: 4, built: true, keywords: "incidents triage" },
   { to: "/live", label: "Live Detection", icon: Eye, phase: 4, built: true, keywords: "live detections observation response timings" },
-  { to: "/probes", label: "Probes", icon: Radar, phase: 5, keywords: "l2 canary data plane" },
-  { to: "/ml", label: "ML", icon: Brain, phase: 5, keywords: "l3 anomaly score model" },
-  { to: "/policy", label: "Policy", icon: Activity, phase: 6, keywords: "risk weights thresholds" },
-  { to: "/reports", label: "Reports", icon: FileBarChart2, phase: 6, keywords: "pdf csv export" },
-  { to: "/audit", label: "Audit", icon: ScrollText, phase: 6, keywords: "audit log who what when" },
-  { to: "/settings", label: "Settings", icon: Settings, phase: 6, keywords: "users keys environment" },
+  { to: "/demo", label: "Demo Lab", icon: FlaskConical, phase: 4, built: true, keywords: "simulate tamper topology attack demonstration" },
+  { to: "/probes", label: "Probes", icon: Radar, phase: 5, built: true, keywords: "l2 canary data plane" },
+  { to: "/ml", label: "ML", icon: Brain, phase: 5, built: true, keywords: "l3 anomaly score model" },
+  { to: "/policy", label: "Policy", icon: Activity, phase: 6, built: true, keywords: "risk weights thresholds" },
+  { to: "/reports", label: "Reports", icon: FileBarChart2, phase: 6, built: true, keywords: "pdf csv export" },
+  { to: "/audit", label: "Audit", icon: ScrollText, phase: 6, built: true, keywords: "audit log who what when" },
+  { to: "/settings", label: "Settings", icon: Settings, phase: 6, built: true, keywords: "users keys environment" },
   { to: "/design", label: "Design system", icon: BookOpen, phase: 3, keywords: "components style guide tokens" },
 ];

@@ -11,10 +11,12 @@ function Brand() {
   return (
     <div className="mb-6 flex flex-col items-center text-center">
       <svg aria-hidden viewBox="0 0 32 32" className="mb-3 h-11 w-11">
-        <path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="rgb(var(--primary) / 0.18)" stroke="rgb(var(--primary))" strokeWidth="1.6" />
-        <path d="M9 13h6l2 3h6M9 19h4l2-3" fill="none" stroke="rgb(var(--ok))" strokeWidth="1.8" strokeLinecap="round" />
+        <rect x="2" y="9" width="28" height="14" rx="2" fill="none" stroke="rgb(var(--fg))" strokeWidth="1.6" />
+        {["#3b82c4", "#f08a24", "#3fae5a", "#d6453d"].map((c, i) => (
+          <rect key={c} x={6 + i * 6} y="13" width="4" height="6" rx="1" fill={c} />
+        ))}
       </svg>
-      <div className="text-xl font-semibold">FlowGuard</div>
+      <div className="font-label text-2xl font-semibold uppercase tracking-[0.1em]">FlowGuard</div>
       <div className="text-[13px] text-muted">SDN flow-rule integrity monitoring</div>
     </div>
   );

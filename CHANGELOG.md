@@ -4,6 +4,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/). One entry per phase or 
 
 ## [Unreleased]
 
+### Phase 5: L2 canary probes, L3 anomaly scoring, risk engine (ADR-022)
+- `engine/prober.py` + probe loop: counter-based canary probes of signed critical rules; `probe_failed` alert (layer L2) when a listed rule no longer acts as signed.
+- `engine/anomaly.py`: explainable statistical baseline learned from legitimate churn; scores every detected change.
+- `engine/risk.py`: fuses L1/L2/L3 under the policy; dry run by default; ML alone never repairs. Core hands the enforced policy fields to the engine (`control/risk-policy.json`).
+- Core stores `probe_result` and `ml_score` records; `/api/probes` and `/api/ml/scores` report `available` from real data; `/api/policies` reports `enforced_fields`.
+- Website: real Policy, Reports, Audit, Settings, Probes and ML pages; Demo Lab (simulated four-switch topology, labelled Simulated). Console: Demo Lab page, live L2/L3 page. New "Patch Panel" look for both.
+- Tests: 16 unit (`test_phase5.py`), API tests updated, 5 new live tests; full live suite 22 passed on WSL2.
+
 ### Demo packaging (after `demo-v0`, release `v0.4.0-demo`)
 - The core serves the built dashboard (`web/dist`) on its own port with client-route fallback, confined to the build directory (test added).
 - `sudo make demo [MODE=alert_only]`: lab + engine + core + dashboard on http://127.0.0.1:8787 (`scripts/demo.sh`); `RUN_AND_SHOW.md`.

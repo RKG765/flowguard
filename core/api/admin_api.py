@@ -61,6 +61,20 @@ class PolicyIn(BaseModel):
             raise ValueError("critical_tables must be unique table ids in 0..254")
         return sorted(v)
 
+    @field_validator("weights")
+    @classmethod
+    def weights_not_all_zero(cls, v: RiskWeights) -> RiskWeights:
+        if v.l1 + v.l2 + v.l3 <= 0:
+            raise ValueError("at least one layer weight must be above zero")
+        return v
+
+    @field_validator("actions")
+    @classmethod
+    def all_severities(cls, v: Dict[str, str]) -> Dict[str, str]:
+        if set(v) != {"critical", "high", "medium", "low"}:
+            raise ValueError("actions must name all four severities")
+        return v
+
 
 DEFAULT_POLICY: Dict[str, Any] = {
     "dry_run": True, "response_mode": "restore", "critical_tables": [0],
@@ -69,7 +83,8 @@ DEFAULT_POLICY: Dict[str, Any] = {
 }
 # Honest flag shown with every policy read: the engine does not read this document yet (it uses config.yaml);
 # the risk engine that enforces it arrives in Phase 5.
-ENFORCED = False
+ENFORCED = True  # dry run, weights, thresholds and actions are enforced by the engine (via control/risk-policy.json)
+ENFORCED_FIELDS = ["dry_run", "weights", "thresholds", "actions"]
 
 
 def ensure_policy(db: Session) -> PolicyDoc:
@@ -86,7 +101,7 @@ def ensure_policy(db: Session) -> PolicyDoc:
 def get_policy(p: Principal = Depends(viewer), db: Session = Depends(get_db)) -> Dict[str, Any]:
     doc = ensure_policy(db)
     return {"version": doc.version, "updated_at": doc.updated_at, "updated_by": doc.updated_by, "enforced": ENFORCED,
-            "policy": json.loads(doc.data)}
+            "enforced_fields": ENFORCED_FIELDS, "policy": json.loads(doc.data)}
 
 
 @router.put("/policies")
@@ -99,8 +114,23 @@ def put_policy(body: PolicyIn, request: Request, p: Principal = Depends(admin), 
     db.add(PolicyHistory(version=doc.version, data=doc.data, t=doc.updated_at, username=p.username))
     db.commit()
     changed = sorted(k for k in new if new[k] != old.get(k))
-    audit_event(request, db, "policy_updated", p, target=f"v{doc.version}", details={"changed": changed})
-    return {"version": doc.version, "updated_at": doc.updated_at, "updated_by": doc.updated_by, "enforced": ENFORCED, "policy": new}
+    handoff = "ok"
+    try:
+        _write_risk_policy(request, new)
+    except OSError:  # the policy is saved and audited either way; the response says the engine did not receive it
+        handoff = "failed"
+    audit_event(request, db, "policy_updated", p, target=f"v{doc.version}", details={"changed": changed, "engine_handoff": handoff})
+    return {"version": doc.version, "updated_at": doc.updated_at, "updated_by": doc.updated_by, "enforced": ENFORCED and handoff == "ok", "engine_handoff": handoff, "policy": new}
+
+
+def _write_risk_policy(request: Request, policy: Dict[str, Any]) -> None:
+    """Hand the enforced part of the policy to the engine (it watches this file)."""
+    d = request.app.state.settings.control_dir
+    os.makedirs(d, exist_ok=True)
+    tmp = os.path.join(d, "risk-policy.json.tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump({k: policy[k] for k in ENFORCED_FIELDS}, fh)
+    os.replace(tmp, os.path.join(d, "risk-policy.json"))
 
 
 @router.get("/policies/history")
@@ -246,6 +276,29 @@ def _engine_status(db: Session) -> Dict[str, Any]:
 @router.get("/engine/status")
 def engine_status(p: Principal = Depends(viewer), db: Session = Depends(get_db)) -> Dict[str, Any]:
     return _engine_status(db)
+
+
+class ReleaseIn(BaseModel):
+    dpid: str = Field(pattern=r"^[0-9a-fA-F]{1,16}$")
+    port: int = Field(ge=1, le=0xFFFFFEFF)
+
+
+@router.get("/quarantine")
+def quarantine_list(p: Principal = Depends(viewer), db: Session = Depends(get_db)) -> Dict[str, Any]:
+    st = _engine_status(db)
+    return {"items": ((st.get("status") or {}).get("quarantined") or []) if st.get("known") else []}
+
+
+@router.post("/quarantine/release", status_code=202)
+def quarantine_release(body: ReleaseIn, request: Request, p: Principal = Depends(admin), db: Session = Depends(get_db)) -> Dict[str, Any]:
+    """Ask the engine to lift a port quarantine (it watches the control directory). Admin only, audited."""
+    d = request.app.state.settings.control_dir
+    os.makedirs(d, exist_ok=True)
+    name = f"release-{uuid.uuid4().hex}.json"
+    with open(os.path.join(d, name), "w", encoding="utf-8") as fh:
+        json.dump({"dpid": body.dpid, "port": body.port, "requested_by": p.username}, fh)
+    audit_event(request, db, "quarantine_release_requested", p, target=f"{body.dpid}:{body.port}")
+    return {"requested": True}
 
 
 @router.post("/engine/rotate-key", status_code=202)

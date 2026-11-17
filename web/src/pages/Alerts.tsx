@@ -37,7 +37,7 @@ function AlertsTab() {
         <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
           <label className="flex items-center gap-2 text-[12px] text-muted">
             Severity
-            <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="h-8 rounded-[8px] border border-line bg-surface px-2 text-[13px] text-fg">
+            <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="h-8 rounded-[3px] border border-line bg-surface px-2 text-[13px] text-fg">
               {SEVERITIES.map((s) => <option key={s} value={s}>{s || "All"}</option>)}
             </select>
           </label>
@@ -156,7 +156,7 @@ function IncidentPanel({ id }: { id: number }) {
         {i.notes.length === 0 && <p className="text-[13px] text-muted">No notes yet.</p>}
         <ul className="space-y-2">
           {i.notes.map((n) => (
-            <li key={n.id} className="rounded-[10px] border border-line bg-surface/60 p-2.5 text-[13px]">
+            <li key={n.id} className="rounded-[3px] border border-line bg-surface/60 p-2.5 text-[13px]">
               <div className="mb-1 text-[12px] text-muted">{n.username} · {fmtAgo(n.t)}</div>
               <p className="whitespace-pre-wrap">{n.text}</p>
             </li>
@@ -166,7 +166,7 @@ function IncidentPanel({ id }: { id: number }) {
           <form className="mt-3 space-y-2" onSubmit={(e: FormEvent) => { e.preventDefault(); if (note.trim()) addNote.mutate(note.trim()); }}>
             <label htmlFor="note" className="block text-[13px] font-medium">Add a note</label>
             <textarea id="note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={4000} rows={3}
-                      className="w-full rounded-[10px] border border-line bg-surface p-2.5 text-sm text-fg" />
+                      className="w-full rounded-[3px] border border-line bg-surface p-2.5 text-sm text-fg" />
             <Button type="submit" size="sm" disabled={!note.trim()} loading={addNote.isPending}>Add note</Button>
           </form>
         )}
@@ -189,7 +189,7 @@ function IncidentsTab() {
         <div className="flex gap-2 border-b border-line px-4 py-2.5" role="group" aria-label="Filter incidents">
           {(["open", "acknowledged", "closed", ""] as const).map((s) => (
             <button key={s || "all"} onClick={() => setStatus(s)} aria-pressed={status === s}
-                    className={cn("rounded-full border px-3 py-1 text-[12px] capitalize", status === s ? "border-primary bg-primary/15" : "border-line text-muted")}>
+                    className={cn("rounded-[3px] border px-3 py-1 text-[12px] capitalize", status === s ? "border-primary bg-primary/15" : "border-line text-muted")}>
               {s || "all"}
             </button>
           ))}
@@ -227,7 +227,7 @@ export function Alerts() {
       <div role="tablist" aria-label="Alerts and incidents" className="flex gap-2">
         {(["alerts", "incidents"] as const).map((t) => (
           <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
-                  className={cn("rounded-[10px] px-4 py-2 text-[13.5px] capitalize", tab === t ? "bg-primary/15 font-medium" : "text-muted hover:bg-white/5")}>
+                  className={cn("rounded-[3px] px-4 py-2 text-[13.5px] capitalize", tab === t ? "bg-primary/15 font-medium" : "text-muted hover:bg-fg/5")}>
             {t}
           </button>
         ))}

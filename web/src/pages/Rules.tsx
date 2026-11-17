@@ -1,3 +1,4 @@
+import { AckButton, slotKey, TagStripe, useLitSlots } from "@/components/ui/Patch";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, Search, ShieldHalf } from "lucide-react";
@@ -30,6 +31,7 @@ function exportCsv(rows: RuleRow[]) {
 }
 
 export function Rules() {
+  const { lit } = useLitSlots();
   const [dpid, setDpid] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [q, setQ] = useState("");
@@ -59,7 +61,7 @@ export function Rules() {
           <div className="flex flex-wrap items-end gap-3">
             <label className="text-[12px] text-muted">
               Switch
-              <select value={dpid} onChange={(e) => setDpid(e.target.value)} className="mt-1 block h-9 rounded-[10px] border border-line bg-surface px-2 text-sm text-fg">
+              <select value={dpid} onChange={(e) => setDpid(e.target.value)} className="mt-1 block h-9 rounded-[3px] border border-line bg-surface px-2 text-sm text-fg">
                 <option value="">All switches</option>
                 {(switches.data ?? []).map((s) => <option key={s.dpid} value={s.dpid}>{s.dpid}</option>)}
               </select>
@@ -68,7 +70,7 @@ export function Rules() {
               Search match, actions, cookie
               <span className="relative mt-1 block">
                 <Search aria-hidden className="absolute left-2.5 top-2.5 h-4 w-4" />
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. tcp_dst=23" className="h-9 w-full rounded-[10px] border border-line bg-surface pl-8 pr-2 text-sm text-fg" />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. tcp_dst=23" className="h-9 w-full rounded-[3px] border border-line bg-surface pl-8 pr-2 text-sm text-fg" />
               </span>
             </label>
             <Button variant="secondary" size="sm" onClick={() => exportCsv(filtered)} disabled={!filtered.length}>
@@ -76,12 +78,12 @@ export function Rules() {
             </Button>
           </div>
           <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Filter by status">
-            <button onClick={() => setStatus("")} aria-pressed={!status} className={cn("rounded-full border px-3 py-1 text-[12px]", !status ? "border-primary bg-primary/15" : "border-line text-muted")}>
+            <button onClick={() => setStatus("")} aria-pressed={!status} className={cn("rounded-[3px] border px-3 py-1 text-[12px]", !status ? "border-primary bg-primary/15" : "border-line text-muted")}>
               All {summary.data ? `(${summary.data.rules})` : ""}
             </button>
             {STATUSES.map((s) => (
               <button key={s} onClick={() => setStatus(s)} aria-pressed={status === s}
-                      className={cn("rounded-full border px-3 py-1 text-[12px]", status === s ? "border-primary bg-primary/15" : "border-line text-muted")}>
+                      className={cn("rounded-[3px] border px-3 py-1 text-[12px]", status === s ? "border-primary bg-primary/15" : "border-line text-muted")}>
                 {RULE_STATUS[s]!.label} {summary.data ? `(${summary.data.by_status[s] ?? 0})` : ""}
               </button>
             ))}
@@ -98,11 +100,11 @@ export function Rules() {
               {rules.data?.length ? "Clear the search or pick another status." : "Rules appear after the engine's first verification pass of a connected switch."}
             </EmptyState>
           ) : (
-            <div role="table" aria-label="Flow rules" aria-rowcount={filtered.length + 1}>
+            <div className="min-w-[760px]" role="table" aria-label="Flow rules" aria-rowcount={filtered.length + 1}>
               <div role="rowgroup">
-                <div className="grid grid-cols-[110px_150px_56px_70px_1fr_1fr] gap-2 border-b border-line px-4 py-2 text-[11px] font-medium uppercase tracking-wide text-muted" role="row" aria-rowindex={1}>
+                <div className="grid grid-cols-[110px_150px_56px_70px_80px_1fr_1fr] gap-2 border-b border-line px-4 py-2 label" role="row" aria-rowindex={1}>
                   <span role="columnheader">Status</span><span role="columnheader">Switch</span><span role="columnheader">Table</span>
-                  <span role="columnheader">Priority</span><span role="columnheader">Match</span><span role="columnheader">Actions</span>
+                  <span role="columnheader">Priority</span><span role="columnheader">Tag</span><span role="columnheader">Match</span><span role="columnheader">Actions</span>
                 </div>
               </div>
               <div role="rowgroup" style={{ maxHeight: VIEWPORT }} className="overflow-y-auto" onScroll={win.onScroll}>
@@ -111,12 +113,14 @@ export function Rules() {
                 const k = rowKey(r);
                 return (
                   <button key={k} role="row" aria-rowindex={win.first + i + 2} onClick={() => setSelected(k)} aria-selected={k === selected}
-                          className={cn("grid w-full grid-cols-[110px_150px_56px_70px_1fr_1fr] items-center gap-2 border-b border-line px-4 text-left text-[13px] hover:bg-surface-2",
+                          className={cn("grid w-full grid-cols-[110px_150px_56px_70px_80px_1fr_1fr] items-center gap-2 border-b border-line px-4 text-left text-[13px] hover:bg-surface-2",
+                                        ((r.status !== "ok" && r.status !== "pending") || lit.has(slotKey(r.dpid, r.table_id, r.priority))) && "row-lit",
                                         k === selected && "bg-primary/10")} style={{ height: ROW_H }}>
                     <span role="cell"><RuleStatusBadge status={r.status} /></span>
                     <span role="cell" className="mono truncate text-muted">{r.dpid}</span>
                     <span role="cell" className="tabular">{r.table_id}</span>
                     <span role="cell" className="tabular">{r.priority}</span>
+                    <span role="cell"><TagStripe cookie={r.cookie} against={r.golden_cookie ?? undefined} /></span>
                     <span role="cell" className="mono truncate">{formatMatch(r.match)}</span>
                     <span role="cell" className="mono truncate text-muted">{r.present ? formatInstructions(r.instructions).join(" ; ") : "(not on the switch)"}</span>
                   </button>
@@ -146,7 +150,10 @@ export function Rules() {
               </dl>
               <RuleDiff signed={sel.golden ? (sel.golden_instructions ?? sel.instructions) : null} observed={sel.instructions}
                         signedCookie={sel.golden_cookie} observedCookie={sel.cookie} present={sel.present} />
-              <RepairButton target={sel} onDone={() => void rules.refetch()} />
+              <div className="flex flex-wrap gap-2">
+                <RepairButton target={sel} onDone={() => void rules.refetch()} />
+                <AckButton dpid={sel.dpid} table={sel.table_id} priority={sel.priority} />
+              </div>
             </div>
           )}
         </GlassCard>

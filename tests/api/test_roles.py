@@ -45,6 +45,8 @@ EXPECTED = {
     ("GET", "/api/audit/verify"): "admin",
     ("GET", "/api/engine/status"): "viewer",
     ("POST", "/api/engine/rotate-key"): "admin",
+    ("GET", "/api/quarantine"): "viewer",
+    ("POST", "/api/quarantine/release"): "admin",
     ("GET", "/api/health"): "public",
     ("GET", "/api/health/detail"): "viewer",
 }

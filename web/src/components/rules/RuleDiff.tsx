@@ -1,6 +1,7 @@
 import { diffLines, formatInstructions, shortCookie, type Instruction } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { DataSurface } from "@/components/ui/primitives";
+import { TagStripe } from "@/components/ui/Patch";
 
 /** Signed (golden) vs what the switch actually holds. Lines only in one side are marked with text, not color alone. */
 export function RuleDiff({ signed, observed, signedCookie, observedCookie, present = true }: {
@@ -16,7 +17,7 @@ export function RuleDiff({ signed, observed, signedCookie, observedCookie, prese
   return (
     <DataSurface className="grid grid-cols-2 divide-x divide-line p-0 text-[12.5px]">
       <div className="p-3">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted">Signed by the controller</div>
+        <div className="label mb-2">Signed by the controller</div>
         {s === null ? (
           <p className="text-muted">No signed rule exists for this slot (the rule is not from the controller).</p>
         ) : (
@@ -29,10 +30,10 @@ export function RuleDiff({ signed, observed, signedCookie, observedCookie, prese
             ))}
           </ul>
         )}
-        <p className="mono mt-2 text-muted">cookie {shortCookie(signedCookie)}</p>
+        <p className="mono mt-2 flex items-center gap-2 text-muted"><TagStripe cookie={signedCookie} /> cookie {shortCookie(signedCookie)}</p>
       </div>
       <div className="p-3">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted">On the switch now</div>
+        <div className="label mb-2">On the switch now</div>
         {o === null ? (
           <p className="text-warn">Missing: the rule is not on the switch.</p>
         ) : (
@@ -45,7 +46,7 @@ export function RuleDiff({ signed, observed, signedCookie, observedCookie, prese
             ))}
           </ul>
         )}
-        <p className="mono mt-2 text-muted">cookie {present ? shortCookie(observedCookie) : "—"}</p>
+        <p className="mono mt-2 flex items-center gap-2 text-muted">{present && <TagStripe cookie={observedCookie} against={signedCookie ?? null} />} cookie {present ? shortCookie(observedCookie) : "—"}</p>
       </div>
     </DataSurface>
   );

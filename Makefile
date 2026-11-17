@@ -4,7 +4,7 @@ ENGINE_PY ?= $(CURDIR)/.venv-engine/bin/python
 SHELL := /bin/bash
 PYTEST_FLAGS := -q -p no:cacheprovider -W ignore::DeprecationWarning
 
-.PHONY: help setup doctor docs docs-check test test-web test-e2e test-e2e-live build-web dev-web test-live keygen run-core spike demo present ui-setup ui start eval test-security test-soak
+.PHONY: help setup doctor docs docs-check test test-web test-e2e test-e2e-live build-web dev-web test-live keygen run-core spike demo present ui-setup ui start prototype stop status export eval test-security test-soak
 
 help:
 	@echo "FlowGuard targets:"
@@ -84,12 +84,33 @@ present:
 	.venv-core/bin/python scripts/present.py
 
 ui-setup:
-	[ -d .venv-ui ] || python3 -m venv .venv-ui
-	.venv-ui/bin/python -m pip install --quiet -r requirements/ui.txt
+	UV=$$(command -v uv || echo $$HOME/.local/bin/uv); \
+	[ -d .venv-ui ] || $$UV venv .venv-ui --python 3.10; \
+	$$UV pip install --quiet --python .venv-ui/bin/python -r requirements/ui.txt
 
 ui:
 	@[ -x .venv-ui/bin/streamlit ] || { echo "run once: make ui-setup"; exit 1; }
 	.venv-ui/bin/streamlit run ui/streamlit_app.py --server.address 127.0.0.1 --server.port 8501 --server.headless true --browser.gatherUsageStats false
 
-start eval test-security test-soak:
-	@echo "make $@: not implemented yet (planned, see ROADMAP.md)"; exit 2
+start prototype:
+	bash scripts/prototype.sh $(MODE)
+
+stop:
+	bin/flowguard stop
+
+status:
+	bin/flowguard status
+
+export:
+	bin/flowguard export
+
+eval:
+	.venv-core/bin/python scripts/eval.py $(EVAL_ARGS)
+
+SOAK_SECONDS ?= 120
+test-soak:
+	.venv-core/bin/python scripts/eval.py --soak $(SOAK_SECONDS)
+
+# authentication, roles, CSRF, rate limiting, audit chain, secret handling, input validation (no root needed)
+test-security:
+	$(PY) -m pytest tests/api/test_auth.py tests/api/test_roles.py tests/api/test_admin_features.py tests/unit/test_crypto.py tests/unit/test_canonical.py tests/unit/test_phase5.py $(PYTEST_FLAGS)

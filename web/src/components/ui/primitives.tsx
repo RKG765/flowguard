@@ -14,7 +14,7 @@ export function DataSurface({ className, ...p }: HTMLAttributes<HTMLDivElement>)
 export function CardTitle({ icon: Icon, children, aside }: { icon?: LucideIcon; children: ReactNode; aside?: ReactNode }) {
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
-      <h2 className="flex items-center gap-2 text-[15px] font-semibold">
+      <h2 className="label flex items-center gap-2 !text-[13px] !text-fg">
         {Icon && <Icon aria-hidden className="h-4 w-4 text-muted" />}
         {children}
       </h2>
@@ -25,13 +25,13 @@ export function CardTitle({ icon: Icon, children, aside }: { icon?: LucideIcon; 
 
 /* ---- buttons ----------------------------------------------------------------------------------------------------- */
 const button = cva(
-  "inline-flex items-center justify-center gap-2 rounded-[10px] font-medium transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 rounded-[3px] font-medium transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
         primary: "bg-primary-strong text-white hover:bg-primary-strong/90",
         secondary: "border border-line bg-surface-2 text-fg hover:bg-surface",
-        ghost: "text-muted hover:bg-white/5 hover:text-fg",
+        ghost: "text-muted hover:bg-fg/5 hover:text-fg",
         danger: "bg-danger-strong text-white hover:bg-danger-strong/90",
       },
       size: { sm: "h-8 px-3 text-[13px]", md: "h-10 px-4 text-sm", icon: "h-9 w-9" },
@@ -72,7 +72,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(({ label, hint, er
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           className={cn(
-            "h-10 w-full rounded-[10px] border bg-surface px-3 text-sm text-fg placeholder:text-muted/70",
+            "h-10 w-full rounded-[3px] border bg-surface px-3 text-sm text-fg placeholder:text-muted/70",
             error ? "border-danger" : "border-line",
             trailing ? "pr-10" : "",
             className,
@@ -107,7 +107,7 @@ export function Banner({ tone = "info", icon, children }: { tone?: "danger" | "w
     ok: "border-ok/40 bg-ok/10 text-ok",
   } as const;
   return (
-    <div role={tone === "danger" || tone === "warn" ? "alert" : "status"} className={cn("flex items-start gap-2 rounded-[10px] border px-3 py-2 text-[13px]", tones[tone])}>
+    <div role={tone === "danger" || tone === "warn" ? "alert" : "status"} className={cn("flex items-start gap-2 rounded-[3px] border px-3 py-2 text-[13px]", tones[tone])}>
       <Icon aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
       <div className="text-fg">{children}</div>
     </div>
@@ -126,7 +126,7 @@ const TONE_CLASS: Record<Tone, string> = {
 };
 export function Badge({ tone = "muted", icon: Icon, children, className }: { tone?: Tone; icon?: LucideIcon; children: ReactNode; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide", TONE_CLASS[tone], className)}>
+    <span className={cn("inline-flex items-center gap-1 rounded-[3px] border px-2 py-0.5 font-label text-[12px] font-semibold uppercase tracking-[0.08em] [word-spacing:0.2em]", TONE_CLASS[tone], className)}>
       {Icon && <Icon aria-hidden className="h-3 w-3" />}
       {children}
     </span>

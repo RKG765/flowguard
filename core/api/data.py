@@ -253,11 +253,11 @@ def events(limit: int = Query(default=100, ge=1, le=1000), kind: Optional[str] =
 def probes(limit: int = Query(default=100, ge=1, le=1000), p: Principal = Depends(viewer), db: Session = Depends(get_db)) -> Dict[str, Any]:
     items = [{"id": r.id, "t": r.t, "dpid": r.dpid, "data": json.loads(r.payload)}
              for r in db.execute(select(ProbeResult).order_by(ProbeResult.id.desc()).limit(limit)).scalars()]
-    return {"layer": "L2", "available": False, "note": "the L2 prober is planned for Phase 5", "items": items}
+    return {"layer": "L2", "available": bool(items), "note": "L2 canary probes run inside the engine and appear here" if items else "no L2 probe results yet: the engine runs a probe cycle every few seconds once a switch is connected", "items": items}
 
 
 @router.get("/ml/scores")
 def ml_scores(limit: int = Query(default=100, ge=1, le=1000), p: Principal = Depends(viewer), db: Session = Depends(get_db)) -> Dict[str, Any]:
     items = [{"id": r.id, "t": r.t, "dpid": r.dpid, "score": r.score, "data": json.loads(r.payload)}
              for r in db.execute(select(MlScore).order_by(MlScore.id.desc()).limit(limit)).scalars()]
-    return {"layer": "L3", "available": False, "note": "the L3 scorer is planned for Phase 5", "items": items}
+    return {"layer": "L3", "available": bool(items), "note": "L3 scores are produced when a rule change is detected" if items else "no L3 scores yet: a score is produced for each detected rule change", "items": items}

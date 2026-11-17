@@ -16,7 +16,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     onOpenChange(false);
     fn();
   };
-  const item = "flex cursor-pointer items-center gap-3 rounded-[8px] px-3 py-2 text-[13.5px] aria-selected:bg-primary/15";
+  const item = "flex cursor-pointer items-center gap-3 rounded-[3px] px-3 py-2 text-[13.5px] aria-selected:bg-primary/15";
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>

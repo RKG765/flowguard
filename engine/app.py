@@ -16,6 +16,7 @@ Table layout (ADR-006): table 0 = signed security/ACL rules, table 1 = unsigned 
 """
 from __future__ import annotations
 
+import dataclasses
 import itertools
 import json
 import logging
@@ -31,15 +32,18 @@ from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER, DEAD_DISPATCHER, MAIN_DISPATCHER, set_ev_cls
 from ryu.lib import hub
-from ryu.lib.packet import ethernet, packet
+from ryu.lib.packet import arp, ethernet, icmp, ipv4, ipv6, packet, tcp, udp
 from ryu.ofproto import ofproto_v1_3
 
 from engine import ryu_codec
 from engine.canonical import CanonicalError, RuleSpec, dpid_hex
+from engine.anomaly import AnomalyScorer, action_class
 from engine.channel import EventChannel
 from engine.config import EngineConfig, load_config
 from engine.crypto import EpochPolicy, KeyMaterialError, Signer, load_master_key
 from engine.monitor_parser import MonitorEvent, MonitorParser
+from engine.prober import PROBE_DST_MAC, PROBE_SRC_MAC, ProbeSpec, judge, make_marker, parse_marker, plan_probes
+from engine.risk import DEFAULT_DOC, DESTRUCTIVE, RiskPolicy, fuse, quarantine_port
 from engine.policy import PolicyError, PolicyRule, diff, file_signature, load_policy, rules_for
 from engine.responder import DELETE, NONE, RESTORE, PlannedAction, Responder
 from engine.spool import AlertSpool
@@ -88,6 +92,19 @@ class _Incident:
         self.alert_id, self.kind, self.t_detect, self.t_event = alert_id, kind, t_detect, t_event
         self.t_response_sent: Optional[float] = None
         self.t_applied: Optional[float] = None
+
+
+class _ProbeRun:
+    """One L2 canary cycle on one table: read counters, inject the probes, read counters again, judge."""
+
+    def __init__(self, dp: Any, dpid: str, table: int, specs: List[ProbeSpec]) -> None:
+        self.dp, self.dpid, self.table, self.specs = dp, dpid, table, specs
+        self.nonce = os.urandom(6).hex()      # random per cycle: only frames carrying it count as this cycle's probes
+        self.gen = 0                          # engine rule-set generation when the cycle started
+        self.leaks = [0] * len(specs)         # probe frames that came back to the controller, per probe
+        self.stage = "before"
+        self.rows: List[Any] = []
+        self.before: Dict[Tuple[int, int, str], int] = {}
 
 
 class FlowGuardEngine(app_manager.RyuApp):
@@ -139,11 +156,24 @@ class FlowGuardEngine(app_manager.RyuApp):
         self.counters = {"alerts": 0, "passes": 0, "events": 0, "events_attributed": 0, "restores": 0, "deletes": 0}
         self.started = time.time()
         self._snap_last: Dict[Tuple[str, int], Tuple[int, float]] = {}
+        # Phase 5: risk engine (policy doc arrives from the core as control/risk-policy.json; dry run until then),
+        # L3 baseline learned from the engine's own legitimate signed churn, L2 canary probe state
+        self.risk = RiskPolicy.from_doc(DEFAULT_DOC)
+        self._risk_sig: Optional[Tuple[float, int]] = None
+        self.scorer = AnomalyScorer.load(self.cfg.anomaly_path)
+        self.l2_state: Dict[str, float] = {}
+        self._qpath = os.path.join(self.cfg.run_dir, "quarantine.json")
+        self.quarantined: Dict[Tuple[str, int], float] = self._load_quarantine()
+        self._xid_probe: Dict[int, "_ProbeRun"] = {}
+        self._active_probes: Dict[str, "_ProbeRun"] = {}
+        self._gen = 0  # bumped whenever the signed rule set changes: a probe cycle that straddles a change is discarded
 
         hub.spawn(self.channel.run, hub.sleep)
         hub.spawn(self._policy_watcher)
         hub.spawn(self._reconcile_loop)
         hub.spawn(self._status_loop)
+        if self.cfg.probes_enabled:
+            hub.spawn(self._probe_loop)
         self.emit("engine_start", key_fingerprint=self.signer.fingerprint(), epoch=self.signer.policy.current,
                   critical_tables=sorted(self.critical), response_mode=self.cfg.response_mode,
                   golden_rules=self.store.count(), mode=self.cfg.verify_mode)
@@ -163,7 +193,8 @@ class FlowGuardEngine(app_manager.RyuApp):
     def raise_alert(self, kind: str, **fields: Any) -> Dict[str, Any]:
         """Durable alert: spool first (fsync), then channel and event log."""
         self.counters["alerts"] += 1
-        alert = dict(fields, id=uuid.uuid4().hex, kind=kind, layer="L1", severity=SEVERITY.get(kind, "medium"), t=time.time())
+        alert = dict(fields, id=uuid.uuid4().hex, kind=kind, layer=fields.get("layer", "L1"),
+                     severity=fields.get("severity") or SEVERITY.get(kind, "medium"), t=time.time())
         try:
             res = self.spool.append(dict(alert, type="alert"))
             alert["seq"] = res.seq
@@ -203,6 +234,7 @@ class FlowGuardEngine(app_manager.RyuApp):
                 self.dps.pop(dpid, None)
                 self.synced[dpid] = False
                 self.monitors_up[dpid] = False
+                self.l2_state.pop(dpid, None)
                 self.emit("switch_disconnected", dpid=dpid)
 
     @set_ev_cls(ofp_event.EventOFPErrorMsg, [MAIN_DISPATCHER, CONFIG_DISPATCHER])
@@ -211,39 +243,45 @@ class FlowGuardEngine(app_manager.RyuApp):
         self.log.warning("openflow_error", extra={"fields": {"dpid": dpid_hex(msg.datapath.id), "type": msg.type, "code": msg.code}})
 
     # ---- signed installs -----------------------------------------------------------------------------------------
-    def install_signed_rule(self, dp: Any, spec: RuleSpec) -> int:
+    def install_signed_rule(self, dp: Any, spec: RuleSpec, learn: bool = True) -> int:
         """The ONLY way the controller installs a protected rule: sign, record as golden, then send."""
         dpid = dpid_hex(dp.id)
         epoch = self.signer.policy.current
         cookie = self.signer.cookie_for(dpid, spec, epoch)
         self.store.put(dpid, spec, epoch, cookie)
+        if learn:
+            self._learn(dpid, spec)
         self.pending.expect(dpid, spec.table_id, cookie, ("added", "modified"), slot=spec.key())
         dp.send_msg(ryu_codec.flow_add(dp, spec, cookie))
         return cookie
 
-    def retire_rule(self, dp: Any, spec: RuleSpec) -> None:
+    def retire_rule(self, dp: Any, spec: RuleSpec, learn: bool = True) -> None:
         dpid = dpid_hex(dp.id)
         g = self.store.get(dpid, spec)
         self.store.delete(dpid, spec)
+        if learn:
+            self._learn(dpid, spec)
         if g is not None:
             self.pending.expect(dpid, spec.table_id, g.cookie, ("deleted",), slot=spec.key())
         dp.send_msg(ryu_codec.flow_delete_strict(dp, spec))
 
     def _desired(self, dpid: str) -> List[RuleSpec]:
-        return [s for s in rules_for(self.policy, dpid) if s.table_id in self.critical]
+        return [s for s in rules_for(self.policy, dpid) if s.table_id in self.critical] + [self._qspec(p) for (d, p) in self.quarantined if d == dpid]
 
     def _apply_connect_policy(self, dp: Any) -> None:
+        self._gen += 1
         dpid = dpid_hex(dp.id)
         desired = self._desired(dpid)
         keep = {s.key() for s in desired}
         for g in self.store.list(dpid):
             if g.spec.table_id in self.critical and g.spec.key() not in keep:
-                self.retire_rule(dp, g.spec)  # policy changed while the engine was down: signed retirement, no alert
+                self.retire_rule(dp, g.spec, learn=False)  # policy changed while the engine was down: signed retirement, no alert
         for spec in desired:
-            self.install_signed_rule(dp, spec)
+            self.install_signed_rule(dp, spec, learn=False)  # a reconnect replays the policy: that is not new churn to learn from
         self.emit("policy_applied", dpid=dpid, installed=len(desired), reason="connect")
 
     def _apply_policy_change(self, old: List[PolicyRule], new: List[PolicyRule]) -> None:
+        self._gen += 1
         for dpid, dp in list(self.dps.items()):
             install, retire = diff(rules_for(old, dpid), rules_for(new, dpid))
             for spec in retire:
@@ -256,12 +294,13 @@ class FlowGuardEngine(app_manager.RyuApp):
 
     def rotate_key(self) -> None:
         """New key epoch: re-sign every golden rule and replace it on its switch (OFPFC_ADD is atomic)."""
+        self._gen += 1
         epoch = self.signer.policy.rotate(time.time())
         self.store.save_epoch_policy(self.signer.policy)
         for dpid, dp in list(self.dps.items()):
             for g in self.store.list(dpid):
                 if g.spec.table_id in self.critical:
-                    self.install_signed_rule(dp, g.spec)
+                    self.install_signed_rule(dp, g.spec, learn=False)
         self.emit("key_rotated", epoch=epoch, previous_epoch=self.signer.policy.previous,
                   grace_seconds=self.signer.policy.grace_seconds)
 
@@ -274,6 +313,12 @@ class FlowGuardEngine(app_manager.RyuApp):
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def on_packet_in(self, ev: Any) -> None:
+        marker = parse_marker(bytes(ev.msg.data))
+        if marker is not None:  # an L2 canary came back to the controller: never learn or flood it
+            run = self._active_probes.get(marker[0])  # counted only while that exact cycle runs; unknown nonces are ignored
+            if run is not None and run.dpid == dpid_hex(ev.msg.datapath.id) and 0 <= marker[1] < len(run.leaks):
+                run.leaks[marker[1]] += 1
+            return
         if not self.cfg.learning_switch:
             return
         msg = ev.msg
@@ -412,6 +457,17 @@ class FlowGuardEngine(app_manager.RyuApp):
     @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
     def on_flow_stats(self, ev: Any) -> None:
         msg = ev.msg
+        pr = self._xid_probe.get(msg.xid)
+        if pr is not None:  # reply to an L2 probe counter read
+            pr.rows.extend(msg.body)
+            if msg.flags & msg.datapath.ofproto.OFPMPF_REPLY_MORE:
+                return
+            self._xid_probe.pop(msg.xid, None)
+            try:
+                self._probe_stats_done(pr)
+            except Exception:
+                self.log.exception("probe stats handling failed")
+            return
         ps = self._xid_pass.get(msg.xid)
         if ps is None:
             return
@@ -495,6 +551,23 @@ class FlowGuardEngine(app_manager.RyuApp):
     def _handle_finding(self, dp: Any, plan: PlannedAction, ps: _Pass, t_event: Optional[float], t_reply: float, t_classified: float, detected_by: str) -> None:
         f = plan.finding
         slot: SlotKey = (f.dpid, f.spec.table_id, f.spec.priority, f.spec.match_key())
+        # risk engine: fuse L1 (this finding) with the switch's latest L2 probe verdict and the L3 anomaly score.
+        # With dry_run off, the policy decides whether the engine repairs; ML alone can never repair.
+        l3, l3_reasons = self.scorer.score({"dpid": f.dpid, "t": time.time(), "priority": f.spec.priority, "signed": bool(f.signature_valid),
+                                            "action_class": action_class(f.observed.spec.instructions) if f.observed else "other"})
+        decision = fuse(self.risk, 1.0, self.l2_state.get(f.dpid, 0.0), l3)
+        if not self.risk.dry_run and plan.op != NONE and decision.effective_action not in DESTRUCTIVE:
+            plan = dataclasses.replace(plan, op=NONE, reason="risk_policy_" + decision.effective_action)
+        if decision.effective_action == "quarantine_port" and not self.risk.dry_run:
+            # only the rule that is on the switch can name the port (never a signed rule that went missing), and only a port
+            # where the learning switch has seen a host: an intruder's rule naming an uplink must not cut the uplink
+            port = quarantine_port(f.observed.spec.match) if f.observed else None
+            if port is None:
+                self.emit("quarantine_skipped", dpid=f.dpid, reason="no_port_attribution", finding=f.kind)
+            elif port not in set(self.mac_to_port.get(f.dpid, {}).values()):
+                self.emit("quarantine_skipped", dpid=f.dpid, port=port, reason="not_a_learned_host_port", finding=f.kind)
+            else:
+                self._quarantine(dp, f.dpid, port, f.kind)
         t_sent: Optional[float] = None
         if plan.op == RESTORE and f.golden is not None:
             self.pending.expect(f.dpid, f.spec.table_id, f.golden.cookie, ("added", "modified"), tag=slot, slot=f.spec.key())
@@ -521,13 +594,15 @@ class FlowGuardEngine(app_manager.RyuApp):
                   "t_response_sent": t_sent,
                   "detect_latency_ms": round((t_classified - t_event) * 1000, 2) if t_event else None,
                   "respond_latency_ms": round((t_sent - t_classified) * 1000, 2) if t_sent else None}
+        self.channel.publish({"type": "ml_score", "t": time.time(), "dpid": f.dpid, "score": l3, "kind": f.kind, "priority": f.spec.priority, "reasons": l3_reasons})
+        self.emit("risk_decision", dpid=f.dpid, finding=f.kind, **decision.to_dict())
         alert = self.raise_alert(
             f.kind, dpid=f.dpid, table_id=f.spec.table_id, priority=f.spec.priority, match=f.spec.match,
             action={RESTORE: "restored", DELETE: "removed", NONE: "none"}[plan.op], action_reason=plan.reason,
             detected_by=detected_by, signature_valid=f.signature_valid, reasons=list(f.reasons), shadows=list(f.shadows),
             observed=None if f.observed is None else {"cookie": f"{f.observed.cookie:016x}", "instructions": list(f.observed.spec.instructions)},
             golden=None if f.golden is None else {"cookie": f"{f.golden.cookie:016x}", "instructions": list(f.golden.spec.instructions)},
-            timing=timing, summary=explain(f))
+            timing=timing, risk=decision.to_dict(), l3_reasons=l3_reasons, summary=explain(f))
         if plan.op != NONE:
             inc = _Incident(alert["id"], f.kind, t_classified, t_event)
             inc.t_response_sent = t_sent
@@ -557,6 +632,7 @@ class FlowGuardEngine(app_manager.RyuApp):
                     else:
                         old, self.policy = self.policy, new
                         self._apply_policy_change(old, new)
+                self._load_risk_policy(os.path.join(control, "risk-policy.json"))
                 rot = os.path.join(control, "rotate")
                 if os.path.exists(rot):
                     os.remove(rot)
@@ -564,6 +640,8 @@ class FlowGuardEngine(app_manager.RyuApp):
                 for name in sorted(os.listdir(control)):
                     if name.startswith("repair-") and name.endswith(".json"):
                         self._take_repair_request(os.path.join(control, name))
+                    elif name.startswith("release-") and name.endswith(".json"):
+                        self._take_release_request(os.path.join(control, name))
             except Exception:
                 self.log.exception("policy watcher failed")
 
@@ -589,6 +667,186 @@ class FlowGuardEngine(app_manager.RyuApp):
                   requested_by=str(req.get("requested_by") or "")[:64])
         self.schedule_pass(dpid, slot[0], "manual_repair", delay=0.0)
 
+    # ---- port quarantine (policy action quarantine_port) ----------------------------------------------------------------
+    def _qspec(self, port: int) -> RuleSpec:
+        """A signed drop for everything arriving on one port, above every policy rule (policies may not use priority 65000 or above). It is a normal golden rule, so L1
+        sees it as verified and a tampering attempt on it is detected like any other."""
+        return RuleSpec.create(min(self.critical), 65000, {"in_port": port}, [])
+
+    def _load_quarantine(self) -> Dict[Tuple[str, int], float]:
+        try:
+            with open(self._qpath, "r", encoding="utf-8") as fh:
+                return {(str(d), int(p)): float(t) for d, p, t in json.load(fh)}
+        except (OSError, ValueError, TypeError):
+            return {}
+
+    def _save_quarantine(self) -> None:
+        tmp = self._qpath + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump([[d, p, t] for (d, p), t in sorted(self.quarantined.items())], fh)
+        os.replace(tmp, self._qpath)
+
+    def _quarantine(self, dp: Any, dpid: str, port: int, because: str) -> None:
+        if (dpid, port) in self.quarantined:
+            return
+        if sum(1 for d, _ in self.quarantined if d == dpid) >= self.cfg.quarantine_max_per_switch:
+            self.emit("quarantine_skipped", dpid=dpid, port=port, reason="limit_reached")
+            return
+        self.install_signed_rule(dp, self._qspec(port), learn=False)
+        self._gen += 1
+        self.quarantined[(dpid, port)] = time.time()
+        self._save_quarantine()
+        self.emit("port_quarantined", dpid=dpid, port=port, because=because)
+        self.raise_alert("port_quarantined", dpid=dpid, table_id=min(self.critical), priority=65000, layer="risk", severity="high", action="quarantined",
+                         detected_by="risk_engine", summary=f"Port {port} was quarantined (all traffic arriving on it is dropped) because of a {because} finding. An admin can release it from the dashboard.")
+
+    def _take_release_request(self, path: str) -> None:
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                req = json.load(fh)
+            os.remove(path)
+            dpid, port = dpid_hex(req["dpid"]), int(req["port"])
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            self.log.warning("bad release request %s: %s", path, exc)
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+            return
+        if (dpid, port) not in self.quarantined:
+            return
+        del self.quarantined[(dpid, port)]
+        self._gen += 1
+        self._save_quarantine()
+        dp = self.dps.get(dpid)
+        if dp is not None:
+            self.retire_rule(dp, self._qspec(port), learn=False)
+        self.emit("quarantine_released", dpid=dpid, port=port, released_by=str(req.get("requested_by") or "")[:64])
+
+    # ---- Phase 5: risk policy, L3 learning, L2 canary probes -----------------------------------------------------------
+    def _load_risk_policy(self, path: str) -> None:
+        sig = file_signature(path)
+        if sig == self._risk_sig:
+            return
+        self._risk_sig = sig
+        if sig is None:
+            return
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                self.risk = RiskPolicy.from_doc(json.load(fh))
+        except (OSError, ValueError, KeyError) as exc:
+            self.log.warning("bad risk policy %s: %s (keeping the previous one)", path, exc)
+            return
+        self.emit("risk_policy_loaded", dry_run=self.risk.dry_run, weights=list(self.risk.weights), thresholds=list(self.risk.thresholds))
+
+    def _learn(self, dpid: str, spec: RuleSpec) -> None:
+        """The engine's own signed installs and retirements are legitimate churn: the L3 baseline learns from them only."""
+        self.scorer.learn({"dpid": dpid, "t": time.time(), "priority": spec.priority, "action_class": action_class(spec.instructions)})
+
+    def _probe_loop(self) -> None:
+        hub.sleep(min(5.0, self.cfg.probe_interval_seconds))
+        while True:
+            for dpid, dp in list(self.dps.items()):
+                try:
+                    self._probe_switch(dpid, dp)
+                except Exception:
+                    self.log.exception("probe cycle failed")
+            hub.sleep(self.cfg.probe_interval_seconds)
+
+    def _probe_switch(self, dpid: str, dp: Any) -> None:
+        specs = [p for p in plan_probes(self._desired(dpid)) if p.table_id in self.critical]  # includes quarantine rules
+        for table in sorted({p.table_id for p in specs}):
+            run = _ProbeRun(dp, dpid, table, [p for p in specs if p.table_id == table])
+            run.gen = self._gen
+            self._request_probe_stats(run)
+
+    def _request_probe_stats(self, run: "_ProbeRun") -> None:
+        run.rows = []
+        req = ryu_codec.flow_stats_request(run.dp, run.table)
+        run.dp.send_msg(req)
+        self._xid_probe[req.xid] = run
+        hub.spawn_after(self.cfg.stats_timeout_seconds, lambda x=req.xid, r=run: self._probe_timeout(x, r))
+
+    def _probe_timeout(self, xid: int, run: "_ProbeRun") -> None:
+        """A counter read never came back: forget the cycle and its stale L2 verdict instead of keeping an old value."""
+        if self._xid_probe.pop(xid, None) is not None:
+            self._active_probes.pop(run.nonce, None)
+            self.l2_state.pop(run.dpid, None)
+
+    @staticmethod
+    def _probe_packet(fields: Dict[str, Any], nonce: str, idx: int) -> bytes:
+        """Build the canary for one rule: the headers the rule matches plus a payload marker naming the rule."""
+        et = fields["eth_type"]
+        pkt = packet.Packet()
+        pkt.add_protocol(ethernet.ethernet(dst=fields.get("eth_dst", PROBE_DST_MAC), src=fields.get("eth_src", PROBE_SRC_MAC), ethertype=et))
+        if et == 0x0806:
+            pkt.add_protocol(arp.arp(opcode=fields["arp_op"], src_mac=fields["arp_sha"], src_ip=fields["arp_spa"],
+                                     dst_mac=fields["arp_tha"], dst_ip=fields["arp_tpa"]))
+        else:
+            proto = fields["ip_proto"]
+            if et == 0x86DD:
+                pkt.add_protocol(ipv6.ipv6(src=fields["ipv6_src"], dst=fields["ipv6_dst"], nxt=proto))
+            else:
+                pkt.add_protocol(ipv4.ipv4(src=fields["ipv4_src"], dst=fields["ipv4_dst"], proto=proto))
+            if proto == 17:
+                pkt.add_protocol(udp.udp(src_port=fields.get("udp_src", 40000), dst_port=fields.get("udp_dst", 40001)))
+            elif proto == 1:
+                pkt.add_protocol(icmp.icmp(type_=fields.get("icmpv4_type", 8), code=fields.get("icmpv4_code", 0), data=icmp.echo()))
+            else:
+                pkt.add_protocol(tcp.tcp(src_port=fields.get("tcp_src", 40000), dst_port=fields.get("tcp_dst", 40001), bits=0x02))
+        pkt.add_protocol(make_marker(nonce, idx))
+        pkt.serialize()
+        return pkt.data
+
+    @staticmethod
+    def _counters(rows: List[Any]) -> Dict[Tuple[int, int, str], int]:
+        out: Dict[Tuple[int, int, str], int] = {}
+        for stat in rows:
+            try:
+                spec = RuleSpec.create(stat.table_id, stat.priority, ryu_codec.match_fields(stat.match), [])
+            except CanonicalError:
+                continue
+            out[spec.key()] = int(stat.packet_count)
+        return out
+
+    def _probe_stats_done(self, run: "_ProbeRun") -> None:
+        counters = self._counters(run.rows)
+        dp = run.dp
+        if run.stage == "before":
+            run.before = counters
+            run.stage = "after"
+            ofp, parser = dp.ofproto, dp.ofproto_parser
+            self._active_probes[run.nonce] = run
+            for idx, spec in enumerate(run.specs):
+                data = self._probe_packet(dict(spec.fields), run.nonce, idx)
+                for _ in range(self.cfg.probe_count):
+                    dp.send_msg(parser.OFPPacketOut(datapath=dp, buffer_id=ofp.OFP_NO_BUFFER,
+                                                    in_port=int(spec.fields.get("in_port", ofp.OFPP_CONTROLLER)),
+                                                    actions=[parser.OFPActionOutput(ofp.OFPP_TABLE)], data=data))
+            hub.spawn_after(0.4, self._request_probe_stats, run)
+            return
+        self._active_probes.pop(run.nonce, None)
+        if run.gen != self._gen:  # the signed rule set changed during this cycle: its counters are not comparable, skip it
+            return
+        worst = 0.0
+        now = time.time()
+        for idx, spec in enumerate(run.specs):
+            key = (spec.table_id, spec.priority, spec.rule_key)
+            before, after = run.before.get(key), counters.get(key)
+            leaked = run.leaks[idx]
+            v = judge(spec, self.cfg.probe_count, before, after, leaked)
+            worst = max(worst, v.l2 if v.status == "fail" else 0.0)
+            self.channel.publish({"type": "probe_result", "t": now, "dpid": run.dpid, "table_id": spec.table_id, "priority": spec.priority,
+                                  "describe": spec.describe, "expect": spec.expect, "status": v.status, "reason": v.reason,
+                                  "sent": self.cfg.probe_count, "counter_delta": None if before is None or after is None else after - before})
+            if v.status == "fail" and self.deduper.should_alert((run.dpid, "probe_failed", spec.table_id, spec.priority), now):
+                self.raise_alert("probe_failed", dpid=run.dpid, table_id=spec.table_id, priority=spec.priority, layer="L2", severity="high",
+                                 action="none", detected_by="canary_probe", summary="Canary probe failed: " + v.reason)
+        self.l2_state[run.dpid] = worst
+        self.counters["probes"] = self.counters.get("probes", 0) + 1
+        if worst:
+            self.counters["probe_fails"] = self.counters.get("probe_fails", 0) + 1
+
     def _status_loop(self) -> None:
         """Every second: engine_status.json for local tools; every 5 s: the same object on the channel for the core."""
         path = os.path.join(self.cfg.run_dir, "engine_status.json")
@@ -601,7 +859,9 @@ class FlowGuardEngine(app_manager.RyuApp):
                     "ready": {k: bool(self.synced.get(k) and (self.monitors_up.get(k) or self.cfg.verify_mode != "event")) for k in self.dps},
                     "golden_rules": self.store.count(), "counters": self.counters, "channel": self.channel.health(),
                     "spool": {"dropped_total": self.spool.dropped_total, "acked": self.spool.acked(), "bytes": self.spool.total_bytes()},
-                    "response_mode": self.cfg.response_mode,
+                    "response_mode": self.cfg.response_mode, "risk_dry_run": self.risk.dry_run, "l2": dict(self.l2_state),
+                    "l3_ready": self.scorer.ready, "probes_enabled": self.cfg.probes_enabled,
+                    "quarantined": [{"dpid": d, "port": p, "t": t} for (d, p), t in sorted(self.quarantined.items())],
                     # hosts the table-1 learning switch has seen: {dpid: {mac: port}} (for the topology view)
                     "hosts": {d: dict(m) for d, m in self.mac_to_port.items()},
                 }
@@ -611,6 +871,8 @@ class FlowGuardEngine(app_manager.RyuApp):
                 os.replace(tmp, path)
                 if tick % 5 == 0:
                     self.channel.publish(dict(status, type="engine_status"))
+                if tick % 30 == 0:
+                    self.scorer.save(self.cfg.anomaly_path)
             except Exception:
                 self.log.exception("status write failed")
             tick += 1

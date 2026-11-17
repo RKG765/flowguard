@@ -13,6 +13,8 @@ import { LiveDetection } from "@/pages/LiveDetection";
 import { Rules } from "@/pages/Rules";
 import { Topology } from "@/pages/Topology";
 import { NotFound, Planned } from "@/pages/Planned";
+import { Demo } from "@/pages/Demo";
+import { AuditPage, MlPage, PolicyPage, ProbesPage, ReportsPage, SettingsPage } from "@/pages/Admin";
 
 function Centered({ children }: { children: ReactNode }) {
   return <main className="grid min-h-screen place-items-center p-4">{children}</main>;
@@ -65,6 +67,13 @@ export default function App() {
           <Route path="alerts" element={<Alerts />} />
           <Route path="topology" element={<Topology />} />
           <Route path="live" element={<LiveDetection />} />
+          <Route path="demo" element={<Demo />} />
+          <Route path="probes" element={<ProbesPage />} />
+          <Route path="ml" element={<MlPage />} />
+          <Route path="policy" element={<PolicyPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="audit" element={<AuditPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="attack-lab" element={<Navigate to="/live" replace />} />
           {NAV.filter((n) => n.phase > 3 && !n.built).map((n) => (
             <Route key={n.to} path={n.to.slice(1)} element={<Planned />} />

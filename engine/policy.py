@@ -24,6 +24,9 @@ class PolicyError(ValueError):
     pass
 
 
+RESERVED_PRIORITY = 65000  # priority 65000 and above is reserved for port quarantine rules
+
+
 @dataclass(frozen=True)
 class PolicyRule:
     spec: RuleSpec
@@ -46,6 +49,8 @@ def parse_policy(data: Any) -> List[PolicyRule]:
             dpids = tuple(sorted(dpid_hex(d) for d in raw["dpids"])) if raw.get("dpids") else None
         except CanonicalError as exc:
             raise PolicyError(f"rule #{idx}: {exc}") from exc
+        if spec.priority >= RESERVED_PRIORITY:
+            raise PolicyError(f"rule #{idx}: priority {spec.priority} is reserved for port quarantine (use below {RESERVED_PRIORITY})")
         ident = (spec.key(), dpids)
         if ident in seen:
             raise PolicyError(f"rule #{idx}: duplicate of an earlier rule ({spec.describe()})")

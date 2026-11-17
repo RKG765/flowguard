@@ -2,13 +2,13 @@
 
 Flow-rule integrity monitoring and unauthorized network-state change detection for SDN (Ryu + Open vSwitch).
 
-> **Status: Phases 0-4 of 11 done (tag `demo-v0`).** The L1 engine, the core API service and the dashboard (Overview, Rules, Alerts and Incidents, Topology, Live Detection) work against a real Open vSwitch + Mininet lab on WSL2 and are covered by live tests. FlowGuard does not execute attacks; the Live Detection page observes changes made outside the controller (ADR-019). L2, L3 and the risk engine (Phase 5) are **not built yet**. Exactly what was verified is in [STATUS.md](STATUS.md).
+> **Status: a working prototype (Phases 0-5, 8 and 10 done; 6, 7, 9 and 11 partly: no PDF report or session replay, no separate OS users for engine and core, reconnect-storm and many-switch tests not run, release checklist open; see [STATUS.md](STATUS.md) for exactly what was verified and what was not).** One command starts the lab, the engine, the core, the website and the operator console: `sudo bin/flowguard start`. L1 signed rules, L2 canary probes, L3 anomaly scoring and a policy-driven risk engine (with port quarantine) run on a real Open vSwitch + Mininet lab on WSL2; measured results are in [docs/results.md](docs/results.md). FlowGuard does not execute attacks (ADR-019); the Demo Lab page is a labelled simulation. Not verified: native Ubuntu, real hardware, more than one switch live.
 
-## What it will do
+## What it does
 1. **L1 authenticated rules:** an HMAC tag in the 64-bit OpenFlow `cookie` of every controller-installed rule; a verifier flags forged, altered, shadowing and missing rules and restores the signed rule.
 2. **L2 data-plane probing:** canary packets verify real forwarding behavior (catches a switch that lies in stats replies).
 3. **L3 ML anomaly scoring:** scores rule-change events and traffic shifts to catch signed-but-malicious rules. ML alone never deletes rules.
-4. A **risk engine** fuses the three signals; a **web dashboard** with an Attack Lab shows it live on real Open vSwitch + Mininet traffic.
+4. A **risk engine** fuses the three signals under an editable policy (dry run first; ML alone never repairs; a failed signature never scores below the restore threshold; optional port quarantine); a **website** and a **Streamlit console** show it live, and a **Demo Lab** page simulates tampering on a four-switch topology for presentations.
 
 Honest scope: see [docs/threat_model.md](docs/threat_model.md) (including the lab limitation that controller, key and switch share one host).
 
@@ -30,6 +30,8 @@ Native Ubuntu: the same commands. It has **not** been verified there yet; see [H
 | `make setup` | run `scripts/setup_ubuntu.sh` |
 | `make doctor` / `bin/flowguard doctor [--json] [--quick]` | environment check |
 | `make docs` / `make docs-check` | regenerate / verify generated docs |
+| `sudo bin/flowguard start` / `stop` / `status` / `export` | the whole prototype in one command (website :8787, console :8501); see [RUN_AND_SHOW.md](RUN_AND_SHOW.md) |
+| `sudo make eval` / `sudo make test-soak` / `make test-security` | measured detection times ([docs/results.md](docs/results.md)), a soak run, security-focused tests |
 | `make test` | unit + property tests (both venvs) and core API tests |
 | `sudo make test-live` | live attacks (forge, modify, delete, shadow, replay, tamper-and-revert) against the real engine on a lab switch |
 | `bin/flowguard keygen` | create the HMAC key file (mode 0600, outside the repo) |
@@ -63,11 +65,11 @@ Native Ubuntu: the same commands. It has **not** been verified there yet; see [H
 | 2 | Core service, API, storage, auth | done | 2026-10-14 | 2026-10-14 |
 | 3 | Design system and dashboard shell | done | 2026-10-14 | 2026-10-14 |
 | 4 | Core pages + Live Detection (tag demo-v0; attack execution descoped) | done | 2026-10-14 | 2026-10-15 |
-| 5 | L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete) | not_started | - | - |
-| 6 | Remaining pages, reports, polish | not_started | - | - |
-| 7 | Packaging and hardening | not_started | - | - |
-| 8 | Evaluation and docs | not_started | - | - |
-| 9 | Rigorous testing (full QA pass) | not_started | - | - |
-| 10 | Persona-based review | not_started | - | - |
-| 11 | Fix loop and release gate | not_started | - | - |
+| 5 | L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete) | done | 2026-11-16 | 2026-11-17 |
+| 6 | Remaining pages, reports, polish | in_progress | 2026-11-16 | - |
+| 7 | Packaging and hardening | in_progress | 2026-11-17 | - |
+| 8 | Evaluation and docs | done | 2026-11-17 | 2026-11-17 |
+| 9 | Rigorous testing (full QA pass) | in_progress | 2026-11-17 | - |
+| 10 | Persona-based review | done | 2026-11-17 | 2026-11-17 |
+| 11 | Fix loop and release gate | in_progress | 2026-11-17 | - |
 <!-- /AUTO:phase_table -->

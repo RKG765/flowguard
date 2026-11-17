@@ -1,6 +1,7 @@
 """Policies, reports (CSV safety), audit chain integrity, engine control, health, WebSocket stream, migrations."""
 import csv
 import io
+import json
 import os
 import time
 
@@ -23,9 +24,13 @@ GOOD_POLICY = {"dry_run": False, "response_mode": "restore", "critical_tables": 
 def test_policy_default_versioning_and_history(client, tokens):
     h = bearer(tokens["admin"])
     p = client.get("/api/policies", headers=bearer(tokens["viewer"])).json()
-    assert p["version"] == 1 and p["enforced"] is False and p["policy"]["dry_run"] is True
+    assert p["version"] == 1 and p["enforced"] is True and p["policy"]["dry_run"] is True
+    assert p["enforced_fields"] == ["dry_run", "weights", "thresholds", "actions"]  # response_mode/critical_tables stay in the engine config
     r = client.put("/api/policies", json=GOOD_POLICY, headers=h)
     assert r.status_code == 200 and r.json()["version"] == 2 and r.json()["updated_by"] == "admin"
+    # the enforced part is handed to the engine as control/risk-policy.json
+    handed = json.load(open(os.path.join(client.app.state.settings.control_dir, "risk-policy.json")))
+    assert handed == {k: GOOD_POLICY[k] for k in ("dry_run", "weights", "thresholds", "actions")}
     hist = client.get("/api/policies/history", headers=bearer(tokens["analyst"])).json()
     assert [x["version"] for x in hist] == [2, 1]
     audit = client.get("/api/audit", params={"action": "policy_updated"}, headers=h).json()
@@ -109,11 +114,11 @@ def test_health_public_is_minimal_detail_needs_login(client, tokens):
     assert d["database"] == "ok" and d["engine"] == {"known": False}
 
 
-def test_probes_and_ml_endpoints_say_they_are_not_built(client, tokens):
+def test_probes_and_ml_endpoints_are_empty_and_honest_before_the_engine_reports(client, tokens):
     h = bearer(tokens["viewer"])
     for path in ("/api/probes", "/api/ml/scores"):
         body = client.get(path, headers=h).json()
-        assert body["available"] is False and body["items"] == [] and "Phase 5" in body["note"]
+        assert body["available"] is False and body["items"] == [] and body["note"].startswith("no ")
 
 
 def test_openapi_lists_the_api(client):
@@ -168,3 +173,39 @@ def test_core_serves_the_built_dashboard_with_spa_fallback(tmp_path):
         assert c.get("/..%2Fsecret.txt").status_code == 404        # never outside dist
         assert c.get("/api/nope").status_code == 404
         assert c.get("/api/health").json() == {"status": "ok"}       # the API still wins
+
+
+# ---- Phase 5: L2 probe results and L3 scores flow engine -> core -> API ----------------------------------------------------
+def test_probe_results_and_ml_scores_are_stored_and_served(client, tokens):
+    h = bearer(tokens["viewer"])
+    assert client.get("/api/probes", headers=h).json()["available"] is False  # nothing invented before the engine reports
+    ing = client.app.state.ingestor
+    ing.ingest({"type": "probe_result", "t": time.time(), "dpid": "0000000000000001", "table_id": 0, "priority": 100,
+                "status": "fail", "reason": "forwarding differs"}, "test")
+    ing.ingest({"type": "ml_score", "t": time.time(), "dpid": "0000000000000001", "score": 0.81, "reasons": ["rare drop"]}, "test")
+    p = client.get("/api/probes", headers=h).json()
+    m = client.get("/api/ml/scores", headers=h).json()
+    assert p["available"] is True and p["items"][0]["data"]["status"] == "fail"
+    assert m["available"] is True and m["items"][0]["score"] == 0.81
+
+
+# ---- port quarantine API: role gating and input validation ---------------------------------------------------------------------
+def test_quarantine_endpoints_are_role_gated_and_validated(client, tokens):
+    assert client.get("/api/quarantine").status_code == 401
+    assert client.get("/api/quarantine", headers=bearer(tokens["viewer"])).json() == {"items": []}
+    body = {"dpid": "0000000000000001", "port": 2}
+    for role in ("viewer", "analyst"):
+        assert client.post("/api/quarantine/release", json=body, headers=bearer(tokens[role])).status_code == 403
+    admin = bearer(tokens["admin"])
+    assert client.post("/api/quarantine/release", json={"dpid": "not-hex", "port": 2}, headers=admin).status_code == 422
+    assert client.post("/api/quarantine/release", json={"dpid": "1", "port": 0}, headers=admin).status_code == 422
+    assert client.post("/api/quarantine/release", json={"dpid": "1", "port": 4294967295}, headers=admin).status_code == 422
+    assert client.post("/api/quarantine/release", json=body, headers=admin).status_code == 202
+    assert any(f.startswith("release-") for f in os.listdir(client.app.state.settings.control_dir))
+    assert client.get("/api/audit", params={"action": "quarantine_release_requested"}, headers=admin).json()["total"] == 1
+
+
+@pytest.mark.parametrize("change", [{"weights": {"l1": 0, "l2": 0, "l3": 0}}, {"actions": {"critical": "alert_only"}}])
+def test_policies_the_engine_would_reject_are_rejected_by_the_api_too(client, tokens, change):
+    r = client.put("/api/policies", json=dict(GOOD_POLICY, **change), headers=bearer(tokens["admin"]))
+    assert r.status_code == 422

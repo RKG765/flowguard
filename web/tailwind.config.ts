@@ -12,6 +12,8 @@ export default {
       colors: {
         bg: v("bg"),
         surface: v("surface"),
+        rail: v("rail"),
+        rail: v("rail"),
         "surface-2": v("surface-2"),
         line: v("line"),
         fg: v("fg"),
@@ -26,12 +28,13 @@ export default {
         ml: v("ml"),
       },
       fontFamily: {
-        sans: ['"Inter Variable"', "Inter", "system-ui", "sans-serif"],
+        sans: ["Barlow", "system-ui", "sans-serif"],
+        label: ['"Barlow Condensed"', "Barlow", "system-ui", "sans-serif"],
         mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
       },
-      borderRadius: { glass: "18px", data: "12px" },
+      borderRadius: { glass: "4px", data: "3px" },
       boxShadow: {
-        glass: "0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 8px 24px -8px rgb(0 0 0 / 0.45), 0 2px 6px -2px rgb(0 0 0 / 0.3)",
+        glass: "0 1px 0 0 rgb(0 0 0 / 0.25)",
       },
       transitionDuration: { fast: "150ms", base: "200ms", slow: "250ms" },
       keyframes: {

@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from .config import CoreSettings
 from .hub import Hub
-from .models import Alert, EngineEvent, Incident, Meta, Recording, RuleSnapshot, Switch
+from .models import Alert, EngineEvent, Incident, Meta, MlScore, ProbeResult, Recording, RuleSnapshot, Switch
 
 log = logging.getLogger("flowguard.core.ingest")
 SEVERITY_RANK = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
@@ -73,7 +73,8 @@ class Ingestor:
         typ = rec.get("type")
         handler: Optional[Callable[[Session, Dict[str, Any]], bool]] = {
             "alert": self._alert, "alert_update": self._alert_update, "snapshot": self._snapshot,
-            "engine_status": self._engine_status, "event": self._event}.get(str(typ))
+            "engine_status": self._engine_status, "event": self._event,
+            "probe_result": self._probe_result, "ml_score": self._ml_score}.get(str(typ))
         if handler is None:
             return IGNORED
         with self._lock:
@@ -197,6 +198,27 @@ class Ingestor:
         _meta_set(db, "engine_status", json.dumps(rec, sort_keys=True, default=str))
         _meta_set(db, "engine_status_received_at", str(time.time()))
         return True
+
+    def _probe_result(self, db: Session, rec: Dict[str, Any]) -> bool:
+        db.add(ProbeResult(t=float(rec.get("t") or time.time()), dpid=rec.get("dpid"), payload=json.dumps(rec, sort_keys=True, default=str)))
+        self._trim(db, ProbeResult)
+        return True
+
+    def _ml_score(self, db: Session, rec: Dict[str, Any]) -> bool:
+        db.add(MlScore(t=float(rec.get("t") or time.time()), dpid=rec.get("dpid"), score=float(rec.get("score") or 0.0),
+                       payload=json.dumps(rec, sort_keys=True, default=str)))
+        self._trim(db, MlScore)
+        return True
+
+    def _trim(self, db: Session, model: Any, keep: int = 5000) -> None:
+        """Keep the newest `keep` rows; checked now and then, not on every insert."""
+        n = self.__dict__.setdefault("_trim_n", {})  # one counter per table, so neither starves the other
+        n[model.__tablename__] = n.get(model.__tablename__, 0) + 1
+        if n[model.__tablename__] % 100:
+            return
+        cutoff = db.execute(select(model.id).order_by(model.id.desc()).offset(keep).limit(1)).scalar()
+        if cutoff is not None:
+            db.execute(delete(model).where(model.id <= cutoff))
 
     def _event(self, db: Session, rec: Dict[str, Any]) -> bool:
         t = float(rec.get("t") or time.time())

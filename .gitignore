@@ -35,3 +35,8 @@ web/test-results/
 web/playwright-report/
 web/*.tsbuildinfo
 .venv-ui/
+
+# Impeccable runtime folders (screenshots, decision pages); surfaces/ and design files are committed
+.impeccable/review/
+.impeccable/questions/
+.impeccable/mocks/

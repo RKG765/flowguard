@@ -39,11 +39,16 @@ class EngineConfig:
     policy_poll_seconds: float = 1.0
     alert_dedupe_seconds: float = 30.0
     learning_switch: bool = True        # unsigned learning switch in table 1 (lab)
+    quarantine_max_per_switch: int = 4   # cap so an attacker cannot make the engine cut every port
+    probes_enabled: bool = True         # L2 canary probes of the signed critical rules
+    probe_interval_seconds: float = 10.0
+    probe_count: int = 3                # canary packets per rule per cycle
+    anomaly_path: str = "data/engine/anomaly.json"  # L3 baseline learned from legitimate churn
 
     def resolved(self) -> "EngineConfig":
         """Return a copy with every path made absolute (relative paths are relative to the repo root)."""
         c = EngineConfig(**{f.name: getattr(self, f.name) for f in fields(self)})
-        for name in ("db_path", "policy_path", "spool_path", "eventlog_path", "run_dir"):
+        for name in ("db_path", "policy_path", "spool_path", "eventlog_path", "run_dir", "anomaly_path"):
             setattr(c, name, _abs(getattr(c, name)))
         c.key_file = os.path.expanduser(c.key_file)
         if c.event_endpoint.startswith("ipc://"):
@@ -75,7 +80,7 @@ def load_config(path: Optional[str] = None) -> EngineConfig:
     cfg = EngineConfig(**data)
     for env, attr, cast in (("FLOWGUARD_KEY_FILE", "key_file", str), ("FLOWGUARD_DATA_DIR", None, str),
                             ("FLOWGUARD_POLICY", "policy_path", str), ("FLOWGUARD_RESPONSE_MODE", "response_mode", str),
-                            ("FLOWGUARD_GRACE_MS", "grace_window_ms", int), ("FLOWGUARD_RECONCILE_S", "reconcile_poll_seconds", float),
+                            ("FLOWGUARD_GRACE_MS", "grace_window_ms", int), ("FLOWGUARD_RECONCILE_S", "reconcile_poll_seconds", float), ("FLOWGUARD_PROBE_S", "probe_interval_seconds", float),
                             ("FLOWGUARD_EVENT_ENDPOINT", "event_endpoint", str)):
         val = os.environ.get(env)
         if val is None:
@@ -84,6 +89,7 @@ def load_config(path: Optional[str] = None) -> EngineConfig:
             base = os.path.abspath(val)
             cfg.db_path, cfg.spool_path = f"{base}/engine/golden.db", f"{base}/spool/alerts.jsonl"
             cfg.eventlog_path, cfg.run_dir = f"{base}/run/engine_events.jsonl", f"{base}/run"
+            cfg.anomaly_path = f"{base}/engine/anomaly.json"
             if "FLOWGUARD_EVENT_ENDPOINT" not in os.environ:
                 cfg.event_endpoint = f"ipc://{base}/run/events.ipc"
         else:

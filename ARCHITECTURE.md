@@ -20,13 +20,13 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log | `implemented` | 2 |
 | Privileged attack-execution helper (descoped from Phase 4 by the owner; see ADR-019) | `planned` | 4 |
 | Attack scripts A1-A7 (descoped from Phase 4 by the owner; see ADR-019) | `planned` | 4 |
-| Design system (tokens, glass/data surfaces, components, /design style guide) | `implemented` | 3 |
-| Dashboard: shell, setup, sign-in, Overview, Rules, Alerts/Incidents, Topology, Live Detection (Phase 5-6 pages pending) | `partial` | 4 |
-| L2 data-plane prober | `planned` | 5 |
-| L3 ML scorer worker | `planned` | 5 |
-| Risk engine + policy | `planned` | 5 |
+| Design system "Patch Panel" (tokens, panels, port strip, tag stripe, light and dark) | `implemented` | 3 |
+| Dashboard: all pages (Overview, Topology, Rules, Alerts, Live Detection, Demo Lab, Probes, ML, Policy, Reports, Audit, Settings) | `implemented` | 4 |
+| L2 canary prober (counter-based probes of signed rules) | `implemented` | 5 |
+| L3 anomaly scorer (statistical baseline inside the engine, not a neural network) | `implemented` | 5 |
+| Risk engine, policy enforcement and port quarantine | `implemented` | 5 |
 | Reports (summary + CSV now; PDF later) | `partial` | 6 |
-| Packaging: make demo + core serves the dashboard (flowguard start/stop/status/export: Phase 7) | `partial` | 7 |
+| Packaging: flowguard start/stop/status/export, one-command prototype (separate OS users and pristine-machine install still open) | `partial` | 7 |
 | Ryu engine app (signed installs, monitor supervisor, passes, alerts) | `implemented` | 1 |
 | Policy file + live policy reload (signed churn) | `implemented` | 1 |
 | HMAC key file checks, flowguard keygen, key rotation | `implemented` | 1 |
@@ -35,6 +35,9 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | Google Stitch design system + screens (via Stitch MCP) | `partial` | 3 |
 | Live Detection page (observation mode) | `implemented` | 4 |
 | Dashboard-requested repair (admin, audited; works in alert-only mode) | `implemented` | 4 |
+| Demo Lab (simulated four-switch topology; labelled Simulated; touches no switch) | `implemented` | 5 |
+| Streamlit operator console (same palette; Demo Lab, quarantine release, L2/L3 pages) | `partial` | 5 |
+| make eval, make test-soak, make test-security | `implemented` | 8 |
 <!-- /AUTO:component_tags -->
 
 ## System context
@@ -197,13 +200,13 @@ flowchart TB
   core_auth["Auth (argon2id, sessions, roles, CSRF, lockout) + hash-chained audit log"]:::implemented
   helper["Privileged attack-execution helper (descoped from Phase 4 by the owner; see ADR-019)"]:::planned
   attacks["Attack scripts A1-A7 (descoped from Phase 4 by the owner; see ADR-019)"]:::planned
-  web_design_system["Design system (tokens, glass/data surfaces, components, /design style guide)"]:::implemented
-  web_pages["Dashboard: shell, setup, sign-in, Overview, Rules, Alerts/Incidents, Topology, Live Detection (Phase 5-6 pages pending)"]:::partial
-  engine_prober["L2 data-plane prober"]:::planned
-  ml_worker["L3 ML scorer worker"]:::planned
-  risk_engine["Risk engine + policy"]:::planned
+  web_design_system["Design system "Patch Panel" (tokens, panels, port strip, tag stripe, light and dark)"]:::implemented
+  web_pages["Dashboard: all pages (Overview, Topology, Rules, Alerts, Live Detection, Demo Lab, Probes, ML, Policy, Reports, Audit, Settings)"]:::implemented
+  engine_prober["L2 canary prober (counter-based probes of signed rules)"]:::implemented
+  ml_worker["L3 anomaly scorer (statistical baseline inside the engine, not a neural network)"]:::implemented
+  risk_engine["Risk engine, policy enforcement and port quarantine"]:::implemented
   reports["Reports (summary + CSV now; PDF later)"]:::partial
-  packaging["Packaging: make demo + core serves the dashboard (flowguard start/stop/status/export: Phase 7)"]:::partial
+  packaging["Packaging: flowguard start/stop/status/export, one-command prototype (separate OS users and pristine-machine install still open)"]:::partial
   engine_app["Ryu engine app (signed installs, monitor supervisor, passes, alerts)"]:::implemented
   engine_policy["Policy file + live policy reload (signed churn)"]:::implemented
   key_management["HMAC key file checks, flowguard keygen, key rotation"]:::implemented
@@ -212,6 +215,9 @@ flowchart TB
   stitch_designs["Google Stitch design system + screens (via Stitch MCP)"]:::partial
   live_detection["Live Detection page (observation mode)"]:::implemented
   manual_repair["Dashboard-requested repair (admin, audited; works in alert-only mode)"]:::implemented
+  demo_lab["Demo Lab (simulated four-switch topology; labelled Simulated; touches no switch)"]:::implemented
+  console["Streamlit operator console (same palette; Demo Lab, quarantine release, L2/L3 pages)"]:::partial
+  eval_tools["make eval, make test-soak, make test-security"]:::implemented
   lab_topology --> engine_verifier
   engine_crypto --> engine_store
   engine_store --> engine_verifier
@@ -235,6 +241,11 @@ flowchart TB
   stitch_designs --> web_design_system
   live_detection --> web_pages
   manual_repair --> engine_responder
+  engine_prober --> engine_verifier
+  risk_engine --> engine_prober
+  risk_engine --> ml_worker
+  demo_lab --> web_pages
+  console --> core_service
   classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
   classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
   classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;

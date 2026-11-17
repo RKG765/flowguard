@@ -64,6 +64,16 @@ def test_json_output_contract():
     assert all(set(r) == {"id", "title", "status", "detail", "fix"} for r in data["results"])
 
 
-def test_cli_planned_commands_exit_2():
-    r = subprocess.run([sys.executable, str(REPO / "bin" / "flowguard"), "start"], capture_output=True, text=True)
-    assert r.returncode == 2 and "not implemented" in r.stderr
+def test_cli_lists_every_command_and_rejects_unknown_ones():
+    cli = [sys.executable, str(REPO / "bin" / "flowguard")]
+    usage = subprocess.run([*cli, "--help"], capture_output=True, text=True).stdout
+    for cmd in ("doctor", "keygen", "start", "stop", "status", "export"):
+        assert cmd in usage
+    r = subprocess.run([*cli, "frobnicate"], capture_output=True, text=True)
+    assert r.returncode == 2 and "unknown command" in r.stderr
+
+
+def test_cli_status_reports_without_starting_or_stopping_anything():
+    # `start` and `stop` act on the whole lab (sudo, pkill), so only the read-only command is run here
+    r = subprocess.run([sys.executable, str(REPO / "bin" / "flowguard"), "status"], capture_output=True, text=True, timeout=30)
+    assert "website + core API" in r.stdout and "operator console" in r.stdout and r.returncode in (0, 1)

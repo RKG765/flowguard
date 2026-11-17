@@ -1,29 +1,31 @@
 #!/usr/bin/env python3
 """flowguard command line entry point (standard library only).
 
-Phase 0 implements `doctor` only. The other subcommands are declared so the interface is stable,
-but they exit with code 2 and say they are not implemented yet (status: planned).
+Commands: doctor, keygen, start, stop, status, export. `start` runs the whole prototype (scripts/prototype.sh).
 """
 from __future__ import annotations
 
+import json
+import os
+import shutil
+import socket
 import subprocess
 import sys
+import time
+import urllib.request
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-PLANNED = {
-    "start": "Phase 7",
-    "stop": "Phase 7",
-    "status": "Phase 7",
-    "export": "Phase 7",
-}
+RUN = Path("/run/flowguard/data")  # data directory of `start` (lab, engine, core, console); root-owned
 USAGE = """usage: flowguard <command> [options]
 
 commands:
-  doctor [--json] [--quick]   check the environment (implemented)
-  keygen [path]               create the HMAC key file, mode 0600 (implemented)
-  start | stop | status       supervisor (planned, Phase 7)
-  export                      export a session (planned, Phase 7)
+  doctor [--json] [--quick]   check the environment
+  keygen [path]               create the HMAC key file, mode 0600
+  start [restore|alert_only]  lab + engine + core + website + console, one command
+  stop                        stop everything `start` launched
+  status                      what is running and the engine's counters
+  export [dir]                copy events, alerts and the core database (never keys) to a folder
 """
 
 
@@ -41,6 +43,82 @@ def keygen(args: list[str]) -> int:
     return 0
 
 
+def _port_open(port: int) -> bool:
+    with socket.socket() as s:
+        s.settimeout(0.5)
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
+def start(args: list[str]) -> int:
+    return subprocess.call(["bash", str(REPO / "scripts" / "prototype.sh"), *args])  # the script elevates itself with sudo
+
+
+def stop() -> int:
+    """Stop the processes `start` launched (prototype.sh also tidies its own pid file when it exits)."""
+    script = "pkill -f '[r]yu-manager'; pkill -f '[s]treamlit run'; pkill -f '[e]2e_live/stack.py'; pkill -f '[c]ore.main:create_app'; mn -c >/dev/null 2>&1; true"
+    subprocess.call(["bash", "-c", script] if os.geteuid() == 0 else ["sudo", "bash", "-c", script])
+    print("stopped")
+    return 0
+
+
+def status() -> int:
+    up_count = 0
+    for name, port in (("website + core API", 8787), ("operator console", 8501)):
+        up = _port_open(port)
+        detail = ""
+        if up and port == 8787:
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/health", timeout=2) as r:
+                    detail = r.read().decode()[:80]
+            except OSError as exc:
+                detail, up = f"not answering ({exc})", False
+        print(f"{'UP  ' if up else 'DOWN'} {name:20s} http://127.0.0.1:{port} {detail}")
+        up_count += up
+    st = RUN / "run" / "engine_status.json"
+    try:
+        d = json.loads(st.read_text())
+    except PermissionError:
+        print("engine: run data is private to root (by design); run `sudo bin/flowguard status` for engine counters")
+    except (OSError, ValueError):
+        print("engine: no status yet")
+    else:
+        c = d.get("counters", {})
+        print(f"engine: switches={d.get('switches')} epoch={d.get('epoch')} golden_rules={d.get('golden_rules')} "
+              f"alerts={c.get('alerts')} probes={c.get('probes', 0)} probe_fails={c.get('probe_fails', 0)} "
+              f"quarantined={len(d.get('quarantined', []))} risk_dry_run={d.get('risk_dry_run')} age={time.time() - d.get('t', 0):.0f}s")
+    return 0 if up_count == 2 else 1
+
+
+def export(args: list[str]) -> int:
+    """Copy runtime records to a folder: event and alert files plus a database with the operational tables only.
+    Never the HMAC key, the golden store, user accounts, password hashes or sessions."""
+    import sqlite3
+    dest = Path(args[0] if args else f"flowguard-export-{time.strftime('%Y%m%d-%H%M%S')}")
+    if not RUN.exists():
+        print("flowguard export: nothing to export (no run data in /run/flowguard/data)", file=sys.stderr)
+        return 1
+    dest.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for p in (RUN / "run" / "engine_events.jsonl", RUN / "run" / "engine_status.json", RUN / "spool" / "alerts.jsonl"):
+        if p.exists():
+            shutil.copy2(p, dest / p.name)
+            n += 1
+    src = RUN / "core" / "core.db"
+    if src.exists():
+        safe = ("alerts", "incidents", "incident_notes", "engine_events", "rule_snapshots", "switches", "probe_results", "ml_scores")
+        con = sqlite3.connect(str(dest / "flowguard-records.db"))
+        con.execute("ATTACH DATABASE ? AS src", (str(src),))
+        have = {r[0] for r in con.execute("SELECT name FROM src.sqlite_master WHERE type='table'")}
+        for t in safe:
+            if t in have:
+                con.execute(f"CREATE TABLE main.{t} AS SELECT * FROM src.{t}")
+        con.commit()
+        con.close()
+        n += 1
+    print(f"exported {n} files to {dest} (no keys, no golden store, no user accounts or sessions)")
+    return 0 if n else 1
+
+
 def main(argv: list[str]) -> int:
     if not argv or argv[0] in ("-h", "--help"):
         print(USAGE)
@@ -50,9 +128,14 @@ def main(argv: list[str]) -> int:
         return subprocess.call([sys.executable, str(REPO / "scripts" / "doctor.py"), *rest])
     if cmd == "keygen":
         return keygen(rest)
-    if cmd in PLANNED:
-        print(f"flowguard {cmd}: not implemented yet (planned for {PLANNED[cmd]}).", file=sys.stderr)
-        return 2
+    if cmd == "start":
+        return start(rest)
+    if cmd == "stop":
+        return stop()
+    if cmd == "status":
+        return status()
+    if cmd == "export":
+        return export(rest)
     print(f"flowguard: unknown command '{cmd}'\n\n{USAGE}", file=sys.stderr)
     return 2
 

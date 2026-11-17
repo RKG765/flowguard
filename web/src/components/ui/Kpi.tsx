@@ -36,7 +36,7 @@ function useCountUp(target: number | null, ms = 600): number | null {
 
 const ICON_TONE: Record<Tone, string> = {
   ok: "text-ok bg-ok/10", warn: "text-warn bg-warn/10", danger: "text-danger bg-danger/10",
-  info: "text-info bg-info/10", ml: "text-ml bg-ml/10", muted: "text-muted bg-white/5",
+  info: "text-info bg-info/10", ml: "text-ml bg-ml/10", muted: "text-muted bg-fg/5",
 };
 
 export interface KpiProps {
@@ -58,8 +58,8 @@ export function Kpi({ label, value, format = (v) => String(Math.round(v)), unit,
   return (
     <GlassCard className="flex min-h-[132px] flex-col justify-between">
       <div className="flex items-start justify-between">
-        <span className="text-[13px] font-medium text-muted">{label}</span>
-        <span className={cn("rounded-[10px] p-2", ICON_TONE[tone])}>
+        <span className="label">{label}</span>
+        <span className={cn("rounded-[3px] p-2", ICON_TONE[tone])}>
           <Icon aria-hidden className="h-4 w-4" />
         </span>
       </div>
@@ -68,7 +68,7 @@ export function Kpi({ label, value, format = (v) => String(Math.round(v)), unit,
       ) : value === null || shown === null ? (
         <span className="text-sm text-muted">{empty}</span>
       ) : (
-        <span className="tabular text-[28px] font-semibold leading-8 tracking-tight" aria-label={`${label}: ${format(value)}${unit ? ` ${unit}` : ""}`}>
+        <span className="tabular font-mono text-[30px] font-semibold leading-8" aria-label={`${label}: ${format(value)}${unit ? ` ${unit}` : ""}`}>
           {format(shown)}
           {unit && <span className="ml-1 text-sm font-medium text-muted">{unit}</span>}
         </span>

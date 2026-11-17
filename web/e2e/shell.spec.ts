@@ -67,7 +67,37 @@ test("Ctrl+K palette navigates, and planned pages say so", async ({ page }) => {
   await axe(page);
   await page.screenshot({ path: `${IMG}/design-dark.png`, fullPage: true });
   await page.goto("/probes");
-  await expect(page.getByText("Probes is planned")).toBeVisible();
+  await expect(page.getByText("No L2 probe results recorded")).toBeVisible(); // a real page, honest when no prober has reported
+});
+
+test("the Demo Lab shows a simulated tamper, its detection and the repair", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/demo");
+  await expect(page.getByText("Simulated lab.")).toBeVisible();
+  await page.getByRole("button", { name: /Switch s3/ }).click();
+  await page.getByText("Delete a rule").click();
+  await expect(page.getByText(/Detected in \d+ ms/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Switch s3.*Rule missing/ })).toBeVisible();
+  await expect(page.getByText("repair pending")).toBeVisible();
+  await axe(page);
+  await page.screenshot({ path: `${IMG}/demo-lab-dark.png`, fullPage: true });
+  await page.getByRole("button", { name: "Repair now" }).click();
+  await expect(page.getByRole("button", { name: /Switch s3.*Verified/ })).toBeVisible();
+  await expect(page.getByText(/restored in \d+ ms/)).toBeVisible();
+});
+
+test("every page loads and passes the accessibility check in both themes", async ({ page }) => {
+  await signIn(page);
+  for (const theme of ["dark", "light"]) {
+    await page.goto("/");
+    await page.evaluate((t) => localStorage.setItem("fg-theme", t), theme);
+    for (const path of ["/", "/topology", "/rules", "/alerts", "/live", "/demo", "/probes", "/ml", "/policy", "/reports", "/audit", "/settings"]) {
+      await page.goto(path);
+      await expect(page.locator("main h1, header h1").first()).toBeVisible();
+      await expect(page.getByText("Page not found")).toHaveCount(0);
+      await axe(page);
+    }
+  }
 });
 
 test("theme toggle switches to light and persists", async ({ page }) => {
@@ -86,18 +116,19 @@ test("theme toggle switches to light and persists", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
-test("reduced transparency makes glass solid; reduced motion stops the background animation", async ({ page }) => {
+test("reduced transparency is remembered; reduced motion stops the pulsing of a lit row", async ({ page }) => {
   await signIn(page);
   await page.goto("/design");
-  const glassFilter = () => page.locator(".glass").first().evaluate((el) => getComputedStyle(el).backdropFilter);
-  expect(await glassFilter()).toContain("blur");
   await page.getByRole("button", { name: /Reduced transparency: off/ }).click();
-  expect(await glassFilter()).toBe("none");
+  await expect(page.locator("html")).toHaveAttribute("data-transparency", "reduced");
   await page.getByRole("button", { name: /Reduced transparency: on/ }).click();
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.reload();
-  const anim = await page.evaluate(() => getComputedStyle(document.body, "::before").animationName);
-  expect(anim).toBe("none");
+  await page.goto("/demo");
+  await page.getByText("Add an unknown rule").click();
+  const lit = page.locator(".row-lit").first();
+  await expect(lit).toBeVisible();
+  const duration = await lit.evaluate((el) => getComputedStyle(el).animationDuration);
+  expect(parseFloat(duration)).toBeLessThan(0.01);
 });
 
 test("keyboard users get a skip link and a visible focus ring", async ({ page }) => {

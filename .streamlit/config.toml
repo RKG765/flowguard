@@ -1,0 +1,17 @@
+# FlowGuard "Patch Panel" theme for the Streamlit console (same palette as web/src/styles/tokens.css, dark).
+[theme]
+base = "dark"
+primaryColor = "#5EB0E8"
+backgroundColor = "#1B1B19"
+secondaryBackgroundColor = "#252522"
+textColor = "#ECE8DC"
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"

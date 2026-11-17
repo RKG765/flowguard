@@ -5,8 +5,11 @@ Local-only console: it listens on 127.0.0.1 and signs in to the local core autom
 default: the demo account `make present` creates). Read-only monitoring plus the operator actions the API allows (acknowledge, incidents, admin repair, users, key
 rotation). Like the main dashboard it has no attack execution (ADR-019). L2 probes and L3 ML are Phase 5 placeholders.
 """
+import hashlib
+import html
 import json
 import os
+import random
 import time
 from datetime import datetime
 
@@ -16,13 +19,18 @@ import streamlit as st
 
 CORE = os.environ.get("FG_CORE_URL", "http://127.0.0.1:8787")
 KINDS = ["altered", "forged", "missing", "shadow", "unattributed_change"]
-STATUS_ICON = {"ok": "🟢 verified", "altered": "🟠 altered", "forged": "🔴 forged", "missing": "🔴 missing",
-               "shadow": "🟠 shadow", "pending": "⏳ pending"}
+STATUS_ICON = {"ok": "\u25cf verified", "altered": "! altered", "forged": "\u00d7 forged", "missing": "\u2205 missing",
+               "shadow": "\u2248 shadow", "pending": "\u00b7 pending"}
 
-st.set_page_config(page_title="FlowGuard", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="FlowGuard", page_icon="\u25a4", layout="wide")
 
 
 # ---- API -----------------------------------------------------------------------------------------------------------
+def esc(v):
+    """Everything that comes from the API and is placed in HTML goes through this."""
+    return html.escape(str(v))
+
+
 def api(method, path, **kw):
     headers = {}
     if st.session_state.get("token"):
@@ -68,26 +76,87 @@ def fmt_instr(ins):
     return "; ".join(out)
 
 
+WIRE = ["#3b82c4", "#f08a24", "#3fae5a", "#8a5a3c", "#7b8794", "#d6453d", "#8e63c9", "#e6c229", "#ece8dc", "#e57fa3", "#34b5b0", "#2b2f36"]
+PORT_PATH = {  # drawn icons (24x24 strokes), never text glyphs
+    "ok": "M5 12l4.5 4.5L19 7",
+    "altered": "M12 4l9 16H3z M12 10v4 M12 17v.5",
+    "forged": "M6 6l12 12 M18 6L6 18",
+    "shadow": "M12 4l9 5-9 5-9-5z M3 14l9 5 9-5",
+    "missing": "M12 4a8 8 0 100 16 8 8 0 000-16z M5.5 5.5l13 13",
+    "pending": "M12 3a9 9 0 100 18 9 9 0 000-18z M12 7v5l3 2",
+}
+PORT = {k: ({"ok": "ok", "altered": "bad", "forged": "bad", "shadow": "bad", "missing": "miss", "pending": "pend"}[k], PORT_PATH[k]) for k in PORT_PATH}
+
+
+def _bands(cookie):
+    if not cookie:
+        return None
+    h = "".join(c for c in str(cookie).lower().replace("0x", "") if c in "0123456789abcdef").rjust(16, "0")[-16:]
+    return [int(h[i * 2:i * 2 + 2], 16) % len(WIRE) for i in range(8)]
+
+
+def stripe(cookie, against="__none__"):
+    """Signature move: the 8-byte HMAC cookie as 8 wire-code bands. With `against`, bands that differ are hatched."""
+    b = _bands(cookie)
+    if b is None:
+        return '<span class="fg-mono">no tag</span>'
+    ref = None if against == "__none__" else _bands(against)
+    return '<span class="fg-stripe">' + "".join(
+        f'<i class="{"diff" if ref is not None and ref[k] != v else ""}" style="background:{WIRE[v]}"></i>'
+        for k, v in enumerate(b)) + "</span>"
+
+
+def port_strip(statuses):
+    cells = "".join(
+        f'<span class="fg-port {PORT.get(x, ("pend", PORT_PATH["pending"]))[0]}" title="{esc(x)}">'
+        f'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" '
+        f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{PORT.get(x, ("pend", PORT_PATH["pending"]))[1]}"/></svg></span>'
+        for x in statuses)
+    return f'<div class="fg-ports">{cells}</div>'
+
+
+
 # ---- look ----------------------------------------------------------------------------------------------------------
 st.markdown("""
 <style>
-  .block-container {padding-top: 1.6rem; max-width: 1400px;}
-  [data-testid="stSidebar"] {background: linear-gradient(180deg, #0f172a 0%, #111827 100%); border-right: 1px solid #1f2937;}
-  [data-testid="stSidebar"] label p {font-size: 0.98rem;}
-  [data-testid="stMetric"] {background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 14px 18px;}
-  [data-testid="stMetricLabel"] p {color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: .04em;}
-  [data-testid="stMetricValue"] {font-size: 2.1rem;}
-  .fg-hero {display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 22px;
-            border-radius:16px; background: linear-gradient(120deg, #1e3a8a 0%, #0f766e 100%); margin-bottom: 18px;}
-  .fg-hero h1 {font-size: 1.7rem; margin: 0; color: #f8fafc;}
-  .fg-hero p {margin: 2px 0 0 0; color: #dbeafe; font-size: .95rem;}
-  .fg-pill {padding: 6px 14px; border-radius: 999px; font-weight: 600; font-size: .9rem; white-space: nowrap;}
-  .fg-ok {background:#064e3b; color:#a7f3d0; border:1px solid #10b981;}
-  .fg-warn {background:#78350f; color:#fde68a; border:1px solid #f59e0b;}
-  .fg-bad {background:#7f1d1d; color:#fecaca; border:1px solid #ef4444;}
-  .fg-card {background:#111827; border:1px solid #1f2937; border-radius:14px; padding:16px 18px; height:100%;}
-  .fg-card h4 {margin:0 0 6px 0; font-size:1.02rem;}
-  .fg-card p {margin:0; color:#94a3b8; font-size:.9rem;}
+  @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=JetBrains+Mono:wght@400;600&display=swap');
+  html, body, [class*="css"], .stMarkdown, .stButton button {font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;}
+  code, pre, .fg-mono {font-family: 'JetBrains Mono', ui-monospace, monospace !important;}
+  .block-container {padding-top: 3.4rem; max-width: 1400px;}
+  [data-testid="stDecoration"] {display: none;}
+  h1, h2, h3, h4 {font-family: 'Barlow Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: .08em;}
+  [data-testid="stSidebar"] {background: #182436; border-right: 1px solid #0f1826;}
+  [data-testid="stSidebar"] * {color: #dfe6f0;}
+  [data-testid="stSidebar"] label p {font-size: 1rem;}
+  [data-testid="stMetric"] {background: #252522; border: 1px solid #4E4D46; border-top: 3px solid #4E4D46; border-radius: 4px; padding: 12px 16px;}
+  [data-testid="stMetricLabel"] p {color: #A6A49C; font: 600 .85rem 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .1em;}
+  [data-testid="stMetricValue"] {font-family: 'JetBrains Mono', monospace; font-size: 1.9rem;}
+  .fg-brand {display:flex; align-items:center; gap:10px; margin-bottom: 6px;}
+  .fg-brand b {font: 600 1.35rem 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color:#fff;}
+  .fg-wire {display:inline-flex; gap:3px; padding:5px 6px; border:1.5px solid #e6ebf2; border-radius:3px;}
+  .fg-wire i {display:block; width:5px; height:12px; border-radius:1px;}
+  .fg-bar {display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 16px; margin-bottom:16px;
+           background:#252522; border:1px solid #4E4D46; border-top: 3px solid #5EB0E8; border-radius:4px;}
+  .fg-bar h1 {font-size: 1.5rem; margin: 0; color: #ECE8DC; padding: 0;}
+  .fg-bar p {margin: 0; color: #A6A49C; font-size: .9rem;}
+  .fg-pill {padding: 4px 12px; border-radius: 3px; font: 600 .9rem 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;}
+  .fg-ok {background:#13301f; color:#8fe0a8; border:1px solid #5ECC80;}
+  .fg-warn {background:#3a2a0c; color:#f9c877; border:1px solid #F6AA38;}
+  .fg-bad {background:#44161a; color:#ffb0b0; border:1px solid #FF7070;}
+  .fg-card {background:#252522; border:1px solid #4E4D46; border-top: 3px solid #4E4D46; border-radius:4px; padding:14px 16px; height:100%;}
+  .fg-card h4 {margin:0 0 6px 0; font-size:1.05rem;}
+  .fg-card p {margin:0; color:#A6A49C; font-size:.92rem;}
+  .fg-ports {display:flex; flex-wrap:wrap; gap:4px; margin: 6px 0 14px 0;}
+  .fg-port {width:24px; height:24px; display:grid; place-items:center; border-radius:3px; border:1px solid; font: 600 .8rem 'JetBrains Mono', monospace;}
+  .fg-port.ok {background:#1c4a2c; border-color:#5ECC80; color:#8fe0a8;}
+  .fg-port.bad {background:#5a1f25; border-color:#FF7070; color:#ffb0b0;}
+  .fg-port.miss {background:#5a3a0c; border-color:#F6AA38; color:#f9c877;}
+  .fg-port.pend {background:#1d3a52; border-color:#7EC4F0; color:#a9d8f5;}
+  .fg-stripe {display:inline-flex; vertical-align:middle; height:16px; border:1px solid #4E4D46; border-radius:2px; overflow:hidden;}
+  .fg-stripe i {display:block; width:7px; position:relative;}
+  .fg-stripe i.diff::after {content:''; position:absolute; left:0; right:0; bottom:0; height:5px; background:repeating-linear-gradient(135deg,#000 0 2px,#fff 2px 4px);}
+  [data-testid="stAlert"] p, [data-testid="stAlert"] li {color: #ECE8DC !important;}
+  [data-testid="stAlert"] {background: #252522; border: 1px solid #4E4D46;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -102,7 +171,7 @@ DEMO_PASSWORD = os.environ.get("FG_PASSWORD", "flowguard-demo")
 def auto_sign_in():
     code, _ = api("GET", "/api/health")
     if code != 200:
-        st.markdown("## 🛡️ FlowGuard")
+        st.markdown("## FlowGuard")
         st.warning(f"Waiting for the FlowGuard core at {CORE} ...")
         st.markdown("The lab is not running yet. In **another terminal** start it (this page connects by itself "
                     "within a few seconds, no refresh needed):")
@@ -130,11 +199,12 @@ is_admin, is_analyst = role == "admin", role in ("admin", "analyst")
 
 
 # ---- sidebar -------------------------------------------------------------------------------------------------------
-NAV = ["📊 Overview", "🛡️ Rules", "⚡ Live Detection", "🚨 Alerts & Incidents", "🕸️ Topology", "📜 Policy",
-       "📈 Reports", "🔏 Audit log", "⚙️ Engine", "👥 Users", "🧪 L2 Probes / L3 ML (planned)"]
+NAV = ["Overview", "Rules", "Live Detection", "Demo Lab (simulated)", "Alerts & Incidents", "Topology", "Policy",
+       "Reports", "Audit log", "Engine", "Users", "L2 Probes / L3 ML"]
 with st.sidebar:
-    st.markdown("## 🛡️ FlowGuard")
-    st.caption("SDN flow-rule integrity · operator console")
+    st.markdown('<div class="fg-brand"><span class="fg-wire"><i style="background:#3b82c4"></i><i style="background:#f08a24"></i>'
+                '<i style="background:#3fae5a"></i><i style="background:#d6453d"></i></span><b>FlowGuard</b></div>', unsafe_allow_html=True)
+    st.caption("SDN flow-rule integrity \u00b7 operator console")
     page = st.radio("Navigate", NAV, label_visibility="collapsed")
     st.divider()
     st.caption(f"Local console · {me.get('username')} ({role}) · core {CORE}")
@@ -152,7 +222,7 @@ def engine_banner():
         mode = (eng.get("status") or {}).get("response_mode", "?")
         pill = (f'<span class="fg-pill {"fg-ok" if up else "fg-warn"}">● Engine connected · monitor '
                 f'{"up" if up else "DOWN"} · {mode}</span>')
-    st.markdown(f'<div class="fg-hero"><div><h1>{page.split(" ", 1)[1]}</h1><p>FlowGuard · signed flow rules, '
+    st.markdown(f'<div class="fg-bar"><div><h1>{page}</h1><p>FlowGuard · signed flow rules, '
                 f'verified live on the switch</p></div>{pill}</div>', unsafe_allow_html=True)
     return eng, sws
 
@@ -163,9 +233,15 @@ def overview():
     eng, sws = engine_banner()
     s = get("/api/rules/summary") or {}
     rep = get("/api/reports/summary") or {}
+    all_rules = get("/api/rules") or []
+    st.markdown("#### Patch panel: one port per rule on the switch")
+    if all_rules:
+        st.markdown(port_strip([r["status"] for r in all_rules]), unsafe_allow_html=True)
+    else:
+        st.caption("Ports appear after the engine's first verification pass.")
     c = st.columns(5)
     c[0].metric("Protected rules", s.get("protected", 0))
-    c[1].metric("Verified", f"{s.get('verified', 0)}", f"{s.get('verified_percent', 0)}%")
+    c[1].metric("Verified", f"{s.get('verified', 0)} of {s.get('protected', 0)}", help=f"{s.get('verified_percent', 0)}% of the signed rules match the switch")
     c[2].metric("Not OK now", sum((s.get("by_status") or {}).get(k, 0) for k in ("altered", "forged", "missing", "shadow")))
     c[3].metric("Alerts (total)", rep.get("alerts_total", 0))
     c[4].metric("Open incidents", rep.get("open_incidents", 0))
@@ -173,9 +249,9 @@ def overview():
     l = st.columns(3)
     for col, (name, text, cls) in zip(l, [
             ("L1 · Signed-rule verification", "HMAC-signed rules checked on every switch change", "fg-ok"),
-            ("L2 · Data-plane probes", "Planned for Phase 5", "fg-warn"),
-            ("L3 · ML scoring", "Planned for Phase 5", "fg-warn")]):
-        status = "active" if cls == "fg-ok" else "planned"
+            ("L2 · Data-plane probes", "Canary packets check that signed rules forward as signed", "fg-ok" if (get("/api/probes?limit=1") or {}).get("available") else "fg-warn"),
+            ("L3 · Anomaly scoring", "Baseline learned from normal rule churn scores each change", "fg-ok" if (get("/api/ml/scores?limit=1") or {}).get("available") else "fg-warn")]):
+        status = "active" if cls == "fg-ok" else "waiting"
         col.markdown(f'<div class="fg-card"><h4>{name}</h4><p>{text}</p><br><span class="fg-pill {cls}">{status}</span>'
                      '</div>', unsafe_allow_html=True)
     st.subheader("Live feed (latest alerts)")
@@ -213,15 +289,18 @@ def rules_page():
     a.markdown("**Signed by the controller**")
     a.code(f"{fmt_instr(r.get('golden_instructions')) if r.get('golden') else '(no signed rule for this slot)'}\n"
            f"cookie {r.get('golden_cookie') or '-'}")
+    a.markdown(stripe(r.get("golden_cookie")), unsafe_allow_html=True)
     b.markdown("**On the switch now**")
     b.code(f"{fmt_instr(r.get('instructions')) if r.get('present') else '(rule is missing)'}\ncookie {r.get('cookie') or '-'}")
+    if r.get("present"):
+        b.markdown(stripe(r.get("cookie"), r.get("golden_cookie")), unsafe_allow_html=True)
     if r["status"] == "ok":
         st.success("Matches the signed rule the controller installed.")
     elif r["status"] == "pending":
         st.info("The engine is checking or repairing this slot.")
     else:
         st.error(f"{r['status'].upper()}: the switch differs from the signed policy.")
-        if is_admin and st.button("🔧 Repair this rule", type="primary", key=f"rep{i}"):
+        if is_admin and st.button("Repair this rule", type="primary", key=f"rep{i}"):
             c, body = api("POST", "/api/rules/repair", json={"dpid": r["dpid"], "table_id": r["table_id"],
                                                             "priority": r["priority"], "match": r.get("match") or {}})
             (st.success if c == 202 else st.error)("Repair requested; the engine acts within about a second."
@@ -252,7 +331,7 @@ def live_page():
     seen = st.session_state.setdefault("seen_alerts", {a["id"] for a in items})
     new = [a for a in items if a["id"] not in seen]
     for a in reversed(new):
-        st.toast(f"🚨 {a['kind'].upper()} detected · priority {a['priority']}", icon="🚨")
+        st.toast(f"{a['kind'].upper()} detected \u00b7 priority {a['priority']}", icon="\u26a0\ufe0f")
         seen.add(a["id"])
     if new:
         st.session_state.last_alarm = (time.time(), new[0])
@@ -262,13 +341,13 @@ def live_page():
     # ---- alarm / all-clear banner
     if last and time.time() - t_alarm < 45:
         lat = last.get("detect_latency_ms")
-        st.markdown(f'<div class="fg-card" style="border-color:#ef4444;background:#450a0a"><h4>🚨 TAMPERING DETECTED · '
-                    f'{last["kind"].upper()}</h4><p style="color:#fecaca">{KIND_TEXT.get(last["kind"], last["summary"])} · '
+        st.markdown(f'<div class="fg-card" style="border-color:#ef4444;background:#450a0a"><h4>\u26a0 TAMPERING DETECTED · '
+                    f'{esc(last["kind"].upper())}</h4><p style="color:#fecaca">{esc(KIND_TEXT.get(last["kind"], last["summary"]))} · '
                     f'table {last["table_id"]}, priority {last["priority"]} · detected '
-                    f'{f"in {lat} ms" if lat is not None else "by " + str(last["detected_by"])} · action: {last["action"]}</p>'
+                    f'{f"in {lat} ms" if lat is not None else "by " + esc(last["detected_by"])} · action: {esc(last["action"])}</p>'
                     '</div>', unsafe_allow_html=True)
     elif not bad:
-        st.markdown('<div class="fg-card" style="border-color:#10b981"><h4>✅ All signed rules match the switch</h4>'
+        st.markdown('<div class="fg-card" style="border-color:#10b981"><h4>\u25cf All signed rules match the switch</h4>'
                     '<p>Watching every change on the switch. Any change made outside the controller appears here '
                     'within milliseconds.</p></div>', unsafe_allow_html=True)
     st.write("")
@@ -281,7 +360,7 @@ def live_page():
             c1.markdown(f"**{r['status'].upper()}** · table {r['table_id']} · priority {r['priority']} · "
                         f"`{fmt_match(r.get('match'))}` · signed: `{fmt_instr(r.get('golden_instructions'))}` · "
                         f"on switch: `{fmt_instr(r.get('instructions')) if r.get('present') else 'absent'}`")
-        if is_admin and st.button("🔧 Repair all now", type="primary", key="repair_all"):
+        if is_admin and st.button("Repair all now", type="primary", key="repair_all"):
             repair_bad_rules()
             st.success("Repair requested; the engine restores the signed policy within about a second.")
 
@@ -299,14 +378,14 @@ def live_page():
     df = pd.DataFrame([{"time": datetime.fromtimestamp(a["t"]), "kind": a["kind"],
                         "detect ms": a["detect_latency_ms"] if a["detect_latency_ms"] is not None else 0} for a in items])
     st.markdown("#### Detection timeline")
-    st.scatter_chart(df, x="time", y="detect ms", color="kind", height=230)
+    st.scatter_chart(df, x="time", y="detect ms", color="#FF7070", height=230)
 
     # ---- detections
     st.markdown("#### Detections (newest first)")
     for a in items[:12]:
-        icon = "🔴" if a["severity"] in ("high", "critical") else "🟠"
+        icon = "\u25a0" if a["severity"] in ("high", "critical") else "\u25b2"
         with st.expander(f"{icon} {ts(a['t'])} · {a['kind']} · priority {a['priority']} · {a['action']}"
-                         f"{' · ✔ acknowledged' if a['status'] == 'acknowledged' else ''}", expanded=a in new):
+                         f"{' · acknowledged' if a['status'] == 'acknowledged' else ''}", expanded=a in new):
             d = (get(f"/api/alerts/{a['id']}") or {}).get("details") or {}
             st.markdown(f"**What happened:** {a['summary']}")
             if d.get("reasons"):
@@ -315,8 +394,11 @@ def live_page():
             c1, c2 = st.columns(2)
             c1.markdown("**Signed by the controller**")
             c1.code(f"{fmt_instr(g.get('instructions')) if g else '(no signed rule)'}\ncookie {g.get('cookie', '-') if g else '-'}")
+            c1.markdown(stripe(g.get("cookie") if g else None), unsafe_allow_html=True)
             c2.markdown("**Found on the switch**")
             c2.code(f"{fmt_instr(o.get('instructions')) if o else '(rule absent)'}\ncookie {o.get('cookie', '-') if o else '-'}")
+            if o:
+                c2.markdown(stripe(o.get("cookie"), g.get("cookie") if g else None), unsafe_allow_html=True)
             t = d.get("timing") or {}
             m = st.columns(4)
             m[0].metric("Detect", f"{a['detect_latency_ms']} ms" if a["detect_latency_ms"] is not None else "-")
@@ -418,7 +500,7 @@ def reports_page():
         r = requests.get(CORE + "/api/reports/alerts.csv", headers={"Authorization": f"Bearer {st.session_state.token}"},
                          timeout=6)
         if r.status_code == 200:
-            st.download_button("⬇️ Download alerts CSV", r.content, "flowguard-alerts.csv", "text/csv")
+            st.download_button("Download alerts CSV", r.content, "flowguard-alerts.csv", "text/csv")
 
 
 def audit_page():
@@ -439,6 +521,16 @@ def audit_page():
 def engine_page():
     eng, _ = engine_banner()
     st.json(eng, expanded=False)
+    st.subheader("Quarantined ports")
+    quarantined = (get("/api/quarantine") or {}).get("items", [])
+    if not quarantined:
+        st.caption("No port is quarantined. A port is cut only when the policy action is quarantine_port, dry run is off, and the finding names a port.")
+    for item in quarantined:
+        c1, c2 = st.columns([4, 1])
+        c1.markdown(f"Switch `{item['dpid']}` \u00b7 port **{item['port']}** \u00b7 since {ts(item['t'])}")
+        if is_admin and c2.button("Release", key=f"rel_{item['dpid']}_{item['port']}"):
+            code, body = api("POST", "/api/quarantine/release", json={"dpid": item["dpid"], "port": item["port"]})
+            (st.success if code == 202 else st.error)("Release requested; the engine lifts it within a second." if code == 202 else f"Refused: {body}")
     st.subheader("Recent engine events")
     ev = get("/api/events?limit=50") or []
     if ev:
@@ -469,14 +561,85 @@ def users_page():
 
 
 def planned_page():
-    st.info("**L2 data-plane probes** and **L3 ML scoring** arrive in Phase 5. The API already exposes the "
-            "endpoints; they return no data until then.")
-    st.json({"probes": get("/api/probes"), "ml": get("/api/ml/scores")}, expanded=False)
+    probes, ml = get("/api/probes") or {}, get("/api/ml/scores") or {}
+    st.info("**L2 canary probes** and **L3 anomaly scores** are produced inside the engine. " + (probes.get("note") or ""))
+    a, b = st.columns(2)
+    a.markdown("#### L2 probe results")
+    if probes.get("items"):
+        a.dataframe(pd.DataFrame([{"time": ts(i["t"]), "switch": i["dpid"], "priority": i["data"].get("priority"), "expect": i["data"].get("expect"),
+                                   "status": i["data"].get("status"), "why": i["data"].get("reason")} for i in probes["items"]]), hide_index=True, use_container_width=True)
+    else:
+        a.caption("No probe results yet.")
+    b.markdown("#### L3 anomaly scores")
+    if ml.get("items"):
+        b.dataframe(pd.DataFrame([{"time": ts(i["t"]), "switch": i["dpid"], "score": i["score"], "why": "; ".join(i["data"].get("reasons") or [])} for i in ml["items"]]),
+                    hide_index=True, use_container_width=True)
+    else:
+        b.caption("A score appears for each detected rule change.")
 
 
-PAGES = dict(zip(NAV, [overview, rules_page, live_page, alerts_page, topology_page, policy_page, reports_page,
+# ---- Demo Lab: SIMULATED four-switch network (in-memory; nothing is sent to any switch or the engine) -----------------
+DEMO_SW = {"s1": "core", "s2": "edge-west", "s3": "edge-mid", "s4": "edge-east"}
+DEMO_KINDS = [("altered", "Change a rule"), ("forged", "Add an unknown rule"), ("missing", "Delete a rule"),
+              ("shadow", "Hide a rule"), ("unattributed_change", "Change and revert")]
+
+
+def _cookie(seed):
+    return hashlib.sha1(seed.encode()).hexdigest()[:16]
+
+
+def demo_page():
+    st.info("**Simulated lab.** This page edits an in-memory model of four switches. It sends nothing to any switch or to "
+            "the engine, and FlowGuard runs no attacks. It shows what FlowGuard would report if rules were changed.")
+    d = st.session_state.setdefault("demo", {"bad": {}, "events": []})
+    sw = st.radio("Switch to tamper with", list(DEMO_SW), horizontal=True, format_func=lambda k: f"{k.upper()} \u00b7 {DEMO_SW[k]}")
+    cols = st.columns(5)
+    for c, (k, label) in zip(cols, DEMO_KINDS):
+        if c.button(label, key=f"demo_{k}", use_container_width=True):
+            signed = _cookie(f"{sw}-r1")
+            found = None if k == "missing" else (_cookie(f"{sw}-x") if k in ("forged", "shadow") else signed[:12] + _cookie(signed)[:4])
+            d["bad"][sw] = k
+            d["events"].insert(0, {"t": time.time(), "sw": sw, "kind": k, "ms": random.randint(6, 35), "restore": None,
+                                   "signed": None if k in ("forged", "shadow") else signed, "found": found})
+    a, b, _ = st.columns([1, 1, 4])
+    if a.button("Repair now", type="primary"):
+        d["bad"].clear()
+        for e in d["events"]:
+            e["restore"] = e["restore"] or random.randint(300, 800)
+    if b.button("Reset"):
+        st.session_state.pop("demo", None)
+        st.rerun()
+
+    dot = ['graph G { rankdir=TB; node [shape=box, style="filled", fontname="Helvetica", fontcolor="#1B1B19"];',
+           'eng [label="FlowGuard engine", fillcolor="#182436", fontcolor="#ffffff"];']
+    for k, n in DEMO_SW.items():
+        bad = k in d["bad"]
+        dot.append(f'{k} [label="{k.upper()} {n}\\n{"TAMPERED" if bad else "verified"}", fillcolor="{"#FF9A9A" if bad else "#8fe0a8"}"];')
+        dot.append(f'eng -- {k} [style=dashed];')
+    dot += ["s1 -- s2;", "s1 -- s3;", "s1 -- s4;", "s2 -- s3;"]
+    for h, k in zip(["h1", "h2", "h3", "h4", "h5", "h6"], ["s2", "s2", "s3", "s3", "s4", "s4"]):
+        dot.append(f'{h} [shape=ellipse, fillcolor="#ECE8DC"]; {k} -- {h};')
+    dot.append("}")
+    st.graphviz_chart("\n".join(dot), use_container_width=True)
+
+    st.markdown("#### Patch panel by switch")
+    for k, n in DEMO_SW.items():
+        st.markdown(f"**{k.upper()} \u00b7 {n}**" + port_strip(["altered" if k in d["bad"] else "ok"] + ["ok"] * 3), unsafe_allow_html=True)
+
+    st.markdown("#### What FlowGuard caught")
+    if not d["events"]:
+        st.caption("Nothing yet. Pick a switch and run a scenario above.")
+    for e in d["events"]:
+        st.markdown(f'<div class="fg-card" style="margin-bottom:8px"><h4>{e["kind"].replace("_", " ").upper()} \u00b7 {e["sw"]}</h4>'
+                    f'<p>{ts(e["t"])} \u00b7 detected in <b>{e["ms"]} ms</b> \u00b7 '
+                    f'{"repair pending" if e["restore"] is None else "restored in " + str(e["restore"]) + " ms"}</p><br>'
+                    f'signed {stripe(e["signed"])} &nbsp; found {stripe(e["found"], e["signed"]) if e["found"] else "(rule absent)"}'
+                    '</div>', unsafe_allow_html=True)
+
+
+PAGES = dict(zip(NAV, [overview, rules_page, live_page, demo_page, alerts_page, topology_page, policy_page, reports_page,
                        audit_page, engine_page, users_page, planned_page]))
-SHOWS_BANNER = {overview, rules_page, live_page, alerts_page, topology_page, engine_page}
+SHOWS_BANNER = {overview, rules_page, live_page, demo_page, alerts_page, topology_page, engine_page}
 if PAGES[page] not in SHOWS_BANNER:
     engine_banner()
 PAGES[page]()

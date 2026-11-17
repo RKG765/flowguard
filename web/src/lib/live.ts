@@ -6,7 +6,7 @@ import { api } from "./api";
  *  engine_status | event. Only the newest 50 feed items are kept so a burst of alerts cannot grow memory. */
 
 export interface FeedItem { key: string; t: number; type: string; kind: string; severity: string; text: string; dpid?: string | null; alertId?: string }
-export interface LiveEngineStatus { t: number; switches: string[]; monitors_up: Record<string, boolean>; epoch: number; golden_rules: number }
+export interface LiveEngineStatus { t: number; switches: string[]; monitors_up: Record<string, boolean>; epoch: number; golden_rules: number; response_mode?: string; risk_dry_run?: boolean }
 
 interface LiveState {
   socket: "idle" | "connecting" | "open" | "closed";
