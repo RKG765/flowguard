@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-17 12:11:37",
+  "generated_at": "2026-11-17 19:43:08",
   "trials_per_kind": 10,
   "kinds": {
     "forged": {
@@ -11,21 +11,21 @@
       },
       "wall_clock_ms": {
         "n": 10,
-        "median": 25.2,
-        "p95": 26.2,
-        "max": 26.2
+        "median": 23.5,
+        "p95": 24.6,
+        "max": 24.6
       },
       "engine_detect_ms": {
         "n": 10,
-        "median": 16.3,
-        "p95": 16.6,
-        "max": 16.6
+        "median": 15.9,
+        "p95": 16.7,
+        "max": 16.7
       },
       "restore_ms": {
         "n": 10,
         "median": 3.9,
-        "p95": 4.5,
-        "max": 4.5
+        "p95": 4.1,
+        "max": 4.1
       }
     },
     "altered": {
@@ -37,21 +37,21 @@
       },
       "wall_clock_ms": {
         "n": 10,
-        "median": 25.2,
-        "p95": 25.7,
-        "max": 25.7
+        "median": 23.7,
+        "p95": 25.4,
+        "max": 25.4
       },
       "engine_detect_ms": {
         "n": 10,
-        "median": 16.2,
-        "p95": 16.5,
-        "max": 16.5
+        "median": 16.0,
+        "p95": 16.1,
+        "max": 16.1
       },
       "restore_ms": {
         "n": 10,
-        "median": 12.3,
-        "p95": 14.3,
-        "max": 14.3
+        "median": 4.5,
+        "p95": 15.5,
+        "max": 15.5
       }
     },
     "missing": {
@@ -63,21 +63,21 @@
       },
       "wall_clock_ms": {
         "n": 10,
-        "median": 24.3,
-        "p95": 25.4,
-        "max": 25.4
+        "median": 23.4,
+        "p95": 24.5,
+        "max": 24.5
       },
       "engine_detect_ms": {
         "n": 10,
-        "median": 16.1,
-        "p95": 16.6,
-        "max": 16.6
+        "median": 15.9,
+        "p95": 16.3,
+        "max": 16.3
       },
       "restore_ms": {
         "n": 10,
-        "median": 10.0,
-        "p95": 15.6,
-        "max": 15.6
+        "median": 12.1,
+        "p95": 14.0,
+        "max": 14.0
       }
     },
     "shadow": {
@@ -89,21 +89,21 @@
       },
       "wall_clock_ms": {
         "n": 10,
-        "median": 24.6,
-        "p95": 25.7,
-        "max": 25.7
+        "median": 22.7,
+        "p95": 24.5,
+        "max": 24.5
       },
       "engine_detect_ms": {
         "n": 10,
-        "median": 16.2,
-        "p95": 16.6,
-        "max": 16.6
+        "median": 15.9,
+        "p95": 16.0,
+        "max": 16.0
       },
       "restore_ms": {
         "n": 10,
-        "median": 10.2,
-        "p95": 13.1,
-        "max": 13.1
+        "median": 12.8,
+        "p95": 13.6,
+        "max": 13.6
       }
     }
   },
@@ -113,7 +113,7 @@
   },
   "probes": {
     "cycles": 43,
-    "failed_cycles": 5
+    "failed_cycles": 9
   },
   "l3_score_on_tamper": {
     "n": 40,
@@ -121,6 +121,6 @@
     "p95": 0.6,
     "max": 0.6
   },
-  "duration_s": 112.3,
+  "duration_s": 115.5,
   "environment": "one Open vSwitch switch, four hosts, Mininet, WSL2; engine, core and lab on one host"
 }

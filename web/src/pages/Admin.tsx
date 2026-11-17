@@ -9,6 +9,7 @@ import { fmtAgo, fmtTime } from "@/lib/cn";
 import { Badge, Banner, Button, CardTitle, DataSurface, EmptyState, Field, GlassCard, Skeleton } from "@/components/ui/primitives";
 import { Kpi } from "@/components/ui/Kpi";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ReplayCard } from "./Replay";
 
 const useRole = () => useAuth((s) => s.user)?.role ?? "viewer";
 const err = (e: unknown) => (e instanceof ApiError ? e.detail : "Could not reach the core.");
@@ -134,7 +135,7 @@ export function ReportsPage() {
         <Kpi label="Median restore" value={d?.time_to_restore_ms?.median ?? null} unit="ms" format={(v) => v.toFixed(0)} icon={FileBarChart2} tone="info" empty="No restores yet" />
       </section>
       <GlassCard>
-        <CardTitle icon={FileBarChart2} aside={role !== "viewer" ? <a href="/api/reports/alerts.csv" download><Button variant="secondary" size="sm"><Download aria-hidden className="h-4 w-4" /> Alerts CSV</Button></a> : <span className="text-[12px] text-muted">CSV needs analyst access</span>}>Alerts by kind</CardTitle>
+        <CardTitle icon={FileBarChart2} aside={role !== "viewer" ? <span className="flex gap-2"><a href="/api/reports/alerts.csv" download><Button variant="secondary" size="sm"><Download aria-hidden className="h-4 w-4" /> Alerts CSV</Button></a><a href="/api/reports/summary.pdf" download><Button variant="secondary" size="sm"><Download aria-hidden className="h-4 w-4" /> Report PDF</Button></a></span> : <span className="text-[12px] text-muted">CSV needs analyst access</span>}>Alerts by kind</CardTitle>
         {bars.length ? (
           <ul className="space-y-2">{bars.map(([k, n]) => (
             <li key={k} className="grid grid-cols-[160px_1fr_40px] items-center gap-3 text-[13px]">
@@ -145,6 +146,7 @@ export function ReportsPage() {
         ) : <EmptyState icon={ShieldCheck} title="No alerts recorded">Reports are computed only from stored alerts; nothing is invented.</EmptyState>}
         {d?.note && <p className="mt-3 text-[12px] text-muted">{d.note}</p>}
       </GlassCard>
+      <ReplayCard />
     </div>
   );
 }

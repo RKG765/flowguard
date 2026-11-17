@@ -24,6 +24,15 @@ for d in /run/flowguard "$LOGS"; do
   [ "$(stat -c %u "$d")" = "0" ] || { echo "$d is not owned by root; refusing to run"; exit 1; }
 done
 
+# the engine and the core run as their own unprivileged accounts; only the lab (Mininet / Open vSwitch) needs root.
+# FLOWGUARD_RUN_AS_ROOT=1 keeps the old all-root behaviour.
+DROP="--drop-privileges"
+if [ "${FLOWGUARD_RUN_AS_ROOT:-0}" = "1" ]; then
+  DROP=""
+else
+  bash "$REPO/scripts/service-users.sh"
+fi
+
 # console venv: created with uv when available (pip otherwise), once
 if [ ! -x .venv-ui/bin/streamlit ]; then
   echo "[prototype] preparing the console environment (.venv-ui) ..."
@@ -60,7 +69,7 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-"$REPO/.venv-core/bin/python" "$REPO/tests/e2e_live/stack.py" --core-port 8787 --response-mode "$MODE" --data "$RUN" > "$LOGS/stack.log" 2>&1 &
+"$REPO/.venv-core/bin/python" "$REPO/tests/e2e_live/stack.py" --core-port 8787 --response-mode "$MODE" --data "$RUN" $DROP > "$LOGS/stack.log" 2>&1 &
 echo $! > "$LOGS/prototype.pids"
 for _ in $(seq 1 90); do grep -q FLOWGUARD-STACK-READY "$LOGS/stack.log" 2>/dev/null && break; sleep 1; done
 grep -q FLOWGUARD-STACK-READY "$LOGS/stack.log" || { echo "stack did not become ready; see $LOGS/stack.log"; exit 1; }

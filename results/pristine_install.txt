@@ -1,0 +1,150 @@
+== pristine install check, 2026-11-17 19:58:05, host kernel 6.6.87.2-microsoft-standard-WSL2
+PRETTY_NAME="Ubuntu 22.04 LTS"
+== NOTE: seeding the clean chroot's apt cache from /var/cache/apt/archives (package source outage workaround)
+== copying the checkout (no venvs, no node_modules, no build output, no git history)
+tar: ./data/run/events.ipc: socket ignored
+== step 1: minimal prerequisites the README tells a fresh laptop to install
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu jammy InRelease
+Hit:3 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Get:4 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [128 kB]
+Get:5 http://security.ubuntu.com/ubuntu jammy-security/main Translation-en [519 kB]
+Get:6 http://security.ubuntu.com/ubuntu jammy-security/universe Translation-en [238 kB]
+Get:7 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy InRelease [18.1 kB]
+Ign:8 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy/main Translation-en
+Ign:8 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy/main Translation-en
+Get:9 http://archive.ubuntu.com/ubuntu jammy/main Translation-en [510 kB]
+Ign:8 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy/main Translation-en
+Get:10 http://archive.ubuntu.com/ubuntu jammy/universe Translation-en [5652 kB]
+Get:11 http://archive.ubuntu.com/ubuntu jammy-updates/main Translation-en [585 kB]
+Get:12 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 Packages [1290 kB]
+Get:13 http://archive.ubuntu.com/ubuntu jammy-updates/universe Translation-en [326 kB]
+Get:8 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy/main Translation-en [5680 B]
+Fetched 9272 kB in 36s (259 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+ca-certificates is already the newest version (20260816ubuntu0.22.04.2).
+curl is already the newest version (7.81.0-1ubuntu1.30).
+git is already the newest version (1:2.34.1-1ubuntu1.18).
+gnupg is already the newest version (2.2.27-3ubuntu2.5).
+sudo is already the newest version (1.9.9-1ubuntu2.7).
+0 upgraded, 0 newly installed, 0 to remove and 67 not upgraded.
+== step 2: scripts/setup_ubuntu.sh
+[1;34m[setup][0m environment: wsl
+[1;34m[setup][0m installing apt packages
+Hit:1 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu jammy InRelease
+Hit:3 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
+Ign:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy InRelease
+Get:5 https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy InRelease [18.1 kB]
+Fetched 18.1 kB in 12s (1506 B/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+build-essential is already the newest version (12.9ubuntu3).
+libffi-dev is already the newest version (3.4.2-4).
+pkg-config is already the newest version (0.29.2-1ubuntu3).
+iperf is already the newest version (2.1.5+dfsg1-1).
+mininet is already the newest version (2.3.0-1ubuntu1).
+ca-certificates is already the newest version (20260816ubuntu0.22.04.2).
+curl is already the newest version (7.81.0-1ubuntu1.30).
+git is already the newest version (1:2.34.1-1ubuntu1.18).
+gnupg is already the newest version (2.2.27-3ubuntu2.5).
+iproute2 is already the newest version (5.15.0-1ubuntu2.2).
+iputils-ping is already the newest version (3:20211215-1ubuntu0.1).
+jq is already the newest version (1.6-2.1ubuntu3.2).
+libssl-dev is already the newest version (3.0.2-0ubuntu1.30).
+net-tools is already the newest version (1.60+git20181103.0eebece-1ubuntu5.4).
+openvswitch-common is already the newest version (2.17.12-0ubuntu0.22.04.1).
+openvswitch-switch is already the newest version (2.17.12-0ubuntu0.22.04.1).
+python3 is already the newest version (3.10.6-1~22.04.1).
+python3-dev is already the newest version (3.10.6-1~22.04.1).
+software-properties-common is already the newest version (0.99.22.9).
+sqlite3 is already the newest version (3.37.2-2ubuntu0.8).
+tcpdump is already the newest version (4.99.1-3ubuntu0.2).
+python3-pip is already the newest version (22.0.2+dfsg-1ubuntu0.7).
+python3-venv is already the newest version (3.10.6-1~22.04.1).
+0 upgraded, 0 newly installed, 0 to remove and 67 not upgraded.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+python3.9 is already the newest version (3.9.25-1+jammy1).
+python3.9-dev is already the newest version (3.9.25-1+jammy1).
+python3.9-distutils is already the newest version (3.9.25-1+jammy1).
+python3.9-venv is already the newest version (3.9.25-1+jammy1).
+0 upgraded, 0 newly installed, 0 to remove and 67 not upgraded.
+[1;34m[setup][0m node v20.20.2 already installed
+[1;34m[setup][0m starting Open vSwitch daemons
+ * Starting ovsdb-server
+ * Configuring Open vSwitch system IDs
+ * Starting ovs-vswitchd
+ * Enabling remote OVSDB managers
+[1;34m[setup][0m ovsdb reachable
+[1;34m[setup][0m creating .venv-engine (Python 3.9, Ryu 4.34 pins)
+
+[notice] A new release of pip is available: 23.3.2 -> 26.0.1
+[notice] To update, run: /root/flowguard/.venv-engine/bin/python -m pip install --upgrade pip
+
+[notice] A new release of pip is available: 23.3.2 -> 26.0.1
+[notice] To update, run: /root/flowguard/.venv-engine/bin/python -m pip install --upgrade pip
+[1;34m[setup][0m creating .venv-core (system Python 3.10.12, sees apt Mininet)
+[1;34m[setup][0m running doctor
+STATUS  CHECK                         DETAIL
+--------------------------------------------------------------------
+PASS    Environment                   env=wsl, kernel=6.6.87.2-microsoft-standard-WSL2
+PASS    Operating system              ubuntu 22.04
+WARN    systemd                       not running; flowguard start|stop|status supervisor is used
+                                      fix: Optional: add '[boot]\nsystemd=true' to /etc/wsl.conf and run 'wsl --shutdown'.
+PASS    System Python (core service)  3.10.12
+PASS    Python 3.9 (Ryu engine)       /usr/bin/python3.9
+PASS    Engine venv (.venv-engine)    3.9.25 ryu 4.34 eventlet 0.30.2 pyzmq 26.2.0
+PASS    Core venv (.venv-core)        3.10.12 fastapi 0.115.6 sqlalchemy 2.0.36 mininet ok
+PASS    Node.js (dashboard build)     v20.20.2
+PASS    Root / sudo ability           running as root
+PASS    Open vSwitch daemons          ovs-vsctl (Open vSwitch) 2.17.12
+PASS    OVS datapath mode             kernel (openvswitch module loaded)
+PASS    Required ports free           6653, 8787
+PASS    Disk space                    1018.4 GB free at /root/flowguard
+FAIL    Mininet ping test             kernel: mn --controller=none --switch=ovsbr,datapath=kernel --topo=single,3 --test=pingall: timed out after 120s; user: mn --controller=none --switch=ovsbr,datapath=user --topo=single,3 --test=pingall: timed out after 120s
+                                      fix: Check 'ovs-vsctl show', run 'mn -c', and see docs/spike_findings.md.
+--------------------------------------------------------------------
+PASS=12  WARN=1  FAIL=1  SKIP=0
+[1;33m[setup][warn][0m doctor reported failures; read the fix column above
+[1;34m[setup][0m setup finished
+== step 3: bin/flowguard doctor (expected: lab-only checks may fail inside a chroot)
+STATUS  CHECK                         DETAIL
+--------------------------------------------------------------------
+PASS    Environment                   env=wsl, kernel=6.6.87.2-microsoft-standard-WSL2
+PASS    Operating system              ubuntu 22.04
+WARN    systemd                       not running; flowguard start|stop|status supervisor is used
+                                      fix: Optional: add '[boot]\nsystemd=true' to /etc/wsl.conf and run 'wsl --shutdown'.
+PASS    System Python (core service)  3.10.12
+PASS    Python 3.9 (Ryu engine)       /usr/bin/python3.9
+PASS    Engine venv (.venv-engine)    3.9.25 ryu 4.34 eventlet 0.30.2 pyzmq 26.2.0
+PASS    Core venv (.venv-core)        3.10.12 fastapi 0.115.6 sqlalchemy 2.0.36 mininet ok
+PASS    Node.js (dashboard build)     v20.20.2
+PASS    Root / sudo ability           running as root
+PASS    Open vSwitch daemons          ovs-vsctl (Open vSwitch) 2.17.12
+PASS    OVS datapath mode             kernel (openvswitch module loaded)
+PASS    Required ports free           6653, 8787
+PASS    Disk space                    1018.4 GB free at /root/flowguard
+SKIP    Mininet ping test             skipped (--quick)
+--------------------------------------------------------------------
+PASS=12  WARN=1  FAIL=0  SKIP=1
+== step 4: tests that do not need the lab
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+224 passed, 1 warning in 31.19s
+........................................................................ [ 99%]
+.                                                                        [100%]
+145 passed in 1.99s
+== step 5: dashboard
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+      Tests  119 passed (119)
+✓ built in 1.86s
+== PRISTINE CHECK DONE

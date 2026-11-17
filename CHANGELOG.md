@@ -4,6 +4,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/). One entry per phase or 
 
 ## [Unreleased]
 
+### Open items closed (PDF, replay, least privilege, resilience) (ADR-023)
+- `/api/reports/summary.pdf` and a Report PDF button; session recording controls and in-browser replay (1x to 100x) on the Reports page.
+- Engine and core run as unprivileged accounts (`scripts/service-users.sh`, `--drop-privileges`); the signing key is unreadable to the core.
+- Engine fixes found by the new live tests: audit the switch before re-asserting the policy (changes made while down are now reported), no crash on a connection that dies before the handshake, the change monitor starts without root, own signed re-installs are not "tamper-and-revert".
+- New live tests: reconnect storm, wiped table, engine restart, 303-rule load, rule flood, two switches, least privilege (39 live tests in all). `scripts/pristine-check.sh` builds a clean Ubuntu 22.04 userland and runs the setup script and non-lab tests in it.
+- `setup_ubuntu.sh` now says clearly when the Ubuntu universe repository is off and tolerates a flaky PPA index.
+
 ### Phase 5: L2 canary probes, L3 anomaly scoring, risk engine (ADR-022)
 - `engine/prober.py` + probe loop: counter-based canary probes of signed critical rules; `probe_failed` alert (layer L2) when a listed rule no longer acts as signed.
 - `engine/anomaly.py`: explainable statistical baseline learned from legitimate churn; scores every detected change.

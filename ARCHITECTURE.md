@@ -25,12 +25,12 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | L2 canary prober (counter-based probes of signed rules) | `implemented` | 5 |
 | L3 anomaly scorer (statistical baseline inside the engine, not a neural network) | `implemented` | 5 |
 | Risk engine, policy enforcement and port quarantine | `implemented` | 5 |
-| Reports (summary + CSV now; PDF later) | `partial` | 6 |
+| Reports (summary, CSV, PDF) | `implemented` | 6 |
 | Packaging: flowguard start/stop/status/export, one-command prototype (separate OS users and pristine-machine install still open) | `partial` | 7 |
 | Ryu engine app (signed installs, monitor supervisor, passes, alerts) | `implemented` | 1 |
 | Policy file + live policy reload (signed churn) | `implemented` | 1 |
 | HMAC key file checks, flowguard keygen, key rotation | `implemented` | 1 |
-| Session recorder (record + download; replay planned Phase 6) | `partial` | 2 |
+| Session recorder with replay in the website | `implemented` | 2 |
 | Engine rule snapshots + status events for the core | `implemented` | 2 |
 | Google Stitch design system + screens (via Stitch MCP) | `partial` | 3 |
 | Live Detection page (observation mode) | `implemented` | 4 |
@@ -38,6 +38,8 @@ This file describes what EXISTS after Phase 2. Every component carries a tag: `i
 | Demo Lab (simulated four-switch topology; labelled Simulated; touches no switch) | `implemented` | 5 |
 | Streamlit operator console (same palette; Demo Lab, quarantine release, L2/L3 pages) | `partial` | 5 |
 | make eval, make test-soak, make test-security | `implemented` | 8 |
+| Least privilege: engine and core run as separate unprivileged accounts (key readable by the engine only) | `implemented` | 7 |
+| Resilience tests: reconnect storm, wiped table, engine restart, load, rule flood, two switches | `implemented` | 9 |
 <!-- /AUTO:component_tags -->
 
 ## System context
@@ -205,12 +207,12 @@ flowchart TB
   engine_prober["L2 canary prober (counter-based probes of signed rules)"]:::implemented
   ml_worker["L3 anomaly scorer (statistical baseline inside the engine, not a neural network)"]:::implemented
   risk_engine["Risk engine, policy enforcement and port quarantine"]:::implemented
-  reports["Reports (summary + CSV now; PDF later)"]:::partial
+  reports["Reports (summary, CSV, PDF)"]:::implemented
   packaging["Packaging: flowguard start/stop/status/export, one-command prototype (separate OS users and pristine-machine install still open)"]:::partial
   engine_app["Ryu engine app (signed installs, monitor supervisor, passes, alerts)"]:::implemented
   engine_policy["Policy file + live policy reload (signed churn)"]:::implemented
   key_management["HMAC key file checks, flowguard keygen, key rotation"]:::implemented
-  core_recordings["Session recorder (record + download; replay planned Phase 6)"]:::partial
+  core_recordings["Session recorder with replay in the website"]:::implemented
   engine_snapshots["Engine rule snapshots + status events for the core"]:::implemented
   stitch_designs["Google Stitch design system + screens (via Stitch MCP)"]:::partial
   live_detection["Live Detection page (observation mode)"]:::implemented
@@ -218,6 +220,8 @@ flowchart TB
   demo_lab["Demo Lab (simulated four-switch topology; labelled Simulated; touches no switch)"]:::implemented
   console["Streamlit operator console (same palette; Demo Lab, quarantine release, L2/L3 pages)"]:::partial
   eval_tools["make eval, make test-soak, make test-security"]:::implemented
+  service_accounts["Least privilege: engine and core run as separate unprivileged accounts (key readable by the engine only)"]:::implemented
+  resilience_tests["Resilience tests: reconnect storm, wiped table, engine restart, load, rule flood, two switches"]:::implemented
   lab_topology --> engine_verifier
   engine_crypto --> engine_store
   engine_store --> engine_verifier
@@ -246,6 +250,8 @@ flowchart TB
   risk_engine --> ml_worker
   demo_lab --> web_pages
   console --> core_service
+  service_accounts --> packaging
+  resilience_tests --> engine_app
   classDef done fill:#1f7a4d,stroke:#0b3d24,color:#ffffff;
   classDef in_progress fill:#b7791f,stroke:#5c3b0d,color:#ffffff;
   classDef not_started fill:#4a5568,stroke:#1a202c,color:#ffffff;

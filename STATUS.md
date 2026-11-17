@@ -1,6 +1,6 @@
 # FlowGuard status
 <!-- AUTO:header -->
-Last updated: 2026-11-17 | Current phase: 11, Fix loop and release gate | Overall: 8 of 12 phases done
+Last updated: 2026-11-17 | Current phase: 11, Fix loop and release gate | Overall: 9 of 12 phases done
 Verified on: WSL2 Ubuntu 22.04: 2026-10-15 | Native Ubuntu 22.04: not yet
 <!-- /AUTO:header -->
 
@@ -14,7 +14,7 @@ Verified on: WSL2 Ubuntu 22.04: 2026-10-15 | Native Ubuntu 22.04: not yet
 | 3 | Design system and dashboard shell | done | 2026-10-14 | 2026-10-14 |
 | 4 | Core pages + Live Detection (tag demo-v0; attack execution descoped) | done | 2026-10-14 | 2026-10-15 |
 | 5 | L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete) | done | 2026-11-16 | 2026-11-17 |
-| 6 | Remaining pages, reports, polish | in_progress | 2026-11-16 | - |
+| 6 | Remaining pages, reports, polish | done | 2026-11-16 | 2026-11-17 |
 | 7 | Packaging and hardening | in_progress | 2026-11-17 | - |
 | 8 | Evaluation and docs | done | 2026-11-17 | 2026-11-17 |
 | 9 | Rigorous testing (full QA pass) | in_progress | 2026-11-17 | - |
@@ -31,7 +31,7 @@ flowchart LR
   P3["3: Design system and dashboard shell"]:::done
   P4["4: Core pages + Live Detection (tag demo-v0; attack execution descoped)"]:::done
   P5["5: L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete)"]:::done
-  P6["6: Remaining pages, reports, polish"]:::in_progress
+  P6["6: Remaining pages, reports, polish"]:::done
   P7["7: Packaging and hardening"]:::in_progress
   P8["8: Evaluation and docs"]:::done
   P9["9: Rigorous testing (full QA pass)"]:::in_progress
@@ -81,12 +81,12 @@ flowchart LR
 | L2 canary prober (counter-based probes of signed rules) | implemented | `make test (unit); make test-live (tests/integration/test_l2_live.py: healthy pass, shadowing rule fails, ICMP/ARP/IPv6/in_port/masked rules probed)` | 2026-11-17 | WSL2 |
 | L3 anomaly scorer (statistical baseline inside the engine, not a neural network) | implemented | `make test (tests/unit/test_phase5.py); make test-live (score and reasons reach the core API)` | 2026-11-17 | WSL2 |
 | Risk engine, policy enforcement and port quarantine | implemented | `make test; make test-live (tests/integration/test_phase5_live.py: policy decides repair; quarantine cuts and releases a port)` | 2026-11-17 | WSL2 |
-| Reports (summary + CSV now; PDF later) | partial | `make test (summary from stored alerts, CSV with formula-injection guard). PDF and evaluation results: Phase 6/8` | 2026-10-14 | WSL2 |
+| Reports (summary, CSV, PDF) | implemented | `make test (summary, CSV with formula-injection guard, PDF writer and endpoint); PDF rendered with poppler` | 2026-11-17 | WSL2 |
 | Packaging: flowguard start/stop/status/export, one-command prototype (separate OS users and pristine-machine install still open) | partial | `bin/flowguard start (lab, engine, core, website and console up; status checked)` | 2026-11-17 | WSL2 |
 | Ryu engine app (signed installs, monitor supervisor, passes, alerts) | implemented | `make test-live` | 2026-10-14 | WSL2 |
 | Policy file + live policy reload (signed churn) | implemented | `make test; make test-live (policy edit = zero alerts)` | 2026-10-14 | WSL2 |
 | HMAC key file checks, flowguard keygen, key rotation | implemented | `make test; bin/flowguard keygen; make test-live (rotation)` | 2026-10-14 | WSL2 |
-| Session recorder (record + download; replay planned Phase 6) | partial | `make test (tests/api/test_ingest.py::test_recording_*)` | 2026-10-14 | WSL2 |
+| Session recorder with replay in the website | implemented | `make test (recording tests, replay parser); live check: recorded 29 real records and replayed them in the browser` | 2026-11-17 | WSL2 |
 | Engine rule snapshots + status events for the core | implemented | `make test (build_snapshot); make test-live (rules reach the core)` | 2026-10-14 | WSL2 |
 | Google Stitch design system + screens (via Stitch MCP) | partial | `Stitch MCP: create_project, create/update_design_system, generate_screen_from_text (Overview render retrieved; list_screens returned no screens)` | 2026-10-14 | Stitch (cloud) |
 | Live Detection page (observation mode) | implemented | `make test-e2e-live` | 2026-10-15 | WSL2 |
@@ -94,6 +94,8 @@ flowchart LR
 | Demo Lab (simulated four-switch topology; labelled Simulated; touches no switch) | implemented | `make test-e2e (simulate, detect, repair); make test-web (tamper/repair model)` | 2026-11-17 | WSL2 |
 | Streamlit operator console (same palette; Demo Lab, quarantine release, L2/L3 pages) | partial | `compiled and exercised against the live stack; screenshots in .impeccable/review/console-*.png; no automated UI test` | 2026-11-17 | WSL2 |
 | make eval, make test-soak, make test-security | implemented | `sudo make eval; sudo make test-soak; make test-security` | 2026-11-17 | WSL2 |
+| Least privilege: engine and core run as separate unprivileged accounts (key readable by the engine only) | implemented | `sudo make test-live (tests/integration/test_least_privilege_live.py: processes not root, key and user database each private, detection via monitor events, control files and alert delivery across the split)` | 2026-11-17 | WSL2 |
+| Resilience tests: reconnect storm, wiped table, engine restart, load, rule flood, two switches | implemented | `sudo make test-live (tests/integration/test_resilience_live.py, test_multi_switch_live.py)` | 2026-11-17 | WSL2 |
 <!-- /AUTO:component_table -->
 
 ## What works (verified)
@@ -115,8 +117,8 @@ Each item names the command that proved it on WSL2 Ubuntu 22.04. Test output: `r
 Only the **Demo Lab** pages (website and console): an in-memory four-switch model, labelled "Simulated", that touches no switch and no engine. Everything else shown comes from the engine. FlowGuard does not execute attacks (ADR-019); the live tests and `make eval` make rule changes on the throw-away lab switch with the lab's own tooling, the same cases as the Phase 1 integration tests.
 
 ## Test and review status
-- Final run 2026-11-17 (`QA_REPORT.md`): core 218, engine 141, security 137, web 116, browser e2e 10 (axe on every page, both themes), live lab 26 passed; `sudo make eval` 40/40 detected, 0 false alerts (`docs/results.md`); soak pass.
-- Not covered yet: large rule tables in the browser (virtualization is unit-tested only), several switches live, tablet widths, load, reconnect storms, native Ubuntu.
+- Final run 2026-11-17 (`QA_REPORT.md`): core 224, engine 145, security 143, web 119, browser e2e 10 (axe on every page, both themes), live lab 39 passed (reconnect storm, wiped table, engine restart, 303-rule load, rule flood, two switches, least privilege); `sudo make eval` 40/40 detected, 0 false alerts (`docs/results.md`); soak pass.
+- Not covered yet: large rule tables in the browser (virtualization is unit-tested only), more than two switches, tablet widths, runtime SQLite corruption, native Ubuntu.
 - AI-simulated security, code and design reviews done (`SECURITY_REVIEW.md`, `UX_REVIEW.md`); all high and medium findings fixed. No human testers. Open items: `RELEASE_CHECKLIST.md`.
 - Environments: WSL2 only. Native Ubuntu not verified.
 
@@ -128,7 +130,7 @@ Only the **Demo Lab** pages (website and console): an in-memory four-switch mode
 - A tamper applied AND reverted inside the grace window of the engine's own change to the same slot is judged only after the window (ADR-011).
 - The policy document is enforced for `dry_run`, `weights`, `thresholds` and `actions` (ADR-022); `response_mode` and `critical_tables` still come from the engine config. Login lockout is in memory (ADR-014). The audit chain detects in-place edits, not a full rewrite (ADR-015).
 - Engine status (counters, hosts) reaches the core every 5 s, so those values can lag a detection by a few seconds; the Live Detection page shows their age.
-- In the lab the engine and core run as root next to Mininet; separate OS users are not done. The core serves the built dashboard (`web/dist`) on :8787.
+- The engine and the core run as their own unprivileged accounts (ADR-023); only Mininet and Open vSwitch are root. The core serves the built dashboard (`web/dist`) on :8787.
 
 ## Measured numbers so far
 <!-- AUTO:metrics -->
@@ -147,6 +149,8 @@ Only the **Demo Lab** pages (website and console): an in-memory four-switch mode
 | Eval (live lab): altered rule, change to alert (wall clock, median) | 25.2 ms | `results/eval.json` |
 | Eval (live lab): altered rule, engine detect latency (median) | 16.2 ms | `results/eval.json` |
 | Eval (live lab): altered rule, time to restore (median) | 12.3 ms | `results/eval.json` |
+| Load (live lab): policy of 303 rules applied and verified | 1.7 s | `results/load.json` |
+| Load (live lab): altered rule reported with 303 rules installed (wall clock) | 42.1 ms | `results/load.json` |
 <!-- /AUTO:metrics -->
 Phase 0 rows are spike measurements. Phase 1 rows are a single live run (one sample per attack), not an evaluation; the evaluation is Phase 8.
 

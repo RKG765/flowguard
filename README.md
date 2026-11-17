@@ -2,7 +2,7 @@
 
 Flow-rule integrity monitoring and unauthorized network-state change detection for SDN (Ryu + Open vSwitch).
 
-> **Status: a working prototype (Phases 0-5, 8 and 10 done; 6, 7, 9 and 11 partly: no PDF report or session replay, no separate OS users for engine and core, reconnect-storm and many-switch tests not run, release checklist open; see [STATUS.md](STATUS.md) for exactly what was verified and what was not).** One command starts the lab, the engine, the core, the website and the operator console: `sudo bin/flowguard start`. L1 signed rules, L2 canary probes, L3 anomaly scoring and a policy-driven risk engine (with port quarantine) run on a real Open vSwitch + Mininet lab on WSL2; measured results are in [docs/results.md](docs/results.md). FlowGuard does not execute attacks (ADR-019); the Demo Lab page is a labelled simulation. Not verified: native Ubuntu, real hardware, more than one switch live.
+> **Status: a working prototype (Phases 0-10 built and tested on a WSL2 lab; Phase 11 release checklist partly open; see [STATUS.md](STATUS.md) and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for exactly what was verified and what was not).** One command starts the lab, the engine, the core, the website and the operator console: `sudo bin/flowguard start`. The engine and core run as unprivileged accounts. L1 signed rules, L2 canary probes, L3 anomaly scoring and a policy-driven risk engine (with port quarantine), PDF reports and session replay run on a real Open vSwitch + Mininet lab; measured results are in [docs/results.md](docs/results.md). FlowGuard does not execute attacks (ADR-019); the Demo Lab page is a labelled simulation. Not verified: native Ubuntu, real hardware, more than two switches.
 
 ## What it does
 1. **L1 authenticated rules:** an HMAC tag in the 64-bit OpenFlow `cookie` of every controller-installed rule; a verifier flags forged, altered, shadowing and missing rules and restores the signed rule.
@@ -66,7 +66,7 @@ Native Ubuntu: the same commands. It has **not** been verified there yet; see [H
 | 3 | Design system and dashboard shell | done | 2026-10-14 | 2026-10-14 |
 | 4 | Core pages + Live Detection (tag demo-v0; attack execution descoped) | done | 2026-10-14 | 2026-10-15 |
 | 5 | L2 prober, L3 ML, risk engine, lying switch (tag novelty-complete) | done | 2026-11-16 | 2026-11-17 |
-| 6 | Remaining pages, reports, polish | in_progress | 2026-11-16 | - |
+| 6 | Remaining pages, reports, polish | done | 2026-11-16 | 2026-11-17 |
 | 7 | Packaging and hardening | in_progress | 2026-11-17 | - |
 | 8 | Evaluation and docs | done | 2026-11-17 | 2026-11-17 |
 | 9 | Rigorous testing (full QA pass) | in_progress | 2026-11-17 | - |

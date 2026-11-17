@@ -82,12 +82,13 @@
     {
       "id": 6,
       "name": "Remaining pages, reports, polish",
-      "status": "in_progress",
+      "status": "done",
       "depends_on": [
         5
       ],
       "started": "2026-11-16",
-      "verified_by": "Pages built (Policy, Reports, Audit, Settings, Probes, ML, Demo Lab; make test-e2e axe on all 12 pages). Still missing: PDF reports and session replay"
+      "verified_by": "make test (PDF report writer and endpoint), make test-e2e (Reports page, axe), live check: a recording of real detections replayed in the browser and a 1-page PDF made from live data",
+      "finished": "2026-11-17"
     },
     {
       "id": 7,
@@ -97,7 +98,7 @@
         6
       ],
       "started": "2026-11-17",
-      "verified_by": "flowguard start/stop/status/export, scripts/prototype.sh (checked end to end on WSL2). Still missing: separate OS users for engine and core, packaging for a pristine machine"
+      "verified_by": "flowguard start/stop/status/export; engine and core run as unprivileged accounts (sudo make test-live: tests/integration/test_least_privilege_live.py); pristine-machine check: see RELEASE_CHECKLIST.md"
     },
     {
       "id": 8,
@@ -118,7 +119,7 @@
         8
       ],
       "started": "2026-11-17",
-      "verified_by": "make test, make test-security, make test-e2e, sudo make test-live, soak. Not yet run: reconnect storms, SQLite corruption, many switches, load, native Ubuntu"
+      "verified_by": "make test, make test-security, make test-e2e, sudo make test-live (39 incl. reconnect storm, engine restart, wiped table, 303-rule load, rule flood, two switches), soak. Not run: native Ubuntu, SQLite corruption, more than two switches"
     },
     {
       "id": 10,
@@ -310,11 +311,11 @@
     },
     {
       "id": "reports",
-      "name": "Reports (summary + CSV now; PDF later)",
-      "status": "partial",
+      "name": "Reports (summary, CSV, PDF)",
+      "status": "implemented",
       "phase": 6,
-      "verified_by": "make test (summary from stored alerts, CSV with formula-injection guard). PDF and evaluation results: Phase 6/8",
-      "verified_on": "2026-10-14",
+      "verified_by": "make test (summary, CSV with formula-injection guard, PDF writer and endpoint); PDF rendered with poppler",
+      "verified_on": "2026-11-17",
       "environment": "WSL2"
     },
     {
@@ -355,11 +356,11 @@
     },
     {
       "id": "core_recordings",
-      "name": "Session recorder (record + download; replay planned Phase 6)",
-      "status": "partial",
+      "name": "Session recorder with replay in the website",
+      "status": "implemented",
       "phase": 2,
-      "verified_by": "make test (tests/api/test_ingest.py::test_recording_*)",
-      "verified_on": "2026-10-14",
+      "verified_by": "make test (recording tests, replay parser); live check: recorded 29 real records and replayed them in the browser",
+      "verified_on": "2026-11-17",
       "environment": "WSL2"
     },
     {
@@ -422,6 +423,24 @@
       "status": "implemented",
       "phase": 8,
       "verified_by": "sudo make eval; sudo make test-soak; make test-security",
+      "verified_on": "2026-11-17",
+      "environment": "WSL2"
+    },
+    {
+      "id": "service_accounts",
+      "name": "Least privilege: engine and core run as separate unprivileged accounts (key readable by the engine only)",
+      "status": "implemented",
+      "phase": 7,
+      "verified_by": "sudo make test-live (tests/integration/test_least_privilege_live.py: processes not root, key and user database each private, detection via monitor events, control files and alert delivery across the split)",
+      "verified_on": "2026-11-17",
+      "environment": "WSL2"
+    },
+    {
+      "id": "resilience_tests",
+      "name": "Resilience tests: reconnect storm, wiped table, engine restart, load, rule flood, two switches",
+      "status": "implemented",
+      "phase": 9,
+      "verified_by": "sudo make test-live (tests/integration/test_resilience_live.py, test_multi_switch_live.py)",
       "verified_on": "2026-11-17",
       "environment": "WSL2"
     }
@@ -538,6 +557,14 @@
     [
       "console",
       "core_service"
+    ],
+    [
+      "service_accounts",
+      "packaging"
+    ],
+    [
+      "resilience_tests",
+      "engine_app"
     ]
   ],
   "metrics": [
@@ -618,6 +645,18 @@
       "value": "12.3",
       "unit": "ms",
       "source": "results/eval.json"
+    },
+    {
+      "name": "Load (live lab): policy of 303 rules applied and verified",
+      "value": "1.7",
+      "unit": "s",
+      "source": "results/load.json"
+    },
+    {
+      "name": "Load (live lab): altered rule reported with 303 rules installed (wall clock)",
+      "value": "42.1",
+      "unit": "ms",
+      "source": "results/load.json"
     }
   ]
 }

@@ -10,13 +10,14 @@ import time
 import uuid
 from typing import Any, Dict, List, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from .. import audit
+from ..pdf import build_report
 from ..deps import Principal, admin, analyst, audit_event, get_db, viewer
 from ..models import Alert, AuditEvent, Incident, Meta, PolicyDoc, PolicyHistory, Recording, RuleSnapshot, Switch
 
@@ -223,6 +224,20 @@ def _csv_safe(v: Any) -> Any:
     if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r"):
         return "'" + v
     return v
+
+
+@router.get("/reports/summary.pdf")
+def report_pdf(request: Request, p: Principal = Depends(analyst), db: Session = Depends(get_db)) -> Response:
+    """The report as a PDF: key figures, alerts by kind, latencies, incidents, latest alerts. Built from stored alerts only."""
+    summary = report_summary(p, db)
+    alerts = [{"t": a.t, "kind": a.kind, "severity": a.severity, "layer": a.layer, "priority": a.priority, "action": a.action,
+               "detect_latency_ms": a.detect_latency_ms, "time_to_restore_ms": a.time_to_restore_ms}
+              for a in db.execute(select(Alert).order_by(Alert.t.desc()).limit(40)).scalars()]
+    incidents = [{"id": i.id, "severity": i.severity, "status": i.status, "dpid": i.dpid, "alert_count": i.alert_count, "title": i.title}
+                 for i in db.execute(select(Incident).order_by(Incident.updated_at.desc()).limit(20)).scalars()]
+    data = build_report(summary, alerts, incidents, p.username)
+    audit_event(request, db, "report_exported", p, target="summary.pdf")
+    return Response(content=data, media_type="application/pdf", headers={"Content-Disposition": 'attachment; filename="flowguard-report.pdf"'})
 
 
 @router.get("/reports/alerts.csv")

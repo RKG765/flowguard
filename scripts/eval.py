@@ -176,6 +176,20 @@ def fmt(s):
     return "n/a" if not s else f"{s['median']} / {s['p95']} / {s['max']}"
 
 
+def load_section() -> str:
+    """Numbers written by tests/integration/test_resilience_live.py (results/load.json), when that test has been run."""
+    lp = REPO / "results" / "load.json"
+    if not lp.exists():
+        return ""
+    l = json.loads(lp.read_text())
+    return f"""
+## Load and resilience (live lab tests, `tests/integration/test_resilience_live.py`, {l['generated_at']})
+- A policy of {l['rules_in_policy']} rules was applied and verified in {l['converge_seconds']} s. Changing one rule under that load was reported in {l['altered_rule_wall_clock_ms']} ms (wall clock). L2 probes kept running with {l['failed_probe_cycles']} failed cycles.
+- Pass/fail only, same lab: 15 controller reconnects in 8 s raise no alerts; a switch whose flow table is wiped by a controller flap is reported missing and repaired; rules changed while the engine is down are reported and repaired after it restarts; a flood of 45 unsigned rules is removed at the limited repair rate (30 per minute per switch, by design) while the engine keeps running; two linked switches are protected independently (`tests/integration/test_multi_switch_live.py`).
+- Environment: {l['environment']}. Not measured: more than two switches, hardware switches, hundreds of thousands of rules.
+"""
+
+
 def write_report(out: dict) -> None:
     rows = "\n".join(f"| {k} | {v['detected']}/{v['trials']} | {fmt(v['engine_detect_ms'])} | {fmt(v['wall_clock_ms'])} | {fmt(v['restore_ms'])} | {v['detected_by']} |"
                      for k, v in out["kinds"].items())
@@ -197,7 +211,7 @@ Environment: {out['environment']}. Times are milliseconds as median / 95th perce
 - It shows detection and repair speed for four kinds of tampering on one lab switch, {out['trials_per_kind']} trials each, and that normal policy changes do not raise alerts.
 - It does not show behaviour on real hardware, many switches, or an adversary who also controls the host (the key, controller and switch share one host in the lab; see `docs/threat_model.md`).
 - Wall clock includes the ovs-ofctl process start and the 50 ms polling of the spool file used by this script, so it is an upper bound on what an operator would notice.
-""")
+""" + load_section())
 
 
 if __name__ == "__main__":

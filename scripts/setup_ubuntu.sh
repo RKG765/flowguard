@@ -52,14 +52,15 @@ preflight() {
   . /etc/os-release
   [ "${ID:-}" = "ubuntu" ] || die "unsupported distro '${ID:-?}'; Ubuntu 22.04 is required"
   [ "${VERSION_ID:-}" = "22.04" ] || warn "Ubuntu ${VERSION_ID:-?} detected; only 22.04 is tested"
-  command -v curl >/dev/null 2>&1 || { $SUDO apt-get update -y && $SUDO apt-get install -y curl; }
+  command -v curl >/dev/null 2>&1 || { $SUDO apt-get update -y -o Acquire::Languages=none -o Acquire::Retries=3 && $SUDO apt-get install -y curl; }
   curl -fsS -m 10 -o /dev/null https://pypi.org || warn "cannot reach pypi.org; package installs may fail"
 }
 
 install_apt() {
   log "installing apt packages"
   export DEBIAN_FRONTEND=noninteractive
-  $SUDO apt-get update -y
+  $SUDO apt-get update -y -o Acquire::Languages=none -o Acquire::Retries=3
+  apt-cache show mininet >/dev/null 2>&1 || die "the Ubuntu universe repository is not enabled (mininet, python3-pip and python3-venv live there). Enable it, then run this script again: sudo add-apt-repository universe && sudo apt-get update"
   $SUDO apt-get install -y --no-install-recommends \
     ca-certificates curl gnupg git jq sqlite3 build-essential pkg-config \
     software-properties-common iproute2 iputils-ping net-tools tcpdump \
@@ -85,7 +86,7 @@ add_deadsnakes() {
   $SUDO install -m 0644 "$tmp" "$key"; rm -f "$tmp"
   echo "deb [signed-by=${key}] https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy main" \
     | $SUDO tee /etc/apt/sources.list.d/deadsnakes.list >/dev/null
-  $SUDO apt-get update -y
+  $SUDO apt-get update -y -o Acquire::Languages=none -o Acquire::Retries=3
 }
 
 install_node() {
@@ -98,7 +99,7 @@ install_node() {
     | $SUDO gpg --dearmor --yes -o /etc/apt/keyrings/nodesource.gpg
   echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" \
     | $SUDO tee /etc/apt/sources.list.d/nodesource.list >/dev/null
-  $SUDO apt-get update -y
+  $SUDO apt-get update -y -o Acquire::Languages=none -o Acquire::Retries=3
   $SUDO apt-get install -y nodejs
 }
 

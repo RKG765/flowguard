@@ -166,6 +166,7 @@ class FlowGuardEngine(app_manager.RyuApp):
         self.quarantined: Dict[Tuple[str, int], float] = self._load_quarantine()
         self._xid_probe: Dict[int, "_ProbeRun"] = {}
         self._active_probes: Dict[str, "_ProbeRun"] = {}
+        self._audit_wait: Dict[str, set] = {}  # dpid -> tables whose connect-time audit pass is still outstanding
         self._gen = 0  # bumped whenever the signed rule set changes: a probe cycle that straddles a change is discarded
 
         hub.spawn(self.channel.run, hub.sleep)
@@ -219,22 +220,32 @@ class FlowGuardEngine(app_manager.RyuApp):
         self.emit("switch_connected", dpid=dpid)
         if self.cfg.learning_switch:
             self._install_learning_miss(dp)
-        self._apply_connect_policy(dp)
+        if self.store.list(dpid):
+            # this switch was protected before: verify what is on it BEFORE re-asserting the signed policy, otherwise the
+            # re-install would silently overwrite anything changed while the engine or the connection was down
+            self._audit_wait[dpid] = set(self.critical)
+            for table in sorted(self.critical):
+                self._start_pass(dp, table, "connect_audit", [])
+        else:
+            self._apply_connect_policy(dp)
         if self.cfg.verify_mode == "event" and not self._monitor_running.get(dpid):
             self._monitor_running[dpid] = True
             hub.spawn(self._monitor_loop, dpid, self.cfg.monitor_port(dp.id))
-        self.schedule_pass(dpid, None, "startup", delay=self.pending.grace + 0.1)
+        if dpid not in self._audit_wait:
+            self.schedule_pass(dpid, None, "startup", delay=self.pending.grace + 0.1)
         self.synced[dpid] = True
 
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def on_state(self, ev: Any) -> None:
-        if ev.state == DEAD_DISPATCHER and ev.datapath is not None:
+        # a connection that dies before the OpenFlow handshake finished has no datapath id yet: nothing to clean up
+        if ev.state == DEAD_DISPATCHER and ev.datapath is not None and ev.datapath.id is not None:
             dpid = dpid_hex(ev.datapath.id)
             if self.dps.get(dpid) is ev.datapath:
                 self.dps.pop(dpid, None)
                 self.synced[dpid] = False
                 self.monitors_up[dpid] = False
                 self.l2_state.pop(dpid, None)
+                self._audit_wait.pop(dpid, None)
                 self.emit("switch_disconnected", dpid=dpid)
 
     @set_ev_cls(ofp_event.EventOFPErrorMsg, [MAIN_DISPATCHER, CONFIG_DISPATCHER])
@@ -346,7 +357,7 @@ class FlowGuardEngine(app_manager.RyuApp):
             if not exe:
                 self.raise_alert("monitor_down", dpid=dpid, summary="ovs-ofctl is not installed; change detection falls back to the slow poll.")
                 return
-            cmd = ([stdbuf, "-oL", "-eL"] if stdbuf else []) + [exe, "monitor", f"tcp:127.0.0.1:{port}", "watch:!initial"]
+            cmd = ([stdbuf, "-oL", "-eL"] if stdbuf else []) + [exe, "--unixctl=none", "monitor", f"tcp:127.0.0.1:{port}", "watch:!initial"]  # unixctl=none: an unprivileged account cannot create the control socket under /var/run/openvswitch
             try:
                 proc = gsub.Popen(cmd, stdout=gsub.PIPE, stderr=gsub.STDOUT)
             except OSError as exc:
@@ -436,15 +447,40 @@ class FlowGuardEngine(app_manager.RyuApp):
             if dp is None:
                 return
             triggers = self.unexplained.pop((dpid, table_id), [])
-            ps = _Pass(dp, table_id, reason, triggers)
-            req = ryu_codec.flow_stats_request(dp, table_id)
-            ps.t_request = time.time()
-            dp.send_msg(req)
-            ps.xid = req.xid
-            self._xid_pass[req.xid] = ps
-            hub.spawn(self._pass_timeout, ps)
+            self._start_pass(dp, table_id, reason, triggers)
         except Exception:
             self.log.exception("could not start verification pass")
+
+    def _only_signed_adds(self, dpid: str, table: int, events: List[MonitorEvent]) -> bool:
+        """True when every change event is an ADD carrying the cookie of a signed rule. With the table verified equal to the
+        golden store, that can only be signed rules being (re)installed, for example the engine re-asserting its own policy
+        after a reconnect: tampering always leaves a delete, a modify, or an add with a cookie that is not signed."""
+        golden = {g.cookie for g in self.store.list(dpid, table)}
+        return bool(events) and all(e.event == "added" and e.cookie is not None and e.cookie in golden for e in events)
+
+    def _start_pass(self, dp: Any, table_id: int, reason: str, triggers: List[MonitorEvent]) -> None:
+        ps = _Pass(dp, table_id, reason, triggers)
+        req = ryu_codec.flow_stats_request(dp, table_id)
+        ps.t_request = time.time()
+        dp.send_msg(req)
+        ps.xid = req.xid
+        self._xid_pass[req.xid] = ps
+        hub.spawn(self._pass_timeout, ps)
+
+    def _audit_done(self, dpid: str, table_id: int) -> None:
+        """A connect-time audit pass finished (or timed out): once every critical table is audited, re-assert the policy."""
+        wait = self._audit_wait.get(dpid)
+        if wait is None:
+            return
+        wait.discard(table_id)
+        if wait:
+            return
+        del self._audit_wait[dpid]
+        dp = self.dps.get(dpid)
+        if dp is None:
+            return
+        self._apply_connect_policy(dp)
+        self.schedule_pass(dpid, None, "startup", delay=self.pending.grace + 0.1)
 
     def _pass_timeout(self, ps: _Pass) -> None:
         hub.sleep(self.cfg.stats_timeout_seconds)
@@ -453,6 +489,8 @@ class FlowGuardEngine(app_manager.RyuApp):
             self.unexplained.setdefault((dpid, ps.table_id), []).extend(ps.triggers)  # keep the triggers for the retry
             self.raise_alert("verify_timeout", dpid=dpid, table_id=ps.table_id, summary="The switch did not answer a rule-table request in time; verification will be retried.")
             self.schedule_pass(dpid, ps.table_id, "retry", delay=0.5)
+            if ps.reason == "connect_audit":  # a silent switch must not keep the policy from being applied
+                self._audit_done(dpid, ps.table_id)
 
     @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
     def on_flow_stats(self, ev: Any) -> None:
@@ -479,6 +517,8 @@ class FlowGuardEngine(app_manager.RyuApp):
             self._finish_pass(ps)
         except Exception:
             self.log.exception("verification pass failed")
+        if ps.reason == "connect_audit":
+            self._audit_done(dpid_hex(ps.dp.id), ps.table_id)
 
     def _finish_pass(self, ps: _Pass) -> None:
         t_reply = time.time()
@@ -522,7 +562,7 @@ class FlowGuardEngine(app_manager.RyuApp):
                 by = "manual_repair" if plan.finding in forced else detected_by
                 self._handle_finding(dp, plan, ps, t_event, t_reply, t_classified, by)
             self.schedule_pass(dpid, table, "confirm", delay=self.pending.grace + 0.1)
-        elif ps.triggers:
+        elif ps.triggers and not self._only_signed_adds(dpid, table, ps.triggers):
             # changes happened, but the table already equals the golden rules: a tamper-and-revert
             if self.deduper.should_alert((dpid, "unattributed_change", table), t_classified):
                 self.raise_alert(

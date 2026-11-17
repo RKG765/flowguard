@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-11-17 19:37:54",
+  "rules_in_policy": 303,
+  "converge_seconds": 1.7,
+  "altered_rule_wall_clock_ms": 42.1,
+  "probe_cycles": 4,
+  "failed_probe_cycles": 0,
+  "environment": "one Open vSwitch switch, Mininet, WSL2"
+}

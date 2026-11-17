@@ -41,3 +41,21 @@ Both new routes are in the role matrix test.
   is off by default (dry run, and the default actions map to restore or alert).
 
 Verify: `make test-security` (authentication, roles, CSRF, validation, crypto, Phase 5 logic) and `sudo make test-live`.
+
+## Second pass: least privilege and the stress tests (2026-11-17)
+Not an AI review: these are results of building and running the changes.
+- **The engine and the core no longer run as root** (`scripts/service-users.sh`, `stack.py --drop-privileges`). `sudo make test-live`
+  (`tests/integration/test_least_privilege_live.py`) proves it on the real lab: the processes run as `flowguard-engine` and
+  `flowguard-core`; the HMAC key (mode 0600) is unreadable to the core, the user database (password hashes, sessions) is unreadable
+  to the engine, the golden store is unreadable to the core; detection comes from monitor events, repair works, alerts reach the core,
+  and the core's control files (key rotation, policy hand-off) reach the engine. This answers the residual risk "a bug in the core
+  or the API can read the signing key".
+- **Found by the stress tests and fixed:** the engine re-installed the signed policy on every connect before looking at the switch,
+  silently overwriting rules changed while it was down (it now audits first); a crash on a connection that dies before the OpenFlow
+  handshake; the change monitor not starting without root (silent fall back to the slow poll).
+- **Still true:** the lab runs on one host, so root on that host defeats the product; Mininet and Open vSwitch themselves need root;
+  the service accounts get a traverse-only ACL on the folders down to the checkout (reviewable with `getfacl`); `pkill` in the start
+  and stop scripts is not scoped to one lab; there is still no authentication on the ZeroMQ socket beyond file permissions
+  (group `flowguard`).
+- Not re-reviewed by an AI after these changes: the new code was exercised by tests, not by a second reviewer.
+

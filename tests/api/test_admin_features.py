@@ -209,3 +209,14 @@ def test_quarantine_endpoints_are_role_gated_and_validated(client, tokens):
 def test_policies_the_engine_would_reject_are_rejected_by_the_api_too(client, tokens, change):
     r = client.put("/api/policies", json=dict(GOOD_POLICY, **change), headers=bearer(tokens["admin"]))
     assert r.status_code == 422
+
+
+# ---- PDF report ---------------------------------------------------------------------------------------------------------------
+def test_pdf_report_is_valid_role_gated_and_audited(client, tokens):
+    assert client.get("/api/reports/summary.pdf").status_code == 401
+    assert client.get("/api/reports/summary.pdf", headers=bearer(tokens["viewer"])).status_code == 403
+    client.app.state.ingestor.ingest(alert_rec(), "test")
+    r = client.get("/api/reports/summary.pdf", headers=bearer(tokens["analyst"]))
+    assert r.status_code == 200 and r.headers["content-type"] == "application/pdf"
+    assert r.content.startswith(b"%PDF-1.4") and r.content.rstrip().endswith(b"%%EOF") and b"FLOWGUARD" in r.content
+    assert client.get("/api/audit", params={"action": "report_exported"}, headers=bearer(tokens["admin"])).json()["total"] >= 1
