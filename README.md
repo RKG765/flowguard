@@ -40,12 +40,24 @@ Native Ubuntu: the same commands. It has **not** been verified there yet; see [H
 | `make test-e2e` | browser tests with accessibility checks |
 | `make spike` | re-run the Phase 0 feasibility spikes (root) |
 
-`start`, `demo`, `eval`, `test-e2e`, `test-security`, `test-soak` are planned and exit with code 2.
+All of the above are implemented. `sudo make test-live`, `sudo make eval` and `sudo make test-soak` need root and a running Open vSwitch; `make test`, `make test-security` and `make test-e2e` do not.
 
 ## Documentation
-[STATUS.md](STATUS.md) · [HANDOFF.md](HANDOFF.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [DECISIONS.md](DECISIONS.md) · [ROADMAP.md](ROADMAP.md) · [TESTING.md](TESTING.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/spike_findings.md](docs/spike_findings.md) · [docs/threat_model.md](docs/threat_model.md)
+[STATUS.md](STATUS.md) · [HANDOFF.md](HANDOFF.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [DECISIONS.md](DECISIONS.md) · [ROADMAP.md](ROADMAP.md) · [TESTING.md](TESTING.md) · [QA_REPORT.md](QA_REPORT.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/results.md](docs/results.md) · [docs/spike_findings.md](docs/spike_findings.md) · [docs/threat_model.md](docs/threat_model.md)
 
-## Screenshots (captured by the Playwright runs; "live engine" ones are from a real Mininet lab)
+**Study guide:** [docs/FlowGuard_Study_Guide.md](docs/FlowGuard_Study_Guide.md) explains every concept, the architecture (with Mermaid diagrams), how to run the project from WSL, what each file contains, and a set of practice questions with answers.
+**Presentation:** [docs/presentation/FlowGuard-v6.pptx](docs/presentation/FlowGuard-v6.pptx) (30 slides, literature review with links to the papers).
+
+## Latest screenshots (2026-11-19, real Mininet lab, redesigned front end)
+| Overview after one rule change | Rules (signed vs on the switch) |
+|---|---|
+| ![Overview after a change](docs/img/overview-alert-2026-11-19.png) | ![Rules](docs/img/rules-2026-11-19.png) |
+
+A real detection on the Live Detection page: an unsigned priority-500 rule added to `s1` was found in 16.3 ms and removed 0.7 ms later.
+
+![Live Detection detail](docs/img/live-detection-detail-2026-11-19.png)
+
+## Earlier screenshots (captured by the Playwright runs; "live engine" ones are from a real Mininet lab)
 | Overview (dark) | Design system (light) |
 |---|---|
 | ![Overview](docs/img/overview-dark.png) | ![Design system](docs/img/design-light.png) |
